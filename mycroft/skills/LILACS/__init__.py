@@ -166,7 +166,7 @@ class ConceptStorage():
                 self._dataConnStatus = 0
             """
         elif(self._dataStorageType == "json"):
-            with open(dirname(__file__) + "/.db/" + self._dataStorageDB)\
+            with open("db/" + self._dataStorageDB)\
              as datastore:
                 self._dataJSON = json.load(datastore)
 
@@ -175,35 +175,70 @@ class ConceptStorage():
             else:
                 self._dataConnStatus = 0
 
-    def getNodeDataDictionary(self, conceptname="cow", conceptid=0):
-        print("\n")
+    def getNodeDataDictionary(self, conceptname="cow"):
+        returnVal = {}
         if(self._dataConnStatus == 1):
             for p in self._dataJSON[conceptname]:
-                print(('Concept: ' + conceptname))
-                print(('Dictionary: ' + p["data_dict"]))
+                returnVal["data_dict"] = str(p["data_dict"])
+        return returnVal
 
-    def getNodeParent(self, conceptname="cow", generation=0):
-        print("\r")
+    def getNodeParent(self, conceptname="cow", generation=None):
+        returnVal = {}
         if(self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                print(('Concept: ' + conceptname))
-                print(('Parent (' + str(generation + 1) + ') : ' +
-                    str(p["parents"][0][str(generation)])))
+            for node in self._dataJSON[conceptname]:
+                if(generation is None):
+                    for parent in node["parents"]:
+                        returnVal = parent
+                elif(generation <= len(node["parents"])):
+                    for parent in node["parents"]:
+                        if parent[str(generation)]:
+                            returnVal = parent[str(generation)]
+        return returnVal
 
-    def getNodeChildren(self, conceptname="cow", generation=0):
-        print("\r")
+    def getNodeChildren(self, conceptname="cow", generation=None):
+        returnVal = {}
         if(self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                print(('Concept: ' + conceptname))
-                print(('Parent (' + str(generation + 1) + ') : ' +
-                    str(p["parents"][0][str(generation)])))
+            for node in self._dataJSON[conceptname]:
+                if(generation is None):
+                    for child in node["children"]:
+                        returnVal = child
+                elif(generation <= len(node["children"])):
+                    for child in node["children"]:
+                        if child[str(generation)]:
+                            returnVal = child[str(generation)]
+        return returnVal
 
-    def getNodeLastUpdate(self, conceptname="cow", generation=0):
-        print("\r")
+    def getNodeSynonymn(self, conceptname="cow", generation=None):
+        returnVal = {}
+        if(self._dataConnStatus == 1):
+            for node in self._dataJSON[conceptname]:
+                if(generation is None):
+                    for synonymn in node["synonymns"]:
+                        returnVal = synonymn
+                elif(generation <= len(node["synonymns"])):
+                    for synonymn in node["synonymns"]:
+                        if synonymn[str(generation)]:
+                            returnVal = synonymn[str(generation)]
+            return returnVal
+
+    def getNodeAntonymn(self, conceptname="cow", generation=None):
+        returnVal = {}
+        if(self._dataConnStatus == 1):
+            for node in self._dataJSON[conceptname]:
+                if(generation is None):
+                    for synonymn in node["antonymns"]:
+                        returnVal = synonymn
+                elif(generation <= len(node["antonymns"])):
+                    for synonymn in node["antonymns"]:
+                        if synonymn[str(generation)]:
+                            returnVal = synonymn[str(generation)]
+            return returnVal
+
+    def getNodeLastUpdate(self, conceptname="cow"):
+        returnVal = {}
         if(self._dataConnStatus == 1):
             for p in self._dataJSON[conceptname]:
-                print(('Concept: ' + conceptname))
-                print(('Last Update: ' +
-                    str(p["last_update"])))
+                returnVal["last_update"] = str(p["last_update"])
+        return returnVal
 
 

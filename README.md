@@ -1,8 +1,10 @@
-MyCroft LILACS Fork 
-===================
+MyCroft - LILACS Fork 
+=====================
 See Core issue : https://github.com/MycroftAI/mycroft-core/issues/629
 
-# Purpose
+## LILACS ( Lilacs Is a Learning And Comprehension Subsystem )
+
+### Purpose
 
 Deducing answers / gathering knowledge for offline usage. Lilacs will be called when no intent is matched and no answer is given in wolpham alpha 
 

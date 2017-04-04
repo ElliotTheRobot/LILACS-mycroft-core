@@ -5,7 +5,7 @@ MyCroft LILACS Fork
 
 Deducing answers / gathering knowledge for offline usage. Lilacs will be called when no intent is matched and no answer is given in wolpham alpha 
 
-# NOTE
+### NOTE
 
 This fork will be merged with the main core when it is complete and approved
 

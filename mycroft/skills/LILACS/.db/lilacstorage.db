@@ -1,0 +1,33 @@
+{
+    "cow": [
+        {
+            "parents": [
+                        {
+                            "0" : "mammal", 
+                            "1" : "animal"
+                        }
+                       ],
+            "data_dict": "Cow is the nickname for cattle, and the name of adult female cattle.", 
+            "last_update": "2017-04-04"
+        }
+    ],
+    "human": [
+        {
+            "parents": [
+                        {
+                            "0" : "mammal", 
+                            "1" : "animal"
+                        }
+                       ],
+            "children": [
+                        {
+                            "0" : "male", 
+                            "1" : "female",
+                            "2" : "name"
+                        }
+                       ],
+            "data_dict": "Modern humans (Homo sapiens, primarily ssp. Homo sapiens sapiens) are the only extant members of Hominina tribe (or human tribe), a branch of the tribe Hominini belonging to the family of great apes. They are characterized by erect posture and bipedal locomotion; manual dexterity and increased tool use, compared to other animals; and a general trend toward larger, more complex brains and societies.[3][4]", 
+            "last_update": "2017-04-04"
+        }
+    ]
+}

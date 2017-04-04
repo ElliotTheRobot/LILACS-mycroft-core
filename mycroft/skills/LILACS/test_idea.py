@@ -1,14 +1,12 @@
-from mycroft.skills.LILACS import ConceptConnector
+from mycroft.skills.LILACS import ConceptCreator
 from mycroft.skills.LILACS import ConceptStorage
 
 
 def main():
-    knowledge = ConceptConnector()
+    knowledge = ConceptCreator()
     storage = ConceptStorage()
 
     # create concepts for testing
-    # this will eventually interact with ConceptData and read / writeback
-    # to file for persistence
 
     name = "human"
     child_concepts = ["male", "female"]
@@ -29,7 +27,7 @@ def main():
         child_concepts=child_concepts)
 
     # lets see what concept connector can deduce from here
-    key = "human"
+    key = "joana"
     childs = knowledge.concepts[key].child_concepts
     parents = knowledge.concepts[key].parent_concepts
 

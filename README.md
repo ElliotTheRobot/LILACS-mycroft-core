@@ -1,6 +1,8 @@
-MyCroft LILACS Fork 
-===================
+MyCroft - LILACS Fork 
+=====================
 See Core issue : https://github.com/MycroftAI/mycroft-core/issues/629
+
+### LILACS ( Lilacs Is a Learning And Comprehension Subsystem )
 
 # Purpose
 

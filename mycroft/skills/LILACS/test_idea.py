@@ -6,25 +6,31 @@ def main():
     knowledge = ConceptCreator()
     storage = ConceptStorage()
 
-    # create concepts for testing
+    print "\n reading concepts from db test\n"
+    # example of storage class usage
+    storage.getNodeDataDictionary()
+    storage.getNodeParent('cow', 0)
+    storage.getNodeParent('cow', 1)
 
+    # create concepts for testing
+    print "\ncreating coded concepts test\n"
     name = "human"
-    child_concepts = ["male", "female"]
-    parent_concepts = ["animal"]
+    child_concepts = {"male": 1, "female": 1}
+    parent_concepts = {"animal": 1}
     knowledge.create_concept(name, parent_concepts=parent_concepts,
-        child_concepts=child_concepts)
+                             child_concepts=child_concepts)
 
     name = "joana"
-    child_concepts = ["wife"]
-    parent_concepts = ["human"]
+    child_concepts = {"wife": 1}
+    parent_concepts = {"human": 1, "female": 2}
     knowledge.create_concept(name, parent_concepts=parent_concepts,
-        child_concepts=child_concepts)
+                             child_concepts=child_concepts)
 
     name = "animal"
-    child_concepts = ["dog", "cow", "frog", "cat", "spider", "insect"]
-    parent_concepts = ["alive"]
+    child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
+    parent_concepts = {"alive": 1}
     knowledge.create_concept(name, parent_concepts=parent_concepts,
-        child_concepts=child_concepts)
+                             child_concepts=child_concepts)
 
     # lets see what concept connector can deduce from here
     key = "joana"
@@ -41,11 +47,6 @@ def main():
     print key + " is:"
     for parent in parents:
         print parent
-
-    # example of storage class usage
-    storage.getNodeDataDictionary()
-    storage.getNodeParent('cow', 0)
-    storage.getNodeParent('cow', 1)
 
 if __name__ == '__main__':
     main()

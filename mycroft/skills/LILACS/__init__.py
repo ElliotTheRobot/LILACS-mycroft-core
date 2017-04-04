@@ -167,7 +167,7 @@ class ConceptStorage():
                 print(("Database connection failed" + str(sqlerr)))
                 self._dataConnStatus = 0
             """
-        elif(self._dataStorageType == "json")::
+        elif(self._dataStorageType == "json"):
             with open(dirname(__file__) + "/.db/" + self._dataStorageDB)\
              as datastore:
                 self._dataJSON = json.load(datastore)

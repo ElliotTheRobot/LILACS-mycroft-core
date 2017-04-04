@@ -20,11 +20,11 @@ class Concept():
             self.data.setdefault(key, data)
 
     def add_parent(self, parent_name):
-        if parent_name not in self.parent_concepts:
+        if parent_name not in self.parent_concepts and parent_name != self.name:
             self.parent_concepts.append(parent_name)
 
     def add_child(self, child_name):
-        if child_name not in self.child_concepts:
+        if child_name not in self.child_concepts and child_name != self.name:
             self.child_concepts.append(child_name)
 
     def remove_synonim(self, synonim):
@@ -55,7 +55,7 @@ class Concept():
             i += 1
 
 
-class KnowledgeBase():
+class ConceptConnector():
     def __init__(self, concepts = {}):
         self.concepts = concepts
 
@@ -74,15 +74,17 @@ class KnowledgeBase():
             for synonim in concept.synonims:
                 if synonim not in self.concepts[concept_name].synonims:
                     self.concepts[concept_name].synonims.append(synonim)
-            # TODO merge data
-
         else:
             self.concepts.setdefault(concept_name, concept)
 
     def remove_concept(self, concept_name ):
         self.concepts.pop(concept_name)
 
-    def create_concept(self, new_concept_name, data = {}, child_concepts = [], parent_concepts = []):
+    def create_concept(self, new_concept_name, data = {}, child_concepts = [], parent_concepts = [], synonims = [], antonims = []):
+        # handle new concept
+        concept = Concept(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
+        self.add_concept(new_concept_name, concept)
+
         # handle parent concepts
         for concept_name in parent_concepts:
             # create parent if it doesnt exist
@@ -94,8 +96,8 @@ class KnowledgeBase():
                 self.concepts[concept_name].add_child(new_concept_name)
 
             #add parents of parents (if jon is human and humans are animals, jon is an animal)
-            #for grandpa_concept_name in self.concepts[concept_name].parent_concepts:
-            #    self.create_concept(grandpa_concept_name, child_concepts= [concept_name, new_concept_name])
+            for grandpa_concept_name in self.concepts[concept_name].parent_concepts:
+                self.create_concept(grandpa_concept_name, child_concepts= [new_concept_name])
 
         # handle child concepts
         for concept_name in child_concepts:
@@ -107,42 +109,46 @@ class KnowledgeBase():
             # add parent to child if it exists
                 self.concepts[concept_name].add_parent(new_concept_name)
 
-        concept = Concept(new_concept_name, data, parent_concepts, child_concepts)
-        self.add_concept(new_concept_name, concept)
+
+def main():
+    knowledge = ConceptConnector()
+
+    # create concepts for testing
+    # this will eventually interact with ConceptData and read / writeback to file for persistence
+
+    name = "human"
+    child_concepts = ["male", "female", "name"]
+    parent_concepts = ["animal", "mammal"]
+    knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
+
+    name = "joana"
+    child_concepts = ["wife"]
+    parent_concepts = ["human"]
+    knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
+
+    name = "animal"
+    child_concepts = ["dog", "cow", "frog", "cat", "spider", "insect"]
+    parent_concepts = ["alive"]
+    knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
 
 
-knowledge = KnowledgeBase()
+    # lets see what concept connector can deduce from here
+    key = "joana"
+    childs = knowledge.concepts[key].child_concepts
+    parents = knowledge.concepts[key].parent_concepts
+
+    print key + " can be: "
+    for child in childs:
+        print child
+
+    print "\n"
+
+    # in case of Joana everything here except human was deduced
+    print key + " is:"
+    for parent in parents:
+        print parent
+    
 
 
-
-name = "human"
-child_concepts = ["male", "female", "name"]
-parent_concepts = ["Animal", "Mammal"]
-knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
-
-name = "Joana"
-child_concepts = ["wife"]
-parent_concepts = ["human", "name", "female"]
-knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
-
-name = "Animal"
-child_concepts = ["dog", "cow", "frog", "cat", "spider", "insect"]
-parent_concepts = ["alive"]
-knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
-
-
-key = "Animal"
-childs = knowledge.concepts[key].child_concepts
-parents = knowledge.concepts[key].parent_concepts
-
-print key + " can be: "
-for child in childs:
-    print child
-
-print "\n"
-
-print key + " are:"
-
-for parent in parents:
-    print parent
-
+if __name__ == '__main__':
+	main()

@@ -1,4 +1,6 @@
+from mycroft.util.log import getLogger
 
+logger = getLogger("Skills")
 
 class Concept():
     def __init__(self, name, data = {}, parent_concepts = [], child_concepts = [], synonims = [], antonims = []):
@@ -81,22 +83,29 @@ class ConceptConnector():
         self.concepts.pop(concept_name)
 
     def create_concept(self, new_concept_name, data = {}, child_concepts = [], parent_concepts = [], synonims = [], antonims = []):
+        logger.info("creating concept " + new_concept_name)
         # handle new concept
         concept = Concept(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
         self.add_concept(new_concept_name, concept)
+        #self.create_concept(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
 
         # handle parent concepts
         for concept_name in parent_concepts:
+            logger.info("processing parent: " + concept_name)
+
             # create parent if it doesnt exist
             if concept_name not in self.concepts:
+                logger.info("parent doesnt exit, creating")
                 concept = Concept(concept_name, child_concepts=[new_concept_name])
                 self.add_concept(concept_name, concept)
             else:
             # add child to parent if it exists
+                logger.info("parent exits, adding child: " + new_concept_name)
                 self.concepts[concept_name].add_child(new_concept_name)
 
             #add parents of parents (if jon is human and humans are animals, jon is an animal)
             for grandpa_concept_name in self.concepts[concept_name].parent_concepts:
+                logger.info("processing grand_parent: " + grandpa_concept_name)
                 self.create_concept(grandpa_concept_name, child_concepts= [new_concept_name])
 
         # handle child concepts
@@ -109,6 +118,21 @@ class ConceptConnector():
             # add parent to child if it exists
                 self.concepts[concept_name].add_parent(new_concept_name)
 
+            # add as parent of grandchilds also
+            for grandchild_concept_name in self.concepts[concept_name].child_concepts:
+                logger.info("processing grand_child: " + grandchild_concept_name)
+                #self.create_concept(grandpa_concept_name, child_concepts=[new_concept_name])
+                # create child if it doesnt exist
+                if grandchild_concept_name not in self.concepts:
+                    logger.info("grand_child doesnt exist, creating ")
+                    concept = Concept(concept_name, parent_concepts=[new_concept_name])
+                    self.add_concept(concept_name, concept)
+                else:
+                    # add parent to child if it exists
+                    logger.info("grand_child exists, adding parent ")
+                    self.concepts[grandchild_concept_name].add_parent(new_concept_name)
+
+
 
 def main():
     knowledge = ConceptConnector()
@@ -117,8 +141,8 @@ def main():
     # this will eventually interact with ConceptData and read / writeback to file for persistence
 
     name = "human"
-    child_concepts = ["male", "female", "name"]
-    parent_concepts = ["animal", "mammal"]
+    child_concepts = ["male", "female"]
+    parent_concepts = ["animal"]
     knowledge.create_concept(name, parent_concepts=parent_concepts, child_concepts=child_concepts)
 
     name = "joana"
@@ -133,7 +157,7 @@ def main():
 
 
     # lets see what concept connector can deduce from here
-    key = "joana"
+    key = "human"
     childs = knowledge.concepts[key].child_concepts
     parents = knowledge.concepts[key].parent_concepts
 
@@ -147,7 +171,7 @@ def main():
     print key + " is:"
     for parent in parents:
         print parent
-    
+
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-__authors__ = ["jarbas", "heinzschmid"]
+__authors__ = ["jarbas", "heinzschmidt"]
 
 from mycroft.util.log import getLogger
 

@@ -1,1 +1,1 @@
-__authors__ = ["jarbas", "heinzschmid"]
+__authors__ = ["jarbas", "heinzschmidt"]

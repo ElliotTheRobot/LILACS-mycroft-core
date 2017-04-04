@@ -1,4 +1,4 @@
-
+import conceptdataconnector
 
 class Concept():
     def __init__(self, name, data = {}, parent_concepts = [], child_concepts = [], synonims = [], antonims = []):
@@ -58,6 +58,13 @@ class Concept():
 class KnowledgeBase():
     def __init__(self, concepts = {}):
         self.concepts = concepts
+
+    def load_concepts(self):
+        # a quick test of the data connector class
+        dcon = conceptdataconnector.ConceptStorage()
+        dcon.getNodeDataDictionary()
+        dcon.getNodeParent('cow', 0)
+        dcon.getNodeParent('cow', 1)
 
     def add_concept(self, concept_name, concept):
         if concept_name in self.concepts:
@@ -145,4 +152,7 @@ print key + " are:"
 
 for parent in parents:
     print parent
+
+knowledge.load_concepts()
+
 

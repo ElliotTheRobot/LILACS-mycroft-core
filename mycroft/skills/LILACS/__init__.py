@@ -4,7 +4,7 @@ from os.path import dirname
 
 logger = getLogger("Skills")
 
-__authors__ = ["jarbas", "heinzschmid"]
+__authors__ = ["jarbas", "heinzschmidt"]
 
 
 class ConceptNode():
@@ -166,7 +166,7 @@ class ConceptStorage():
                 self._dataConnStatus = 0
             """
         elif(self._dataStorageType == "json"):
-            with open("db/" + self._dataStorageDB)\
+            with open(".db/" + self._dataStorageDB)\
              as datastore:
                 self._dataJSON = json.load(datastore)
 

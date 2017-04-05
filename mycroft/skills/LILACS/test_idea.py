@@ -9,8 +9,8 @@ def main():
     print "\n reading concepts from db test\n"
     # example of storage class usage
     storage.getNodeDataDictionary()
-    storage.getNodeParent('cow', 0)
-    storage.getNodeParent('cow', 1)
+    print(storage.getNodeParent('cow', 0))
+    print(storage.getNodeChildren('cow'))
 
     # create concepts for testing
     print "\ncreating coded concepts test\n"

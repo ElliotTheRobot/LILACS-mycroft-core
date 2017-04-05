@@ -62,11 +62,11 @@ class ConceptCreator():
         if concept_name in self.concepts:
             #  merge fields
             for parent in concept.parent_concepts:
-                if parent not in self.concepts[concept_name].parent_concepts:
-                    self.concepts[concept_name].add_parent(parent)
+                if parent not in self.get_parents(concept_name):
+                    self.concepts[concept_name].add_parent(parent, gen= concept.parent_concepts[parent])
             for child in concept.child_concepts:
-                if child not in self.concepts[concept_name].child_concepts:
-                    self.concepts[concept_name].add_child(child)
+                if child not in self.get_childs(concept_name):
+                    self.concepts[concept_name].add_child(child, gen= concept.child_concepts[child])
             for antonim in concept.antonims:
                 if antonim not in self.concepts[concept_name].antonims:
                     self.concepts[concept_name].antonims.add_antonim(antonim)
@@ -79,10 +79,18 @@ class ConceptCreator():
     def remove_concept(self, concept_name):
         self.concepts.pop(concept_name)
 
+    def get_childs(self, concept_name):
+        return self.concepts[concept_name].child_concepts
+
+    def get_parents(self, concept_name):
+        return self.concepts[concept_name].parent_concepts
+
     def create_concept(self, new_concept_name, data={},
-                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
-        self.logger.info("creating concept " + new_concept_name)
+                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[], gen = 1):
+        self.logger.info("processing concept " + new_concept_name)
+
         # handle new concept
+        self.logger.info("creating node for " + new_concept_name)
         concept = ConceptNode(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
         self.add_concept(new_concept_name, concept)
 
@@ -93,48 +101,48 @@ class ConceptCreator():
             # create parent if it doesnt exist
             if concept_name not in self.concepts:
                 self.logger.info("parent doesnt exit, creating")
-                concept = ConceptNode(concept_name, child_concepts={new_concept_name: 1})
+                concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
                 self.add_concept(concept_name, concept)
-                # add child
-                self.logger.info("adding child")
-                self.concepts[concept_name].add_child(new_concept_name)
-            else:
-                # add child to parent if it exists
-                self.logger.info("parent exits, adding child: " + new_concept_name)
-                self.concepts[concept_name].add_child(new_concept_name)
-
+            # add child
+            self.logger.info("adding child to parent")
+            self.concepts[concept_name].add_child(new_concept_name, gen)
+            # add parent
+            #self.logger.info("adding parent to node ")
+            #self.concepts[new_concept_name].add_parent(concept_name, parent_concepts[concept_name])
             # add parents of parents (if jon is human and humans are animals, jon is an animal)
-            for grandpa_concept_name in self.concepts[concept_name].parent_concepts:
+            for grandpa_concept_name in self.get_parents(concept_name):
                 self.logger.info("processing grand_parent: " + grandpa_concept_name)
-                self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: 2})
+                self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: gen + 1 }, gen=gen + 1)
 
         # handle child concepts
         for concept_name in child_concepts:
+            self.logger.info("processing child: " + concept_name)
             # create child if it doesnt exist
             if concept_name not in self.concepts:
-                concept = ConceptNode(concept_name, parent_concepts={new_concept_name: 2})
+                self.logger.info("creating child")
+                concept = ConceptNode(concept_name, parent_concepts={new_concept_name: gen})
                 self.add_concept(concept_name, concept)
-            else:
-                # add parent to child if it exists
-                self.concepts[concept_name].add_parent(new_concept_name)
+
+            # add parent to child if it exists
+            self.logger.info("adding parent to child")
+            self.concepts[concept_name].add_parent(new_concept_name, gen)
+            #add child
+            #self.logger.info("adding child to node")
+            #self.concepts[new_concept_name].add_child(concept_name, child_concepts[concept_name])
 
             # add as parent of grandchilds also
-            for grandchild_concept_name in self.concepts[concept_name].child_concepts:
+            for grandchild_concept_name in self.get_childs(concept_name):
                 self.logger.info("processing grand_child: " + grandchild_concept_name)
-                # self.create_concept(grandpa_concept_name, child_concepts=[new_concept_name])
+                # self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: gen + 2}, gen = gen +2)
                 # create child if it doesnt exist
                 if grandchild_concept_name not in self.concepts:
                     self.logger.info("grand_child doesnt exist, creating ")
-                    concept = ConceptNode(grandchild_concept_name, parent_concepts={new_concept_name: 2})
+                    concept = ConceptNode(grandchild_concept_name, parent_concepts={new_concept_name: gen + 2})
                     self.add_concept(grandchild_concept_name, concept)
-                    # add grand_parent
-                    self.logger.info("adding parent")
-                    self.concepts[grandchild_concept_name].add_parent(new_concept_name)
+                # add grand_parent
+                self.logger.info("adding grand_parent")
+                self.concepts[grandchild_concept_name].add_parent(new_concept_name, gen + 2)
 
-                else:
-                    # add grand_parent to child if it exists
-                    self.logger.info("grand_child exists, adding parent ")
-                    self.concepts[grandchild_concept_name].add_parent(new_concept_name)
 
 
 class ConceptStorage():

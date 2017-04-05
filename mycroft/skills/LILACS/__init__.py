@@ -49,34 +49,17 @@ class LilacsSkill(MycroftSkill):
 
         self.speak('Learning enabled')
 
-        self.speak("Reading concepts from db test")
-        # example of storage class usage
-        storage.getNodeDataDictionary()
-        print(storage.getNodeParent('cow', 0))
-        print(storage.getNodeChildren('cow'))
-
-        # create concepts for testing
-        self.speak("Creating coded concepts test")
-        name = "human"
-        child_concepts = {"male": 1, "female": 1}
-        parent_concepts = {"animal": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
-        print "\n\n"
-        name = "joana"
-        child_concepts = {"wife": 1}
-        parent_concepts = {"female": 2, "human": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
-        print "\n\n"
-        name = "animal"
-        child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
-        parent_concepts = {"alive": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
+        nodenames = {}
+        for nodes in storage.getNodesAll():
+            nodenames = nodes
+            name = nodes
+            parent_concepts = storage.getNodeParent(conceptname=str(name))
+            child_concepts = storage.getNodeChildren(conceptname=str(name))
+            knowledge.create_concept(name, parent_concepts=parent_concepts,
+                                     child_concepts=child_concepts)
 
         # lets see what concept connector can deduce from here
-        key = "joana"
+        key = nodenames
         childs = knowledge.concepts[key].child_concepts
         parents = knowledge.concepts[key].parent_concepts
 
@@ -87,7 +70,7 @@ class LilacsSkill(MycroftSkill):
         # in case of Joana everything here except human was deduced
         self.speak(key + " is:")
         for parent in parents:
-            self.speak(parent  + " from generation " + str(parents[parent]))
+            self.speak(parent + " from generation " + str(parents[parent]))
 
     def stop(self):
         pass

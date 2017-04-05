@@ -33,6 +33,7 @@ class LilacsSkill(MycroftSkill):
 
     def __init__(self):
         super(LilacsSkill, self).__init__(name="LilacsSkill")
+        self.reload_skill = False
 
     def initialize(self):
         self.storagepath = str(dirname(__file__) + "/.db/")
@@ -64,7 +65,7 @@ class LilacsSkill(MycroftSkill):
 
         name = "joana"
         child_concepts = {"wife": 1}
-        parent_concepts = {"human": 1, "female": 2}
+        parent_concepts = {"female": 2, "human": 1}
         knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
 
@@ -81,12 +82,12 @@ class LilacsSkill(MycroftSkill):
 
         self.speak(key + " can be: ")
         for child in childs:
-            self.speak(child)
+            self.speak(child + " from generation " + str(childs[child]))
 
         # in case of Joana everything here except human was deduced
         self.speak(key + " is:")
         for parent in parents:
-            self.speak(parent)
+            self.speak(parent  + " from generation " + str(parents[parent]))
 
     def stop(self):
         pass

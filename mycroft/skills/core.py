@@ -257,6 +257,7 @@ class MycroftSkill(object):
                 logger.error(
                     "An error occurred while processing a request in " +
                     self.name, exc_info=True)
+
         if handler:
             self.emitter.on(intent_parser.name, receive_handler)
 

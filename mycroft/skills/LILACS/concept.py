@@ -86,7 +86,7 @@ class ConceptCreator():
         return self.concepts[concept_name].parent_concepts
 
     def create_concept(self, new_concept_name, data={},
-                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[], gen = 1):
+                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[], gen =0):
         self.logger.info("processing concept " + new_concept_name)
 
         # handle new concept
@@ -104,11 +104,10 @@ class ConceptCreator():
                 concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
                 self.add_concept(concept_name, concept)
             # add child
-            self.logger.info("adding child to parent")
-            self.concepts[concept_name].add_child(new_concept_name, gen)
-            # add parent
-            #self.logger.info("adding parent to node ")
-            #self.concepts[new_concept_name].add_parent(concept_name, parent_concepts[concept_name])
+            if new_concept_name not in self.get_childs(concept_name):
+                self.logger.info("adding child to parent")
+                self.concepts[concept_name].add_child(new_concept_name, gen)
+
             # add parents of parents (if jon is human and humans are animals, jon is an animal)
             for grandpa_concept_name in self.get_parents(concept_name):
                 self.logger.info("processing grand_parent: " + grandpa_concept_name)
@@ -124,11 +123,9 @@ class ConceptCreator():
                 self.add_concept(concept_name, concept)
 
             # add parent to child if it exists
-            self.logger.info("adding parent to child")
-            self.concepts[concept_name].add_parent(new_concept_name, gen)
-            #add child
-            #self.logger.info("adding child to node")
-            #self.concepts[new_concept_name].add_child(concept_name, child_concepts[concept_name])
+            if new_concept_name not in self.get_parents(concept_name):
+                self.logger.info("adding parent to child")
+                self.concepts[concept_name].add_parent(new_concept_name, gen)
 
             # add as parent of grandchilds also
             for grandchild_concept_name in self.get_childs(concept_name):

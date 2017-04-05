@@ -1,5 +1,4 @@
 import json
-from os.path import join, dirname
 
 __authors__ = ["jarbas", "heinzschmidt"]
 
@@ -23,17 +22,33 @@ class ConceptNode():
         else:
             self.data.setdefault(key, data)
 
-    def add_parent(self, parent_name, gen = 1):
-        if parent_name not in self.parent_concepts and parent_name != self.name:
-            self.parent_concepts.setdefault(parent_name, gen)
-        elif parent_name in self.parent_concepts and parent_name != self.name:
-            self.parent_concepts[parent_name]=gen
+    def add_parent(self, parent_name, gen = 1, update = True):
 
-    def add_child(self, child_name, gen=1):
-        if child_name not in self.child_concepts and child_name != self.name:
+        # a node cannot be a parent  of itself
+        if parent_name == self.name:
+            return
+
+        # a node cannot be a parent and a child (would it make sense in some corner case?)
+        if parent_name in self.child_concepts:
+            return
+
+        if parent_name not in self.parent_concepts:
+            self.parent_concepts.setdefault(parent_name, gen)
+        elif parent_name in self.parent_concepts and update:
+            self.parent_concepts[parent_name] = gen
+
+    def add_child(self, child_name, gen=1, update = True):
+        # a node cannot be a child of itself
+        if child_name == self.name:
+            return
+
+        if child_name in self.parent_concepts:
+            return
+
+        if child_name not in self.child_concepts:
             self.child_concepts.setdefault(child_name, gen)
-        elif child_name in self.child_concepts and child_name != self.name:
-            self.child_concepts[child_name]=gen
+        elif child_name in self.child_concepts and update:
+            self.child_concepts[child_name] = gen
 
     def remove_synonim(self, synonim):
         i = 0
@@ -86,64 +101,40 @@ class ConceptCreator():
         return self.concepts[concept_name].parent_concepts
 
     def create_concept(self, new_concept_name, data={},
-                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[], gen =0):
+                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
+
         self.logger.info("processing concept " + new_concept_name)
 
         # handle new concept
-        self.logger.info("creating node for " + new_concept_name)
-        concept = ConceptNode(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
-        self.add_concept(new_concept_name, concept)
+        if new_concept_name not in self.concepts:
+            self.logger.info("creating concept node for: " + new_concept_name)
+            concept = ConceptNode(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
+            self.add_concept(new_concept_name, concept)
 
         # handle parent concepts
-        for concept_name in dict(parent_concepts):
-            self.logger.info("processing parent: " + concept_name)
+        for concept_name in parent_concepts:
+            self.logger.info("checking if parent node exists: " + concept_name)
 
             # create parent if it doesnt exist
             if concept_name not in self.concepts:
-                self.logger.info("parent doesnt exit, creating")
+                self.logger.info("creating node: " + concept_name + " with child: " + new_concept_name)
+                gen = parent_concepts[concept_name]
                 concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
                 self.add_concept(concept_name, concept)
-            # add child
-            if new_concept_name not in self.get_childs(concept_name):
-                self.logger.info("adding child to parent")
-                self.concepts[concept_name].add_child(new_concept_name, gen)
 
-            # add parents of parents (if jon is human and humans are animals, jon is an animal)
-            for grandpa_concept_name in self.get_parents(concept_name):
-                self.logger.info("processing grand_parent: " + grandpa_concept_name)
-                self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: gen + 1 }, gen=gen + 1)
 
         # handle child concepts
         for concept_name in child_concepts:
-            self.logger.info("processing child: " + concept_name)
+            self.logger.info("checking if child node exists: " + concept_name)
             # create child if it doesnt exist
             if concept_name not in self.concepts:
-                self.logger.info("creating child")
-                concept = ConceptNode(concept_name, parent_concepts={new_concept_name: gen})
+                self.logger.info("creating node: " + concept_name + " with parent: " + new_concept_name)
+                gen = child_concepts[concept_name]
+                concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
                 self.add_concept(concept_name, concept)
-
-            # add parent to child if it exists
-            if new_concept_name not in self.get_parents(concept_name):
-                self.logger.info("adding parent to child")
-                self.concepts[concept_name].add_parent(new_concept_name, gen)
-
-            # add as parent of grandchilds also
-            for grandchild_concept_name in self.get_childs(concept_name):
-                self.logger.info("processing grand_child: " + grandchild_concept_name)
-                # self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: gen + 2}, gen = gen +2)
-                # create child if it doesnt exist
-                if grandchild_concept_name not in self.concepts:
-                    self.logger.info("grand_child doesnt exist, creating ")
-                    concept = ConceptNode(grandchild_concept_name, parent_concepts={new_concept_name: gen + 2})
-                    self.add_concept(grandchild_concept_name, concept)
-                # add grand_parent
-                self.logger.info("adding grand_parent")
-                self.concepts[grandchild_concept_name].add_parent(new_concept_name, gen + 2)
-
 
 
 class ConceptStorage():
-
     _dataStorageType = ""
     _dataStorageUser = ""
     _dataStoragePass = ""
@@ -160,7 +151,7 @@ class ConceptStorage():
         self.datastore_connect()
 
     def datastore_connect(self):
-        if(self._dataStorageType == "sqllite3"):
+        if (self._dataStorageType == "sqllite3"):
             """try:
                 self._dataConnection = sqllite3.connect(self._dataStorageDB)
                 self._dataConnStatus = 1
@@ -169,16 +160,16 @@ class ConceptStorage():
                 print(("Database connection failed" + str(sqlerr)))
                 self._dataConnStatus = 0
             """
-        elif(self._dataStorageType == "json"):
-            with open(self._storagepath + self._dataStorageDB)\
-             as datastore:
+        elif (self._dataStorageType == "json"):
+            with open(self._storagepath + self._dataStorageDB) \
+                    as datastore:
                 self._dataJSON = json.load(datastore)
 
-            if(self._dataJSON):
+            if (self._dataJSON):
                 self._dataConnStatus = 1
             else:
                 self._dataConnStatus = 0
-            
+
     def getNodesAll(self):
         returnVal = {}
         if (self._dataConnStatus == 1):
@@ -188,19 +179,19 @@ class ConceptStorage():
 
     def getNodeDataDictionary(self, conceptname="cow"):
         returnVal = {}
-        if(self._dataConnStatus == 1):
+        if (self._dataConnStatus == 1):
             for p in self._dataJSON[conceptname]:
                 returnVal["data_dict"] = str(p["data_dict"])
         return returnVal
 
     def getNodeParent(self, conceptname="cow", generation=None):
         returnVal = {}
-        if(self._dataConnStatus == 1):
+        if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
-                if(generation is None):
+                if (generation is None):
                     for parent in node["parents"]:
                         returnVal = parent
-                elif(generation <= len(node["parents"])):
+                elif (generation <= len(node["parents"])):
                     for parent in node["parents"]:
                         if parent[str(generation)]:
                             returnVal = parent[str(generation)]
@@ -208,12 +199,12 @@ class ConceptStorage():
 
     def getNodeChildren(self, conceptname="cow", generation=None):
         returnVal = {}
-        if(self._dataConnStatus == 1):
+        if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
-                if(generation is None):
+                if (generation is None):
                     for child in node["children"]:
                         returnVal = child
-                elif(generation <= len(node["children"])):
+                elif (generation <= len(node["children"])):
                     for child in node["children"]:
                         if child[str(generation)]:
                             returnVal = child[str(generation)]
@@ -221,12 +212,12 @@ class ConceptStorage():
 
     def getNodeSynonymn(self, conceptname="cow", generation=None):
         returnVal = {}
-        if(self._dataConnStatus == 1):
+        if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
-                if(generation is None):
+                if (generation is None):
                     for synonymn in node["synonymns"]:
                         returnVal = synonymn
-                elif(generation <= len(node["synonymns"])):
+                elif (generation <= len(node["synonymns"])):
                     for synonymn in node["synonymns"]:
                         if synonymn[str(generation)]:
                             returnVal = synonymn[str(generation)]
@@ -234,12 +225,12 @@ class ConceptStorage():
 
     def getNodeAntonymn(self, conceptname="cow", generation=None):
         returnVal = {}
-        if(self._dataConnStatus == 1):
+        if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
-                if(generation is None):
+                if (generation is None):
                     for synonymn in node["antonymns"]:
                         returnVal = synonymn
-                elif(generation <= len(node["antonymns"])):
+                elif (generation <= len(node["antonymns"])):
                     for synonymn in node["antonymns"]:
                         if synonymn[str(generation)]:
                             returnVal = synonymn[str(generation)]
@@ -247,7 +238,7 @@ class ConceptStorage():
 
     def getNodeLastUpdate(self, conceptname="cow"):
         returnVal = {}
-        if(self._dataConnStatus == 1):
+        if (self._dataConnStatus == 1):
             for p in self._dataJSON[conceptname]:
                 returnVal["last_update"] = str(p["last_update"])
         return returnVal

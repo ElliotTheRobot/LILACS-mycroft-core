@@ -3,21 +3,21 @@
         {
             "parents": [
                         {
-                            "0" : "mammal", 
-                            "1" : "animal"
+                            "1" : "mammal",
+                            "2" : "animal"
                         }
                        ],
             "children": [
                         {
-                            "0" : "female",
-                            "1" : "mother",
-                            "2" : "milk"
+                            "1" : "female",
+                            "2" : "mother",
+                            "3" : "milk"
                         }
                         ],
             "synonymns" : [
                             {
-                            "0" : "Ox",
-                            "1" : "Cattle"
+                            "1" : "Ox",
+                            "2" : "Cattle"
                             }
                           ],
             "antonyms" : [],
@@ -29,26 +29,50 @@
         {
             "parents": [
                         {
-                            "0" : "mammal", 
-                            "1" : "animal"
+                            "1" : "mammal",
+                            "2" : "animal"
                         }
                        ],
             "children": [
                         {
-                            "0" : "male", 
-                            "1" : "female",
-                            "2" : "name"
+                            "1" : "male",
+                            "2" : "female",
+                            "3" : "name"
                         }
                        ],
             "synonymns" : [
                             {
-                            "0" : "hominid",
-                            "1" : "homo sapien"
+                            "1" : "hominid",
+                            "2" : "homo sapien"
                             }
                           ],
             "antonyms" : [],
             "data_dict": "Modern humans (Homo sapiens, primarily ssp. Homo sapiens sapiens) are the only extant members of Hominina tribe (or human tribe), a branch of the tribe Hominini belonging to the family of great apes. They are characterized by erect posture and bipedal locomotion; manual dexterity and increased tool use, compared to other animals; and a general trend toward larger, more complex brains and societies.[3][4]", 
             "last_update": "2017-04-04"
+        }
+    ],
+    "Joanna": [
+        {
+            "parents": [
+                        {
+                            "1" : "female",
+                            "2" : "human",
+                            "3" : "animal"
+                        }
+                       ],
+            "children": [
+                        {
+                            "1" : "James"
+                        }
+                       ],
+            "synonymns" : [
+                            {
+                            "1" : "Patsy"
+                            }
+                          ],
+            "antonyms" : [],
+            "data_dict": "Joanna Lamond Lumley, OBE FRGS (born 1 May 1946) is an English actress,[1] voice-over artist, former model, author and activist. She won two BAFTA TV Awards for her role as Patsy Stone in the sitcom Absolutely Fabulous (1992–2012), and was nominated for the 2011 Tony Award for Best Featured Actress in a Play for the Broadway revival of La Bête. In 2013, she received the Special Recognition Award at the National Television Awards.",
+            "last_update": "2017-04-05"
         }
     ]
 }

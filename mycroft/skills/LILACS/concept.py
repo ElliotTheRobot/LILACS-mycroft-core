@@ -178,6 +178,13 @@ class ConceptStorage():
                 self._dataConnStatus = 1
             else:
                 self._dataConnStatus = 0
+            
+    def getNodesAll(self):
+        returnVal = {}
+        if (self._dataConnStatus == 1):
+            # for p in self._dataJSON[]:
+            returnVal = self._dataJSON
+            return returnVal
 
     def getNodeDataDictionary(self, conceptname="cow"):
         returnVal = {}

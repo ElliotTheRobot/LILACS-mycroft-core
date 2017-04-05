@@ -62,13 +62,13 @@ class LilacsSkill(MycroftSkill):
         parent_concepts = {"animal": 1}
         knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
-
+        print "\n\n"
         name = "joana"
         child_concepts = {"wife": 1}
         parent_concepts = {"female": 2, "human": 1}
         knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
-
+        print "\n\n"
         name = "animal"
         child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
         parent_concepts = {"alive": 1}

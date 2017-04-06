@@ -1,5 +1,3 @@
-import json
-
 __authors__ = ["jarbas", "heinzschmidt"]
 
 class ConceptNode():
@@ -68,7 +66,7 @@ class ConceptNode():
         self.child_concepts.pop(child_name)
 
 
-class ConceptCreator():
+class ConceptConnector():
     def __init__(self, logger,  concepts = {}):
         self.concepts = concepts
         self.logger = logger
@@ -134,113 +132,102 @@ class ConceptCreator():
                 self.add_concept(concept_name, concept)
 
 
-class ConceptStorage():
-    _dataStorageType = ""
-    _dataStorageUser = ""
-    _dataStoragePass = ""
-    _dataStorageDB = ""
-    _dataConnection = None
-    _dataConnStatus = 0
-    _dataJSON = None
-    _storagepath = ""
+class ConceptCrawler():
+    def _init__(self, center_node, target_node, concept_connector):
+        # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/9
+        # concept database
+        self.concept_db = concept_connector
+        # make tree of concepts
+        self.tree = self.build_tree(concept_connector, target_node)
+        # crawl path
+        self.crawl_path = [center_node]
+        # crawled antonims
+        self.do_not_crawl = []
+        # nodes we left behind without checking
+        self.uncrawled = []
+        # nodes we already checked
+        self.crawled = []
+        # crawl target
+        self.target = target_node
 
-    def __init__(self, storagepath, storagetype="json", database="lilacstorage.db"):
-        self._storagepath = storagepath
-        self._dataStorageType = storagetype
-        self._dataStorageDB = database
-        self.datastore_connect()
+    def build_tree(self, center_node, target_node, depth=20):
+        tree = None
+        return tree
 
-    def datastore_connect(self):
-        if (self._dataStorageType == "sqllite3"):
-            """try:
-                self._dataConnection = sqllite3.connect(self._dataStorageDB)
-                self._dataConnStatus = 1
-            except Exception as sqlerr:
-                # log something
-                print(("Database connection failed" + str(sqlerr)))
-                self._dataConnStatus = 0
-            """
-        elif (self._dataStorageType == "json"):
-            with open(self._storagepath + self._dataStorageDB) \
-                    as datastore:
-                self._dataJSON = json.load(datastore)
+    def find_path(self, center_node, target_node, path=[]):
+        # find first path to connection
+        path = path + [center_node]
+        if center_node == target_node:
+            return path
 
-            if (self._dataJSON):
-                self._dataConnStatus = 1
-            else:
-                self._dataConnStatus = 0
+        if center_node not in self.tree:
+            return None
 
-    def getNodesAll(self):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            # for p in self._dataJSON[]:
-            returnVal = self._dataJSON
-            return returnVal
+        for node in self.tree[center_node]:
+            if node not in path:
+                newpath = self.find_path(center_node, target_node, path)
+                if newpath:
+                    return newpath
+        return None
 
-    def getNodeDataDictionary(self, conceptname="cow"):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                returnVal["data_dict"] = str(p["data_dict"])
-        return returnVal
+    def find_all_paths(self, center_node, target_node, path=[]):
+        path = path + [center_node]
 
-    def getNodeParent(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if (generation is None):
-                    for parent in node["parents"]:
-                        returnVal = parent
-                elif (generation <= len(node["parents"])):
-                    for parent in node["parents"]:
-                        if parent[str(generation)]:
-                            returnVal = parent[str(generation)]
-        return returnVal
+        if center_node == target_node:
+            return [path]
 
-    def getNodeChildren(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if (generation is None):
-                    for child in node["children"]:
-                        returnVal = child
-                elif (generation <= len(node["children"])):
-                    for child in node["children"]:
-                        if child[str(generation)]:
-                            returnVal = child[str(generation)]
-        return returnVal
+        if center_node not in self.tree:
+            return []
 
-    def getNodeSynonymn(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if (generation is None):
-                    for synonymn in node["synonymns"]:
-                        returnVal = synonymn
-                elif (generation <= len(node["synonymns"])):
-                    for synonymn in node["synonymns"]:
-                        if synonymn[str(generation)]:
-                            returnVal = synonymn[str(generation)]
-            return returnVal
+        paths = []
+        for node in self.tree[center_node]:
+            if node not in path:
+                newpaths = self.find_all_paths(node, target_node, path)
+                for newpath in newpaths:
+                    paths.append(newpath)
+        return paths
 
-    def getNodeAntonymn(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if (generation is None):
-                    for synonymn in node["antonymns"]:
-                        returnVal = synonymn
-                elif (generation <= len(node["antonymns"])):
-                    for synonymn in node["antonymns"]:
-                        if synonymn[str(generation)]:
-                            returnVal = synonymn[str(generation)]
-            return returnVal
+    def find_shortest_path(self, center_node, target_node, path=[]):
 
-    def getNodeLastUpdate(self, conceptname="cow"):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                returnVal["last_update"] = str(p["last_update"])
-        return returnVal
+        path = path + [center_node]
+        if center_node == target_node:
+            return path
 
+        if center_node not in self.tree:
+            return None
 
+        shortest = None
+
+        for node in self.tree[center_node]:
+            if node not in path:
+                newpath = self.find_shortest_path(node, target_node, path)
+                if newpath:
+                    if not shortest or len(newpath) < len(shortest):
+                        shortest = newpath
+        return shortest
+
+    def find_minimum_node_distance(self, center_node, target_node):
+        return len(self.find_shortest_path(center_node, target_node))
+
+    def get_total_crawl_distance(self):
+        return len(self.crawled)
+
+    def get_crawl_path_distance(self):
+        return len(self.crawl_path
+                   )
+
+    def drunk_crawl(self, target):
+        ''' Drunk_Crawl idea (because just stumbles around looking for familiar things until target is reached)
+
+        crawl up - this will answer questions of the sort " is CenterNode a TargetNode ?"
+
+        - start at CenterNode and build a concept_tree with all parent (and parents of parents...) nodes and N layers/hops (depth configurable)
+        - while not in TargetNode
+            - check if CurrentNode has synonims, if yes prefer synonim and smaller gen parents of synonim as next node
+            - check if CurrentNode is antonym of any previous node, if yes go back and choose another
+            - choose a random node coming out from CurrentNode, prefer higher gens
+            - if no next node go back and search next guess
+            - if end of tree return False
+        - return True
+        '''
+        pass

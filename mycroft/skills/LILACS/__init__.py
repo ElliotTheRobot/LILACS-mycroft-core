@@ -18,10 +18,11 @@
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
-from mycroft import MYCROFT_ROOT_PATH
 
-from mycroft.skills.LILACS import concept
-from os.path import join, dirname
+from mycroft.skills.LILACS.concept import ConceptConnector
+from mycroft.skills.LILACS.storage import ConceptStorage
+
+from os.path import dirname
 
 storagepath = ""
 
@@ -44,8 +45,8 @@ class LilacsSkill(MycroftSkill):
         self.register_intent(act_intent, self.handle_act_intent)
 
     def handle_act_intent(self, message):
-        knowledge = concept.ConceptCreator(logger)
-        storage = concept.ConceptStorage(self.storagepath)
+        knowledge = ConceptConnector(logger)
+        storage = ConceptStorage(self.storagepath)
 
         self.speak('Learning enabled')
 

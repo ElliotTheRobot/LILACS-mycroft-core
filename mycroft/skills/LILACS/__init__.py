@@ -86,18 +86,18 @@ class LilacsSkill(MycroftSkill):
         crawler = ConceptCrawler(concept_connector=knowledge, center_node="joana")
 
         flag = crawler.drunk_crawl("joana", "frog")
-        print flag
+        self.log.info(flag)
         self.speak("answer to is joana a frog is " + str(flag))
 
         flag = crawler.drunk_crawl("joana", "animal")
-        print flag
+        self.log.info(flag)
         self.speak("answer to is joana a animal is " + str(flag))
 
-        print flag
-        flag = crawler.drunk_crawl("joana", "human")
-        self.speak("answer to is joana a human is " + str(flag))
+        self.log.info(flag)
+        flag = crawler.drunk_crawl("joana", "mammal")
+        self.speak("answer to is joana a mammal is " + str(flag))
 
-        print flag
+        self.log.info(flag)
         flag = crawler.drunk_crawl("joana", "alive")
         self.speak("answer to is joana alive is " + str(flag))
 

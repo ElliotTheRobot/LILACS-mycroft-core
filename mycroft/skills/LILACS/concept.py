@@ -371,7 +371,9 @@ class ConceptCrawler():
         next_node = self.choose_next_node(center_node, direction)
         crawl_depth = 1
         while True:
-
+            # check if we found answer
+            if target_node in self.crawled:
+                return True
             if next_node is None:
                 if len(self.uncrawled) == 0:
                     #no more nodes to crawl
@@ -384,32 +386,32 @@ class ConceptCrawler():
                 if crawl_depth >= self.depth:
                     # do not crawl further
                     return False
-
-            self.logger.info("crawled: " + str(self.crawled))
-           # print "crawl_path: " + str(self.crawl_path)
-            self.logger.info( "uncrawled: " + str(self.uncrawled))
             self.logger.info( "next: " + next_node)
             self.logger.info( "depth: " + str(crawl_depth))
-            # check if we found answer
-            if target_node in self.crawled:
-                return True
             # see if we already crawled this
             if next_node in self.crawled:
+                self.logger.info("crawling this node again: " + next_node)
                 # increase visit counter
                 self.visits[next_node] += 1
+                self.logger.info("number of visits: " + str(self.visits[next_node]))
                 # add to crawl path
                 self.crawl_path.append(next_node)
                 # remove fom uncrawled list
                 i = 0
                 for node in self.uncrawled:
                     if node == next_node:
+                        self.logger.info("removing node from uncrawled node list: " + node)
                         self.uncrawled.pop(i)
                     i += 1
                 # chose another to crawl
                 next_node = None
             # crawl next node
+            self.logger.info("choosing next node")
             next_node = self.choose_next_node(next_node, direction)
-            crawl_depth += 1 #went further
+            self.logger.info("crawled nodes: " + str(self.crawled))
+            # print "crawl_path: " + str(self.crawl_path)
+            self.logger.info("uncrawled nodes: " + str(self.uncrawled))
+            crawl_depth += 1  # went further
 
 
 

@@ -1,7 +1,11 @@
-import json
-from os.path import join, dirname
+from mycroft.util.log import getLogger
+import numpy as np
+import random
 
 __authors__ = ["jarbas", "heinzschmidt"]
+
+logger = getLogger("Skills")
+
 
 class ConceptNode():
     def __init__(self, name, data={}, parent_concepts={},
@@ -23,17 +27,33 @@ class ConceptNode():
         else:
             self.data.setdefault(key, data)
 
-    def add_parent(self, parent_name, gen = 1):
-        if parent_name not in self.parent_concepts and parent_name != self.name:
-            self.parent_concepts.setdefault(parent_name, gen)
-        elif parent_name in self.parent_concepts and parent_name != self.name:
-            self.parent_concepts[parent_name]=gen
+    def add_parent(self, parent_name, gen = 1, update = True):
 
-    def add_child(self, child_name, gen=1):
-        if child_name not in self.child_concepts and child_name != self.name:
+        # a node cannot be a parent  of itself
+        if parent_name == self.name:
+            return
+
+        # a node cannot be a parent and a child (would it make sense in some corner case?)
+        if parent_name in self.child_concepts:
+            return
+
+        if parent_name not in self.parent_concepts:
+            self.parent_concepts.setdefault(parent_name, gen)
+        elif parent_name in self.parent_concepts and update:
+            self.parent_concepts[parent_name] = gen
+
+    def add_child(self, child_name, gen=1, update = True):
+        # a node cannot be a child of itself
+        if child_name == self.name:
+            return
+
+        if child_name in self.parent_concepts:
+            return
+
+        if child_name not in self.child_concepts:
             self.child_concepts.setdefault(child_name, gen)
-        elif child_name in self.child_concepts and child_name != self.name:
-            self.child_concepts[child_name]=gen
+        elif child_name in self.child_concepts and update:
+            self.child_concepts[child_name] = gen
 
     def remove_synonim(self, synonim):
         i = 0
@@ -53,7 +73,7 @@ class ConceptNode():
         self.child_concepts.pop(child_name)
 
 
-class ConceptCreator():
+class ConceptConnector():
     def __init__(self, logger,  concepts = {}):
         self.concepts = concepts
         self.logger = logger
@@ -63,10 +83,10 @@ class ConceptCreator():
             #  merge fields
             for parent in concept.parent_concepts:
                 if parent not in self.get_parents(concept_name):
-                    self.concepts[concept_name].add_parent(parent, gen= concept.parent_concepts[parent])
+                    self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts[parent])
             for child in concept.child_concepts:
                 if child not in self.get_childs(concept_name):
-                    self.concepts[concept_name].add_child(child, gen= concept.child_concepts[child])
+                    self.concepts[concept_name].add_child(child, gen=concept.child_concepts[child])
             for antonim in concept.antonims:
                 if antonim not in self.concepts[concept_name].antonims:
                     self.concepts[concept_name].antonims.add_antonim(antonim)
@@ -85,178 +105,315 @@ class ConceptCreator():
     def get_parents(self, concept_name):
         return self.concepts[concept_name].parent_concepts
 
+    def get_antonims(self, concept_name):
+        return self.concepts[concept_name].antonims
+
+    def get_synonims(self, concept_name):
+        return self.concepts[concept_name].synonims
+
     def create_concept(self, new_concept_name, data={},
-                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[], gen =0):
+                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
+
         self.logger.info("processing concept " + new_concept_name)
 
+
+        # safe - checking
+        if new_concept_name in parent_concepts:
+            parent_concepts.pop(new_concept_name)
+        if new_concept_name in child_concepts:
+            child_concepts.pop(new_concept_name)
+
         # handle new concept
-        self.logger.info("creating node for " + new_concept_name)
-        concept = ConceptNode(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
+        self.logger.info("creating concept node for: " + new_concept_name)
+        concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
+                              synonims=synonims, antonims=antonims)
         self.add_concept(new_concept_name, concept)
 
         # handle parent concepts
-        for concept_name in dict(parent_concepts):
-            self.logger.info("processing parent: " + concept_name)
-
+        for concept_name in parent_concepts:
+            self.logger.info("checking if parent node exists: " + concept_name)
+            gen = parent_concepts[concept_name]
             # create parent if it doesnt exist
             if concept_name not in self.concepts:
-                self.logger.info("parent doesnt exit, creating")
-                concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
+                self.logger.info("creating node: " + concept_name )
+                concept = ConceptNode(concept_name, data={}, child_concepts={}, parent_concepts={}, synonims=[], antonims=[])
                 self.add_concept(concept_name, concept)
-            # add child
-            if new_concept_name not in self.get_childs(concept_name):
-                self.logger.info("adding child to parent")
-                self.concepts[concept_name].add_child(new_concept_name, gen)
-
-            # add parents of parents (if jon is human and humans are animals, jon is an animal)
-            for grandpa_concept_name in self.get_parents(concept_name):
-                self.logger.info("processing grand_parent: " + grandpa_concept_name)
-                self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: gen + 1 }, gen=gen + 1)
+            # add child to parent
+            self.logger.info("adding child: " + new_concept_name + " to parent: " + concept_name)
+            self.concepts[concept_name].add_child(new_concept_name, gen=gen)
 
         # handle child concepts
         for concept_name in child_concepts:
-            self.logger.info("processing child: " + concept_name)
+            self.logger.info("checking if child node exists: " + concept_name)
+            gen = child_concepts[concept_name]
             # create child if it doesnt exist
             if concept_name not in self.concepts:
-                self.logger.info("creating child")
-                concept = ConceptNode(concept_name, parent_concepts={new_concept_name: gen})
+                self.logger.info("creating node: " + concept_name)
+                concept = ConceptNode(concept_name, data={}, child_concepts={}, parent_concepts={}, synonims=[], antonims=[])
                 self.add_concept(concept_name, concept)
-
-            # add parent to child if it exists
-            if new_concept_name not in self.get_parents(concept_name):
-                self.logger.info("adding parent to child")
-                self.concepts[concept_name].add_parent(new_concept_name, gen)
-
-            # add as parent of grandchilds also
-            for grandchild_concept_name in self.get_childs(concept_name):
-                self.logger.info("processing grand_child: " + grandchild_concept_name)
-                # self.create_concept(grandpa_concept_name, child_concepts={new_concept_name: gen + 2}, gen = gen +2)
-                # create child if it doesnt exist
-                if grandchild_concept_name not in self.concepts:
-                    self.logger.info("grand_child doesnt exist, creating ")
-                    concept = ConceptNode(grandchild_concept_name, parent_concepts={new_concept_name: gen + 2})
-                    self.add_concept(grandchild_concept_name, concept)
-                # add grand_parent
-                self.logger.info("adding grand_parent")
-                self.concepts[grandchild_concept_name].add_parent(new_concept_name, gen + 2)
+            #add parent to child
+            self.logger.info("adding parent: " + new_concept_name + " to child: " + concept_name)
+            self.concepts[concept_name].add_parent(new_concept_name, gen=gen)
 
 
+class ConceptCrawler():
+    def __init__(self, center_node, depth=20, concept_connector=None):
+        # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/9
+        self.logger = logger
+        # concept database
+        self.concept_db = concept_connector
+        if self.concept_db is None:
+            self.concept_db = ConceptConnector(logger)
+        # crawl depth
+        self.depth = depth
+        # crawl path
+        self.crawl_path = []
+        # crawled antonims
+        self.do_not_crawl = []
+        # nodes we left behind without checking
+        self.uncrawled = []
+        # nodes we already checked
+        self.crawled = []
+        # count visits to each node
+        self.visits = {}
 
-class ConceptStorage():
 
-    _dataStorageType = ""
-    _dataStorageUser = ""
-    _dataStoragePass = ""
-    _dataStorageDB = ""
-    _dataConnection = None
-    _dataConnStatus = 0
-    _dataJSON = None
-    _storagepath = ""
+    def build_tree(self, center_node, target_node, depth=20, direction="parents", tree = [], step=0):
+        # start in center_node, add all parents / childs
+        parents = []
+        try:
+            self.logger.info("Getting parents of: " + center_node)
+            concepts = self.concept_db.get_parents(center_node)
+            for key in concepts:
+                parents.append(key)
+        except:
+            self.logger.error("no node named " + str(center_node))
 
-    def __init__(self, storagepath, storagetype="json", database="lilacstorage.db"):
-        self._storagepath = storagepath
-        self._dataStorageType = storagetype
-        self._dataStorageDB = database
-        self.datastore_connect()
+        if parents != []:
+            self.logger.info("adding to tree: " + str(parents))
+            tree.append(parents)
+            for node in tree[step]:
+                self.logger.info("Checking next node: " + node)
+                depth -= 1
+                self.logger.info("Current depth: " + str(depth))
+                if depth <= 0:
+                    break
+                tree = self.build_tree(node, target_node, depth, direction, tree, step + 1)
+        return tree
 
-    def datastore_connect(self):
-        if(self._dataStorageType == "sqllite3"):
-            """try:
-                self._dataConnection = sqllite3.connect(self._dataStorageDB)
-                self._dataConnStatus = 1
-            except Exception as sqlerr:
-                # log something
-                print(("Database connection failed" + str(sqlerr)))
-                self._dataConnStatus = 0
-            """
-        elif(self._dataStorageType == "json"):
-            with open(self._storagepath + self._dataStorageDB)\
-             as datastore:
-                self._dataJSON = json.load(datastore)
+    def find_path(self, center_node, target_node, path=[]):
+        # find first path to connection
+        path = path + [center_node]
+        if center_node == target_node:
+            return path
 
-            if(self._dataJSON):
-                self._dataConnStatus = 1
-            else:
-                self._dataConnStatus = 0
-            
-    def getNodesAll(self):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            # for p in self._dataJSON[]:
-            returnVal = self._dataJSON
-            return returnVal
+        if center_node not in self.parents_tree:
+            return None
 
-    def getNodesAll(self):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            # for p in self._dataJSON[]:
-            returnVal = self._dataJSON
-            return returnVal
+        for node in self.parents_tree[center_node]:
+            if node not in path:
+                newpath = self.find_path(center_node, target_node, path)
+                if newpath:
+                    return newpath
+        return None
 
-    def getNodeDataDictionary(self, conceptname="cow"):
-        returnVal = {}
-        if(self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                returnVal["data_dict"] = str(p["data_dict"])
-        return returnVal
+    def find_all_paths(self, center_node, target_node, path=[]):
+        path = path + [center_node]
 
-    def getNodeParent(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if(self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if(generation is None):
-                    for parent in node["parents"]:
-                        returnVal = parent
-                elif(generation <= len(node["parents"])):
-                    for parent in node["parents"]:
-                        if parent[str(generation)]:
-                            returnVal = parent[str(generation)]
-        return returnVal
+        if center_node == target_node:
+            return [path]
 
-    def getNodeChildren(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if(self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if(generation is None):
-                    for child in node["children"]:
-                        returnVal = child
-                elif(generation <= len(node["children"])):
-                    for child in node["children"]:
-                        if child[str(generation)]:
-                            returnVal = child[str(generation)]
-        return returnVal
+        if center_node not in self.parents_tree:
+            return []
 
-    def getNodeSynonymn(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if(self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if(generation is None):
-                    for synonymn in node["synonymns"]:
-                        returnVal = synonymn
-                elif(generation <= len(node["synonymns"])):
-                    for synonymn in node["synonymns"]:
-                        if synonymn[str(generation)]:
-                            returnVal = synonymn[str(generation)]
-            return returnVal
+        paths = []
+        for node in self.parents_tree[center_node]:
+            if node not in path:
+                newpaths = self.find_all_paths(node, target_node, path)
+                for newpath in newpaths:
+                    paths.append(newpath)
+        return paths
 
-    def getNodeAntonymn(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if(self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if(generation is None):
-                    for synonymn in node["antonymns"]:
-                        returnVal = synonymn
-                elif(generation <= len(node["antonymns"])):
-                    for synonymn in node["antonymns"]:
-                        if synonymn[str(generation)]:
-                            returnVal = synonymn[str(generation)]
-            return returnVal
+    def find_shortest_path(self, center_node, target_node, path=[]):
 
-    def getNodeLastUpdate(self, conceptname="cow"):
-        returnVal = {}
-        if(self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                returnVal["last_update"] = str(p["last_update"])
-        return returnVal
+        path = path + [center_node]
+        if center_node == target_node:
+            return path
+
+        if center_node not in self.parents_tree:
+            return None
+
+        shortest = None
+
+        for node in self.parents_tree[center_node]:
+            if node not in path:
+                newpath = self.find_shortest_path(node, target_node, path)
+                if newpath:
+                    if not shortest or len(newpath) < len(shortest):
+                        shortest = newpath
+        return shortest
+
+    def find_minimum_node_distance(self, center_node, target_node):
+        return len(self.find_shortest_path(center_node, target_node))
+
+    def get_total_crawl_distance(self):
+        return len(self.crawled)
+
+    def get_crawl_path_distance(self):
+        return len(self.crawl_path
+                   )
+
+    @staticmethod
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+
+    def choose_next_node(self, node, direction="parents"):
+        # when choosing the next node we have to think about what matters more
+        # - checking child or parent?
+        # - does node have synonims?
+        # - is any of the connected nodes blacklisted in this crawl (antonim)?
+        # - choose stronger connections preferably
+        # - number of times we visited this node
+        if node is None:
+            return node
+
+        # keep count of visits to this node
+        if node in self.visits:
+            self.visits[node] += 1
+        else:
+            self.visits[node] = 1
+
+        # add current node to crawl path
+        self.crawl_path.append(node)
+
+        # if node in crawled list do not re-crawl
+        if node in self.crawled:
+            return None
+
+        # remove current node from uncrawled nodes list
+        i = 0
+        for uncrawled_node in self.uncrawled:
+            if uncrawled_node == node:
+                self.uncrawled.pop(i)
+            i += 1
+
+        # add current node to crawled list
+        if node not in self.crawled:
+            self.crawled.append(node)
+
+        # are we checking parents or childs?
+        if direction == "parents":
+            nodes = self.concept_db.get_parents(node)
+            # check if node as synonims
+            synonims = self.concept_db.get_synonims(node)
+            for synonim in synonims:
+            # get connections of these synonims also
+                nodes += self.concept_db.get_parents(synonim)
+        elif direction == "childs":
+            nodes = self.concept_db.get_childs(node)
+            # check if node as synonims
+            synonims = self.concept_db.get_synonims(node)
+            for synonim in synonims:
+                # get connections of these synonims also
+                nodes += self.concept_db.get_childs(synonim)
+        else:
+            self.logger.error("Invalid crawl direction")
+            return None
+
+        # if no connections found return
+        if len(nodes) == 0:
+            return None
+
+        # add these nodes to "nodes to crawl"
+        for node in dict(nodes):
+            self.uncrawled.append(node)
+            # add all antonims from these nodes to do no crawl
+            for antonim in self.concept_db.get_antonims(node):
+                self.do_not_crawl.append(antonim)
+            # remove any node we are not supposed to crawl
+            if node in self.do_not_crawl:
+                nodes.pop(node)
+            # if we already crawled this node, increase its count but do not re-visit
+            if node in self.crawled:
+                nodes.pop(node)
+                self.visits[node] += 1
+
+        # create a weighted list giving preference
+        for node in nodes:
+            # turn all values into a value between 0 and 1
+            # multiply by 100
+            # smaller values are more important
+            nodes[node] = 100 - self.sigmoid(nodes[node]) * 100
+
+        list = [k for k in nodes for dummy in range(int(nodes[k]))]
+        if list == []:
+            next_node = None
+        else:
+            # choose a node to crawl next
+            next_node = random.choice(list)
+        return next_node
+
+    def drunk_crawl(self, center_node, target_node, direction="parents"):
+        # reset variables
+        # crawl path
+        self.crawl_path = []
+        # crawled antonims
+        self.do_not_crawl = []
+        # nodes we left behind without checking
+        self.uncrawled = []
+        # nodes we already checked
+        self.crawled = []
+        # count visits to each node
+        self.visits = {}
+        # start at center node
+        self.logger.info("start node: " + center_node)
+        self.logger.info("target node: " + target_node)
+        next_node = self.choose_next_node(center_node, direction)
+        crawl_depth = 1
+        while True:
+            # check if we found answer
+            if target_node in self.crawled:
+                return True
+            if next_node is None:
+                if len(self.uncrawled) == 0:
+                    #no more nodes to crawl
+                    return False
+                # reached a dead end, pic next unchecked node
+                # chose last uncrawled node (keep on this path)
+                next_node = self.uncrawled[-1]
+                crawl_depth -= 1 #went back
+                # check crawl_depth threshold
+                if crawl_depth >= self.depth:
+                    # do not crawl further
+                    return False
+            self.logger.info( "next: " + next_node)
+            self.logger.info( "depth: " + str(crawl_depth))
+            # see if we already crawled this
+            if next_node in self.crawled:
+                self.logger.info("crawling this node again: " + next_node)
+                # increase visit counter
+                self.visits[next_node] += 1
+                self.logger.info("number of visits: " + str(self.visits[next_node]))
+                # add to crawl path
+                self.crawl_path.append(next_node)
+                # remove fom uncrawled list
+                i = 0
+                for node in self.uncrawled:
+                    if node == next_node:
+                        self.logger.info("removing node from uncrawled node list: " + node)
+                        self.uncrawled.pop(i)
+                    i += 1
+                # chose another to crawl
+                next_node = None
+            # crawl next node
+            self.logger.info("choosing next node")
+            next_node = self.choose_next_node(next_node, direction)
+            self.logger.info("crawled nodes: " + str(self.crawled))
+            # print "crawl_path: " + str(self.crawl_path)
+            self.logger.info("uncrawled nodes: " + str(self.uncrawled))
+            crawl_depth += 1  # went further
+
+
+
 
 

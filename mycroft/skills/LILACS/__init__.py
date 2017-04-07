@@ -18,10 +18,11 @@
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
-from mycroft import MYCROFT_ROOT_PATH
 
-from mycroft.skills.LILACS import concept
-from os.path import join, dirname
+from mycroft.skills.LILACS.concept import ConceptConnector, ConceptCrawler
+from mycroft.skills.LILACS.storage import ConceptStorage
+
+from os.path import dirname
 
 storagepath = ""
 
@@ -44,33 +45,61 @@ class LilacsSkill(MycroftSkill):
         self.register_intent(act_intent, self.handle_act_intent)
 
     def handle_act_intent(self, message):
-        knowledge = concept.ConceptCreator(logger)
-        storage = concept.ConceptStorage(self.storagepath)
+        knowledge = ConceptConnector(logger)
+      #  storage = ConceptStorage(self.storagepath)
 
-        self.speak('Learning enabled')
+      #  self.speak("Reading concepts from db test")
+      #  nodenames = {}
+      #  for nodes in storage.getNodesAll():
+      #      nodenames = nodes
+      #      name = nodes
+      #      parent_concepts = storage.getNodeParent(conceptname=str(name))
+      #      child_concepts = storage.getNodeChildren(conceptname=str(name))
+      #      knowledge.create_concept(name, parent_concepts=parent_concepts,
+      #                               child_concepts=child_concepts)
 
-        nodenames = {}
-        for nodes in storage.getNodesAll():
-            nodenames = nodes
-            name = nodes
-            parent_concepts = storage.getNodeParent(conceptname=str(name))
-            child_concepts = storage.getNodeChildren(conceptname=str(name))
-            knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                     child_concepts=child_concepts)
+        # create concepts for testing
 
-        # lets see what concept connector can deduce from here
-        key = nodenames
-        childs = knowledge.concepts[key].child_concepts
-        parents = knowledge.concepts[key].parent_concepts
+        self.speak("Creating coded concepts test")
+        name = "human"
+        child_concepts = {"male": 1, "female": 1}
+        parent_concepts = {"animal": 2, "mammal": 1}
+        knowledge.create_concept(name, parent_concepts=parent_concepts,
+                                 child_concepts=child_concepts)
 
-        self.speak(key + " can be: ")
-        for child in childs:
-            self.speak(child + " from generation " + str(childs[child]))
+        print "\n\n"
+        name = "joana"
+        child_concepts = {"wife": 1}
+        parent_concepts = {"female": 2, "human": 1}
+        knowledge.create_concept(name, parent_concepts=parent_concepts,
+                                 child_concepts=child_concepts)
 
-        # in case of Joana everything here except human was deduced
-        self.speak(key + " is:")
-        for parent in parents:
-            self.speak(parent + " from generation " + str(parents[parent]))
+        print "\n\n"
+        name = "animal"
+        child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
+        parent_concepts = {"alive": 1}
+        knowledge.create_concept(name, parent_concepts=parent_concepts,
+                                 child_concepts=child_concepts)
+
+
+        # Crawler test
+        crawler = ConceptCrawler(concept_connector=knowledge, center_node="joana")
+
+        flag = crawler.drunk_crawl("joana", "frog")
+        self.log.info(flag)
+        self.speak("answer to is joana a frog is " + str(flag))
+
+        flag = crawler.drunk_crawl("joana", "animal")
+        self.log.info(flag)
+        self.speak("answer to is joana a animal is " + str(flag))
+
+        self.log.info(flag)
+        flag = crawler.drunk_crawl("joana", "mammal")
+        self.speak("answer to is joana a mammal is " + str(flag))
+
+        self.log.info(flag)
+        flag = crawler.drunk_crawl("joana", "alive")
+        self.speak("answer to is joana alive is " + str(flag))
 
     def stop(self):
         pass

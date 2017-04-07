@@ -59,47 +59,54 @@ class LilacsSkill(MycroftSkill):
       #                               child_concepts=child_concepts)
 
         # create concepts for testing
-
-        self.speak("Creating coded concepts test")
         name = "human"
-        child_concepts = {"male": 1, "female": 1}
+        child_concepts = {"human_male": 1, "human_female": 1}
         parent_concepts = {"animal": 2, "mammal": 1}
         knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
 
-        print "\n\n"
         name = "joana"
-        child_concepts = {"wife": 1}
-        parent_concepts = {"female": 2, "human": 1}
+        child_concepts = {"human_wife": 1}
+        parent_concepts = {"human_female": 2, "human": 1}
         knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
 
-        print "\n\n"
+        name = "maria"
+        child_concepts = {"human_wife": 1}
+        parent_concepts = {"human_female": 2, "human": 1}
+        knowledge.create_concept(name, parent_concepts=parent_concepts,
+                                 child_concepts=child_concepts)
+
         name = "animal"
         child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
-        parent_concepts = {"alive": 1}
+        parent_concepts = {"living being": 1}
         knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
 
 
         # Crawler test
-        crawler = ConceptCrawler(concept_connector=knowledge, center_node="joana")
+        crawler = ConceptCrawler(concept_connector=knowledge)
 
-        flag = crawler.drunk_crawl("joana", "frog")
-        self.log.info(flag)
-        self.speak("answer to is joana a frog is " + str(flag))
+        keys = ["frog", "living being", "mammal", "maria"]
+        start = "joana"
+        for key in keys:
+            target = key
+            flag = crawler.drunk_crawl(start, target)
+            self.log.info("crawl from " + start + "to " + target + "is: " + str(flag))
+            self.speak("answer to is " + start + " a " + target + " is " + str(flag))
+            if not flag:
+                p_crawl = crawler.crawled
+                for node in p_crawl:
+                    flag = crawler.drunk_crawl(target, node)
+                    if flag:
+                        self.speak(target + " are " + node + " like " + start)
 
-        flag = crawler.drunk_crawl("joana", "animal")
-        self.log.info(flag)
-        self.speak("answer to is joana a animal is " + str(flag))
+            #give examples of animals
+            start_node = key
+            crawler.drunk_crawl(start_node, "no target crawl", direction="childs")
+            for example in crawler.crawled:
+                self.speak(example + " is an example of " + start_node)
 
-        self.log.info(flag)
-        flag = crawler.drunk_crawl("joana", "mammal")
-        self.speak("answer to is joana a mammal is " + str(flag))
-
-        self.log.info(flag)
-        flag = crawler.drunk_crawl("joana", "alive")
-        self.speak("answer to is joana alive is " + str(flag))
 
     def stop(self):
         pass

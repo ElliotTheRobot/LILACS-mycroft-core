@@ -1,10 +1,15 @@
 from mycroft.util.log import getLogger
 import numpy as np
 import random
+import math
 
 __authors__ = ["jarbas", "heinzschmidt"]
 
-logger = getLogger("Skills")
+logger = getLogger("concept logger")
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 
 class ConceptNode():
@@ -157,7 +162,7 @@ class ConceptConnector():
 
 
 class ConceptCrawler():
-    def __init__(self, center_node, depth=20, concept_connector=None):
+    def __init__(self, depth=20, concept_connector=None):
         # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/9
         self.logger = logger
         # concept database
@@ -263,9 +268,17 @@ class ConceptCrawler():
         return len(self.crawl_path
                    )
 
-    @staticmethod
-    def sigmoid(x):
-        return 1 / (1 + np.exp(-x))
+    def mark_as_crawled(self, node):
+        self.logger.info("Marking node as crawled: " + node)
+        # remove current node from uncrawled nodes list
+        i = 0
+        for uncrawled_node in self.uncrawled:
+            if uncrawled_node == node:
+                self.uncrawled.pop(i)
+            i += 1
+        # add current node to crawled list
+        if node not in self.crawled:
+            self.crawled.append(node)
 
     def choose_next_node(self, node, direction="parents"):
         # when choosing the next node we have to think about what matters more
@@ -283,23 +296,12 @@ class ConceptCrawler():
         else:
             self.visits[node] = 1
 
+        self.logger.info("Number of visits to this node: " + str(self.visits[node]))
+
         # add current node to crawl path
         self.crawl_path.append(node)
 
-        # if node in crawled list do not re-crawl
-        if node in self.crawled:
-            return None
-
-        # remove current node from uncrawled nodes list
-        i = 0
-        for uncrawled_node in self.uncrawled:
-            if uncrawled_node == node:
-                self.uncrawled.pop(i)
-            i += 1
-
-        # add current node to crawled list
-        if node not in self.crawled:
-            self.crawled.append(node)
+        self.mark_as_crawled(node)
 
         # are we checking parents or childs?
         if direction == "parents":
@@ -307,7 +309,9 @@ class ConceptCrawler():
             # check if node as synonims
             synonims = self.concept_db.get_synonims(node)
             for synonim in synonims:
-            # get connections of these synonims also
+                # get connections of these synonims also
+                self.logger.info("found synonim: " + synonim)
+                self.logger.info("adding synonim connections to crawl list")
                 nodes += self.concept_db.get_parents(synonim)
         elif direction == "childs":
             nodes = self.concept_db.get_childs(node)
@@ -315,6 +319,8 @@ class ConceptCrawler():
             synonims = self.concept_db.get_synonims(node)
             for synonim in synonims:
                 # get connections of these synonims also
+                self.logger.info("found synonim: " + synonim)
+                self.logger.info("adding synonim connections to crawl list")
                 nodes += self.concept_db.get_childs(synonim)
         else:
             self.logger.error("Invalid crawl direction")
@@ -322,6 +328,7 @@ class ConceptCrawler():
 
         # if no connections found return
         if len(nodes) == 0:
+            self.logger.info(node + " doesn't have any " + direction + " connection")
             return None
 
         # add these nodes to "nodes to crawl"
@@ -330,22 +337,24 @@ class ConceptCrawler():
             # add all antonims from these nodes to do no crawl
             for antonim in self.concept_db.get_antonims(node):
                 self.do_not_crawl.append(antonim)
+                self.logger.info("blacklisting node " + antonim + " because it is an antonim of: " + node)
             # remove any node we are not supposed to crawl
             if node in self.do_not_crawl:
+                self.logger.info("we are in a blacklisted node: " + node)
                 nodes.pop(node)
-            # if we already crawled this node, increase its count but do not re-visit
-            if node in self.crawled:
-                nodes.pop(node)
-                self.visits[node] += 1
 
         # create a weighted list giving preference
+
+
+        new_weights = {}
         for node in nodes:
             # turn all values into a value between 0 and 1
             # multiply by 100
             # smaller values are more important
-            nodes[node] = 100 - self.sigmoid(nodes[node]) * 100
+            new_weights[node] = int(100 - sigmoid(nodes[node]) * 100)
+        self.logger.info("next node weights are: " + str(new_weights))
 
-        list = [k for k in nodes for dummy in range(int(nodes[k]))]
+        list = [k for k in new_weights for dummy in range(new_weights[k])]
         if list == []:
             next_node = None
         else:
@@ -373,18 +382,20 @@ class ConceptCrawler():
         while True:
             # check if we found answer
             if target_node in self.crawled:
+                self.logger.info("Found target node")
                 return True
             if next_node is None:
                 if len(self.uncrawled) == 0:
+                    self.logger.info("No more nodes to crawl")
                     #no more nodes to crawl
                     return False
                 # reached a dead end, pic next unchecked node
                 # chose last uncrawled node (keep on this path)
                 next_node = self.uncrawled[-1]
-                crawl_depth -= 1 #went back
                 # check crawl_depth threshold
                 if crawl_depth >= self.depth:
                     # do not crawl further
+                    self.logger.info("Maximum crawl depth reached: " + str(crawl_depth))
                     return False
             self.logger.info( "next: " + next_node)
             self.logger.info( "depth: " + str(crawl_depth))

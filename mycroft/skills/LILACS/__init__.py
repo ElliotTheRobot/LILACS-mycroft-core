@@ -46,9 +46,9 @@ class LilacsSkill(MycroftSkill):
 
     def handle_act_intent(self, message):
         knowledge = ConceptConnector(logger)
-        storage = ConceptStorage(self.storagepath)
+      #  storage = ConceptStorage(self.storagepath)
 
-        self.speak("Reading concepts from db test")
+      #  self.speak("Reading concepts from db test")
       #  nodenames = {}
       #  for nodes in storage.getNodesAll():
       #      nodenames = nodes
@@ -59,6 +59,7 @@ class LilacsSkill(MycroftSkill):
       #                               child_concepts=child_concepts)
 
         # create concepts for testing
+
         self.speak("Creating coded concepts test")
         name = "human"
         child_concepts = {"male": 1, "female": 1}
@@ -81,28 +82,24 @@ class LilacsSkill(MycroftSkill):
                                  child_concepts=child_concepts)
 
 
-
-        # lets see what concept connector can deduce from here
-        key = "joana"
-        childs = knowledge.concepts[key].child_concepts
-        parents = knowledge.concepts[key].parent_concepts
-
-        self.speak(key + " can be: ")
-        for child in childs:
-            self.speak(child + " from generation " + str(childs[child]))
-
-        # in case of Joana everything here except human was deduced
-        self.speak(key + " is:")
-        for parent in parents:
-            self.speak(parent + " from generation " + str(parents[parent]))
-
         # Crawler test
         crawler = ConceptCrawler(concept_connector=knowledge, center_node="joana")
 
-        next = crawler.choose_next_node("joana")
-        next = crawler.choose_next_node(next)
-        next = crawler.choose_next_node(next)
-        next = crawler.choose_next_node(next)
+        flag = crawler.drunk_crawl("joana", "frog")
+        print flag
+        self.speak("answer to is joana a frog is " + str(flag))
+
+        flag = crawler.drunk_crawl("joana", "animal")
+        print flag
+        self.speak("answer to is joana a animal is " + str(flag))
+
+        print flag
+        flag = crawler.drunk_crawl("joana", "human")
+        self.speak("answer to is joana a human is " + str(flag))
+
+        print flag
+        flag = crawler.drunk_crawl("joana", "alive")
+        self.speak("answer to is joana alive is " + str(flag))
 
     def stop(self):
         pass

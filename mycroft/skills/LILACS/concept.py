@@ -167,7 +167,7 @@ class ConceptCrawler():
         # crawl depth
         self.depth = depth
         # crawl path
-        self.crawl_path = [center_node]
+        self.crawl_path = []
         # crawled antonims
         self.do_not_crawl = []
         # nodes we left behind without checking
@@ -263,9 +263,6 @@ class ConceptCrawler():
         return len(self.crawl_path
                    )
 
-    def drunk_crawl(self, target):
-        pass
-
     @staticmethod
     def sigmoid(x):
         return 1 / (1 + np.exp(-x))
@@ -288,6 +285,17 @@ class ConceptCrawler():
 
         # add current node to crawl path
         self.crawl_path.append(node)
+
+        # if node in crawled list do not re-crawl
+        if node in self.crawled:
+            return None
+
+        # remove current node from uncrawled nodes list
+        i = 0
+        for uncrawled_node in self.uncrawled:
+            if uncrawled_node == node:
+                self.uncrawled.pop(i)
+            i += 1
 
         # add current node to crawled list
         if node not in self.crawled:
@@ -317,7 +325,7 @@ class ConceptCrawler():
             return None
 
         # add these nodes to "nodes to crawl"
-        for node in nodes:
+        for node in dict(nodes):
             self.uncrawled.append(node)
             # add all antonims from these nodes to do no crawl
             for antonim in self.concept_db.get_antonims(node):
@@ -338,10 +346,72 @@ class ConceptCrawler():
             nodes[node] = 100 - self.sigmoid(nodes[node]) * 100
 
         list = [k for k in nodes for dummy in range(int(nodes[k]))]
-        # choose a node to crawl next
-        next_node = random.choice(list)
-        print nodes
-        print next_node
+        if list == []:
+            next_node = None
+        else:
+            # choose a node to crawl next
+            next_node = random.choice(list)
         return next_node
+
+    def drunk_crawl(self, center_node, target_node, direction="parents"):
+        # reset variables
+        # crawl path
+        self.crawl_path = []
+        # crawled antonims
+        self.do_not_crawl = []
+        # nodes we left behind without checking
+        self.uncrawled = []
+        # nodes we already checked
+        self.crawled = []
+        # count visits to each node
+        self.visits = {}
+        # start at center node
+        self.logger.info("start node: " + center_node)
+        self.logger.info("target node: " + target_node)
+        next_node = self.choose_next_node(center_node, direction)
+        crawl_depth = 1
+        while True:
+
+            if next_node is None:
+                if len(self.uncrawled) == 0:
+                    #no more nodes to crawl
+                    return False
+                # reached a dead end, pic next unchecked node
+                # chose last uncrawled node (keep on this path)
+                next_node = self.uncrawled[-1]
+                crawl_depth -= 1 #went back
+                # check crawl_depth threshold
+                if crawl_depth >= self.depth:
+                    # do not crawl further
+                    return False
+
+            self.logger.info("crawled: " + str(self.crawled))
+           # print "crawl_path: " + str(self.crawl_path)
+            self.logger.info( "uncrawled: " + str(self.uncrawled))
+            self.logger.info( "next: " + next_node)
+            self.logger.info( "depth: " + str(crawl_depth))
+            # check if we found answer
+            if target_node in self.crawled:
+                return True
+            # see if we already crawled this
+            if next_node in self.crawled:
+                # increase visit counter
+                self.visits[next_node] += 1
+                # add to crawl path
+                self.crawl_path.append(next_node)
+                # remove fom uncrawled list
+                i = 0
+                for node in self.uncrawled:
+                    if node == next_node:
+                        self.uncrawled.pop(i)
+                    i += 1
+                # chose another to crawl
+                next_node = None
+            # crawl next node
+            next_node = self.choose_next_node(next_node, direction)
+            crawl_depth += 1 #went further
+
+
+
 
 

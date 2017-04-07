@@ -157,19 +157,15 @@ class ConceptConnector():
 
 
 class ConceptCrawler():
-    def __init__(self, center_node, depth=20, target_node=None, concept_connector=None):
+    def __init__(self, center_node, depth=20, concept_connector=None):
         # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/9
         self.logger = logger
         # concept database
         self.concept_db = concept_connector
         if self.concept_db is None:
             self.concept_db = ConceptConnector(logger)
-
-        # make tree of concepts
+        # crawl depth
         self.depth = depth
-        #self.parents_tree = self.build_tree(center_node, target_node, depth = self.depth, direction ="parents")
-        #print self.parents_tree
-        #self.childs_tree = self.build_tree(concept_connector, target_node, depth=self.depth, direction="childs")
         # crawl path
         self.crawl_path = [center_node]
         # crawled antonims
@@ -178,8 +174,6 @@ class ConceptCrawler():
         self.uncrawled = []
         # nodes we already checked
         self.crawled = []
-        # crawl target
-        self.target = target_node
         # count visits to each node
         self.visits = {}
 
@@ -272,10 +266,11 @@ class ConceptCrawler():
     def drunk_crawl(self, target):
         pass
 
-    def sigmoid(self, x):
+    @staticmethod
+    def sigmoid(x):
         return 1 / (1 + np.exp(-x))
 
-    def choose_next_node(self, node, direction = "parents"):
+    def choose_next_node(self, node, direction="parents"):
         # when choosing the next node we have to think about what matters more
         # - checking child or parent?
         # - does node have synonims?

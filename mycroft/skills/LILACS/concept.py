@@ -1,4 +1,11 @@
+from mycroft.util.log import getLogger
+import numpy as np
+import random
+
 __authors__ = ["jarbas", "heinzschmidt"]
+
+logger = getLogger("Skills")
+
 
 class ConceptNode():
     def __init__(self, name, data={}, parent_concepts={},
@@ -76,10 +83,10 @@ class ConceptConnector():
             #  merge fields
             for parent in concept.parent_concepts:
                 if parent not in self.get_parents(concept_name):
-                    self.concepts[concept_name].add_parent(parent, gen= concept.parent_concepts[parent])
+                    self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts[parent])
             for child in concept.child_concepts:
                 if child not in self.get_childs(concept_name):
-                    self.concepts[concept_name].add_child(child, gen= concept.child_concepts[child])
+                    self.concepts[concept_name].add_child(child, gen=concept.child_concepts[child])
             for antonim in concept.antonims:
                 if antonim not in self.concepts[concept_name].antonims:
                     self.concepts[concept_name].antonims.add_antonim(antonim)
@@ -98,47 +105,71 @@ class ConceptConnector():
     def get_parents(self, concept_name):
         return self.concepts[concept_name].parent_concepts
 
+    def get_antonims(self, concept_name):
+        return self.concepts[concept_name].antonims
+
+    def get_synonims(self, concept_name):
+        return self.concepts[concept_name].synonims
+
     def create_concept(self, new_concept_name, data={},
                        child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
 
         self.logger.info("processing concept " + new_concept_name)
 
+
+        # safe - checking
+        if new_concept_name in parent_concepts:
+            parent_concepts.pop(new_concept_name)
+        if new_concept_name in child_concepts:
+            child_concepts.pop(new_concept_name)
+
         # handle new concept
-        if new_concept_name not in self.concepts:
-            self.logger.info("creating concept node for: " + new_concept_name)
-            concept = ConceptNode(new_concept_name, data, parent_concepts, child_concepts, synonims, antonims)
-            self.add_concept(new_concept_name, concept)
+        self.logger.info("creating concept node for: " + new_concept_name)
+        concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
+                              synonims=synonims, antonims=antonims)
+        self.add_concept(new_concept_name, concept)
 
         # handle parent concepts
         for concept_name in parent_concepts:
             self.logger.info("checking if parent node exists: " + concept_name)
-
+            gen = parent_concepts[concept_name]
             # create parent if it doesnt exist
             if concept_name not in self.concepts:
-                self.logger.info("creating node: " + concept_name + " with child: " + new_concept_name)
-                gen = parent_concepts[concept_name]
-                concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
+                self.logger.info("creating node: " + concept_name )
+                concept = ConceptNode(concept_name, data={}, child_concepts={}, parent_concepts={}, synonims=[], antonims=[])
                 self.add_concept(concept_name, concept)
-
+            # add child to parent
+            self.logger.info("adding child: " + new_concept_name + " to parent: " + concept_name)
+            self.concepts[concept_name].add_child(new_concept_name, gen=gen)
 
         # handle child concepts
         for concept_name in child_concepts:
             self.logger.info("checking if child node exists: " + concept_name)
+            gen = child_concepts[concept_name]
             # create child if it doesnt exist
             if concept_name not in self.concepts:
-                self.logger.info("creating node: " + concept_name + " with parent: " + new_concept_name)
-                gen = child_concepts[concept_name]
-                concept = ConceptNode(concept_name, child_concepts={new_concept_name: gen})
+                self.logger.info("creating node: " + concept_name)
+                concept = ConceptNode(concept_name, data={}, child_concepts={}, parent_concepts={}, synonims=[], antonims=[])
                 self.add_concept(concept_name, concept)
+            #add parent to child
+            self.logger.info("adding parent: " + new_concept_name + " to child: " + concept_name)
+            self.concepts[concept_name].add_parent(new_concept_name, gen=gen)
 
 
 class ConceptCrawler():
-    def _init__(self, center_node, target_node, concept_connector):
+    def __init__(self, center_node, depth=20, target_node=None, concept_connector=None):
         # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/9
+        self.logger = logger
         # concept database
         self.concept_db = concept_connector
+        if self.concept_db is None:
+            self.concept_db = ConceptConnector(logger)
+
         # make tree of concepts
-        self.tree = self.build_tree(concept_connector, target_node)
+        self.depth = depth
+        #self.parents_tree = self.build_tree(center_node, target_node, depth = self.depth, direction ="parents")
+        #print self.parents_tree
+        #self.childs_tree = self.build_tree(concept_connector, target_node, depth=self.depth, direction="childs")
         # crawl path
         self.crawl_path = [center_node]
         # crawled antonims
@@ -149,9 +180,31 @@ class ConceptCrawler():
         self.crawled = []
         # crawl target
         self.target = target_node
+        # count visits to each node
+        self.visits = {}
 
-    def build_tree(self, center_node, target_node, depth=20):
-        tree = None
+
+    def build_tree(self, center_node, target_node, depth=20, direction="parents", tree = [], step=0):
+        # start in center_node, add all parents / childs
+        parents = []
+        try:
+            self.logger.info("Getting parents of: " + center_node)
+            concepts = self.concept_db.get_parents(center_node)
+            for key in concepts:
+                parents.append(key)
+        except:
+            self.logger.error("no node named " + str(center_node))
+
+        if parents != []:
+            self.logger.info("adding to tree: " + str(parents))
+            tree.append(parents)
+            for node in tree[step]:
+                self.logger.info("Checking next node: " + node)
+                depth -= 1
+                self.logger.info("Current depth: " + str(depth))
+                if depth <= 0:
+                    break
+                tree = self.build_tree(node, target_node, depth, direction, tree, step + 1)
         return tree
 
     def find_path(self, center_node, target_node, path=[]):
@@ -160,10 +213,10 @@ class ConceptCrawler():
         if center_node == target_node:
             return path
 
-        if center_node not in self.tree:
+        if center_node not in self.parents_tree:
             return None
 
-        for node in self.tree[center_node]:
+        for node in self.parents_tree[center_node]:
             if node not in path:
                 newpath = self.find_path(center_node, target_node, path)
                 if newpath:
@@ -176,11 +229,11 @@ class ConceptCrawler():
         if center_node == target_node:
             return [path]
 
-        if center_node not in self.tree:
+        if center_node not in self.parents_tree:
             return []
 
         paths = []
-        for node in self.tree[center_node]:
+        for node in self.parents_tree[center_node]:
             if node not in path:
                 newpaths = self.find_all_paths(node, target_node, path)
                 for newpath in newpaths:
@@ -193,12 +246,12 @@ class ConceptCrawler():
         if center_node == target_node:
             return path
 
-        if center_node not in self.tree:
+        if center_node not in self.parents_tree:
             return None
 
         shortest = None
 
-        for node in self.tree[center_node]:
+        for node in self.parents_tree[center_node]:
             if node not in path:
                 newpath = self.find_shortest_path(node, target_node, path)
                 if newpath:
@@ -217,17 +270,83 @@ class ConceptCrawler():
                    )
 
     def drunk_crawl(self, target):
-        ''' Drunk_Crawl idea (because just stumbles around looking for familiar things until target is reached)
-
-        crawl up - this will answer questions of the sort " is CenterNode a TargetNode ?"
-
-        - start at CenterNode and build a concept_tree with all parent (and parents of parents...) nodes and N layers/hops (depth configurable)
-        - while not in TargetNode
-            - check if CurrentNode has synonims, if yes prefer synonim and smaller gen parents of synonim as next node
-            - check if CurrentNode is antonym of any previous node, if yes go back and choose another
-            - choose a random node coming out from CurrentNode, prefer higher gens
-            - if no next node go back and search next guess
-            - if end of tree return False
-        - return True
-        '''
         pass
+
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
+
+    def choose_next_node(self, node, direction = "parents"):
+        # when choosing the next node we have to think about what matters more
+        # - checking child or parent?
+        # - does node have synonims?
+        # - is any of the connected nodes blacklisted in this crawl (antonim)?
+        # - choose stronger connections preferably
+        # - number of times we visited this node
+        if node is None:
+            return node
+
+        # keep count of visits to this node
+        if node in self.visits:
+            self.visits[node] += 1
+        else:
+            self.visits[node] = 1
+
+        # add current node to crawl path
+        self.crawl_path.append(node)
+
+        # add current node to crawled list
+        if node not in self.crawled:
+            self.crawled.append(node)
+
+        # are we checking parents or childs?
+        if direction == "parents":
+            nodes = self.concept_db.get_parents(node)
+            # check if node as synonims
+            synonims = self.concept_db.get_synonims(node)
+            for synonim in synonims:
+            # get connections of these synonims also
+                nodes += self.concept_db.get_parents(synonim)
+        elif direction == "childs":
+            nodes = self.concept_db.get_childs(node)
+            # check if node as synonims
+            synonims = self.concept_db.get_synonims(node)
+            for synonim in synonims:
+                # get connections of these synonims also
+                nodes += self.concept_db.get_childs(synonim)
+        else:
+            self.logger.error("Invalid crawl direction")
+            return None
+
+        # if no connections found return
+        if len(nodes) == 0:
+            return None
+
+        # add these nodes to "nodes to crawl"
+        for node in nodes:
+            self.uncrawled.append(node)
+            # add all antonims from these nodes to do no crawl
+            for antonim in self.concept_db.get_antonims(node):
+                self.do_not_crawl.append(antonim)
+            # remove any node we are not supposed to crawl
+            if node in self.do_not_crawl:
+                nodes.pop(node)
+            # if we already crawled this node, increase its count but do not re-visit
+            if node in self.crawled:
+                nodes.pop(node)
+                self.visits[node] += 1
+
+        # create a weighted list giving preference
+        for node in nodes:
+            # turn all values into a value between 0 and 1
+            # multiply by 100
+            # smaller values are more important
+            nodes[node] = 100 - self.sigmoid(nodes[node]) * 100
+
+        list = [k for k in nodes for dummy in range(int(nodes[k]))]
+        # choose a node to crawl next
+        next_node = random.choice(list)
+        print nodes
+        print next_node
+        return next_node
+
+

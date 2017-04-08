@@ -1,5 +1,7 @@
 import json
 
+__authors__ = ["jarbas", "heinzschmidt"]
+
 class ConceptStorage():
     _dataStorageType = ""
     _dataStorageUser = ""

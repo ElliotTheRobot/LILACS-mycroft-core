@@ -1,15 +1,13 @@
+from mycroft.util.crawl_log import getLogger as CrawlLogger
 from mycroft.util.log import getLogger
-import numpy as np
 import random
 import math
 
 __authors__ = ["jarbas", "heinzschmidt"]
 
-logger = getLogger("concept logger")
-
 
 def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+    return 1 / (1 + math.exp(-x))
 
 
 class ConceptNode():
@@ -79,9 +77,9 @@ class ConceptNode():
 
 
 class ConceptConnector():
-    def __init__(self, logger,  concepts = {}):
+    def __init__(self, concepts = {}):
         self.concepts = concepts
-        self.logger = logger
+        self.logger = getLogger("ConceptConnector")
 
     def add_concept(self, concept_name, concept):
         if concept_name in self.concepts:
@@ -164,11 +162,11 @@ class ConceptConnector():
 class ConceptCrawler():
     def __init__(self, depth=20, concept_connector=None):
         # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/9
-        self.logger = logger
+        self.logger = CrawlLogger("Crawler", "Drunk")
         # concept database
         self.concept_db = concept_connector
         if self.concept_db is None:
-            self.concept_db = ConceptConnector(logger)
+            self.concept_db = ConceptConnector(getLogger("ConceptConnector"))
         # crawl depth
         self.depth = depth
         # crawl path
@@ -364,6 +362,7 @@ class ConceptCrawler():
 
     def drunk_crawl(self, center_node, target_node, direction="parents"):
         # reset variables
+        self.logger = CrawlLogger("Crawler", "Drunk")
         # crawl path
         self.crawl_path = []
         # crawled antonims

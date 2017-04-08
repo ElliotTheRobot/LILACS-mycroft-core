@@ -45,7 +45,7 @@ class LilacsSkill(MycroftSkill):
         self.register_intent(act_intent, self.handle_act_intent)
 
     def handle_act_intent(self, message):
-        knowledge = ConceptConnector(logger)
+        knowledge = ConceptConnector()
       #  storage = ConceptStorage(self.storagepath)
 
       #  self.speak("Reading concepts from db test")

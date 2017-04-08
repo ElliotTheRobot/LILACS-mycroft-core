@@ -24,6 +24,7 @@ from threading import Timer
 import os
 from os.path import expanduser, exists
 
+from mycroft.messagebus.message import Message
 from mycroft.configuration import ConfigurationManager
 from mycroft.messagebus.client.ws import WebsocketClient
 from mycroft.skills.core import load_skills, THIRD_PARTY_SKILLS_DIR, \
@@ -39,8 +40,8 @@ loaded_skills = {}
 last_modified_skill = 0
 skills_directories = []
 skill_reload_thread = None
-prioritary_skills = ["intent"]
-
+id_counter = 0
+prioritary_skills = ["intent", "feedback", "LILACS"]
 
 def connect():
     global ws
@@ -73,16 +74,8 @@ def clear_skill_events(instance):
     instance_events = []
     for event in events:
         e = ws.emitter._events[event]
-        if len(e) == 0:
-            continue
-        if getattr(e[0], 'func_closure', None) is not None and isinstance(
+        if len(e) > 0 and e[0].func_closure and isinstance(
                 e[0].func_closure[1].cell_contents, instance.__class__):
-            instance_events.append(event)
-        elif getattr(e[0], 'im_class', None) is not None and e[0].\
-                im_class == instance.__class__:
-            instance_events.append(event)
-        elif getattr(e[0], 'im_self', None) is not None and isinstance(
-                e[0].im_self, instance.__class__):
             instance_events.append(event)
 
     for event in instance_events:
@@ -90,30 +83,32 @@ def clear_skill_events(instance):
 
 
 def watch_skills():
-    global ws, loaded_skills, last_modified_skill, skills_directories, \
-        id_counter, prioritary_skills
-    # load prioritary skills first
+    global ws, loaded_skills, last_modified_skill, skills_directories, id_counter, prioritary_skills
+    # load prioritary skill first
     for p_skill in prioritary_skills:
         if p_skill not in loaded_skills:
-            loaded_skills[p_skill] = {}
+            id_counter += 1
+            loaded_skills[p_skill] = {"id": id_counter}
             skill = loaded_skills.get(p_skill)
             skill["path"] = os.path.join(os.path.dirname(__file__), p_skill)
             if not MainModule + ".py" in os.listdir(skill["path"]):
-                logger.error(p_skill + " does not appear to be a skill")
+                logger.error(p_skill+" does not appear to be a skill")
                 sys.exit(1)
             skill["loaded"] = True
             skill["instance"] = load_skill(
-                create_skill_descriptor(skill["path"]), ws)
+                create_skill_descriptor(skill["path"]), ws, skill["id"])
+        time.sleep (1)
 
     while True:
         for dir in skills_directories:
             if exists(dir):
-                list = sorted(
-                    filter(lambda x: os.path.isdir(os.path.join(dir, x)),
-                           os.listdir(dir)))
+                list = filter(lambda x: os.path.isdir(os.path.join(dir, x)),
+                              os.listdir(dir))
                 for skill_folder in list:
                     if skill_folder not in loaded_skills:
-                        loaded_skills[skill_folder] = {}
+                        # register unique ID
+                        id_counter += 1
+                        loaded_skills[skill_folder] = {"id": id_counter}
                     skill = loaded_skills.get(skill_folder)
                     skill["path"] = os.path.join(dir, skill_folder)
                     if not MainModule + ".py" in os.listdir(skill["path"]):
@@ -127,19 +122,51 @@ def watch_skills():
                         continue
                     elif skill.get(
                             "instance") and modified > last_modified_skill:
+                        # some skills must'nt be reloaded, variables get reset
+                        # intent skill, dictation skill
                         if not skill["instance"].reload_skill:
                             continue
+                        #####
                         logger.debug("Reloading Skill: " + skill_folder)
                         skill["instance"].shutdown()
                         clear_skill_events(skill["instance"])
                         del skill["instance"]
                     skill["loaded"] = True
                     skill["instance"] = load_skill(
-                        create_skill_descriptor(skill["path"]), ws)
+                        create_skill_descriptor(skill["path"]), ws, skill["id"])
+
         last_modified_skill = max(
             map(lambda x: x.get("last_modified"), loaded_skills.values()))
         time.sleep(2)
 
+
+def handle_conversation_request(message):
+    skill_id = int(message.data["skill_id"])
+    utterances = message.data["utterances"]
+    lang = message.data["lang"]
+    global ws, loaded_skills
+    # loop trough skills list and call converse for skill with skill_id
+    for skill in loaded_skills:
+        if loaded_skills[skill]["id"] == skill_id:
+            instance = loaded_skills[skill]["instance"]
+            result = instance.converse(utterances, lang)
+            ws.emit(Message("converse_status_response", {
+                    "skill_id": skill_id, "result": result}))
+            return
+    ws.emit(Message("converse_status_response", {
+        "skill_id": 0, "result": False}))
+
+def handle_feedback_request(message):
+    global loaded_skills
+    skill_id = message.data["skill_id"]
+    utterance = message.data["utterance"]
+    result = message.data["sentiment"]
+    # loop trough skills list and call feedback for skill with skill_id
+    for skill in loaded_skills:
+        if loaded_skills[skill]["id"] == skill_id:
+            instance = loaded_skills[skill]["instance"]
+            instance.feedback(result, utterance)
+            return
 
 def main():
     global ws
@@ -160,6 +187,8 @@ def main():
 
     ws.on('message', echo)
     ws.once('open', load_watch_skills)
+    ws.on('converse_status_request', handle_conversation_request)
+    ws.on('do_feedback', handle_feedback_request)
     ws.run_forever()
 
 

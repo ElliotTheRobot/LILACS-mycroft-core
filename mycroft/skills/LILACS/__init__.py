@@ -91,22 +91,41 @@ class LilacsSkill(MycroftSkill):
         start = "joana"
         for key in keys:
             target = key
-            flag = crawler.drunk_crawl(start, target)
+            # is joana a...
+            flag = self.is_this_that(start, target, crawler)
             self.log.info("crawl from " + start + "to " + target + "is: " + str(flag))
             self.speak("answer to is " + start + " a " + target + " is " + str(flag))
             if not flag:
-                p_crawl = crawler.crawled
-                for node in p_crawl:
-                    flag = crawler.drunk_crawl(target, node)
-                    if flag:
-                        self.speak(target + " are " + node + " like " + start)
+                # what do they have in common
+                commons = self.common_this_and_that(start, target, crawler)
+                for common in commons:
+                    self.speak(start + " are " + common + " like " + target)
 
-            #give examples of animals
-            start_node = key
-            crawler.drunk_crawl(start_node, "no target crawl", direction="childs")
-            for example in crawler.crawled:
-                self.speak(example + " is an example of " + start_node)
+            #give examples of..
+            for example in self.examples_of_this(key, crawler):
+                self.speak(example + " is an example of " + key)
 
+    # standard questions helper functions
+    def is_this_that(self, this, that, crawler):
+        flag = crawler.drunk_crawl(this, that)
+        return flag
+
+    def examples_of_this(self, this, crawler):
+        crawler.drunk_crawl(this, "no target crawl", direction="childs")
+        examples = []
+        for example in crawler.crawled:
+            examples.append(example)
+        return examples
+
+    def common_this_and_that(self, this, that, crawler):
+        crawler.drunk_crawl(this, "no target crawl")
+        p_crawl = crawler.crawled
+        common = []
+        for node in p_crawl:
+            flag = crawler.drunk_crawl(that, node)
+            if flag:
+                common.append(node)
+        return common
 
     def stop(self):
         pass

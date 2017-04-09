@@ -179,11 +179,13 @@ class ConceptCrawler():
         self.crawled = []
         # count visits to each node
         self.visits = {}
+        #
+        self.short_path = []
 
     def find_all_paths(self, center_node, target_node, path=[], direction="parents"):
-        self.logger = CrawlLogger("Crawler", "Explorer")
         path = path + [center_node]
         self.logger.info("Current Node: " + center_node)
+        self.visits[center_node] += 1
         if center_node == target_node:
             self.logger.info("path found from " + path[0] + " to " + target_node)
             self.logger.info(path)
@@ -219,12 +221,6 @@ class ConceptCrawler():
             if not shortest or len(newpath) < len(shortest):
                 shortest = newpath
         self.logger.info("shortest path is: " + str(shortest))
-        # TODO update vars
-        self.crawled = [] #all nodes
-        self.crawl_path = shortest
-        self.uncrawled = [] #none
-        self.do_not_crawl = [] #none
-        self.visits = {} #all possible
         return shortest
 
     def find_minimum_node_distance(self, center_node, target_node):
@@ -331,6 +327,11 @@ class ConceptCrawler():
             next_node = random.choice(list)
         return next_node
 
+    def reset_visit_counter(self):
+        # visit counter at zero
+        for node in self.concept_db.concepts:
+            self.visits[node] = 0
+
     def drunk_crawl(self, center_node, target_node, direction="parents"):
         # reset variables
         self.logger = CrawlLogger("Crawler", "Drunk")
@@ -355,6 +356,7 @@ class ConceptCrawler():
                 self.logger.info("Found target node")
                 return True
             if next_node is None:
+                # choose next node
                 if len(self.uncrawled) == 0:
                     self.logger.info("No more nodes to crawl")
                     #no more nodes to crawl
@@ -394,6 +396,15 @@ class ConceptCrawler():
             self.logger.info("uncrawled nodes: " + str(self.uncrawled))
             crawl_depth += 1  # went further
 
+    def explorer_crawl(self, center_node, target_node, direction="parents"):
+        self.logger = CrawlLogger("Crawler", "Explorer")
+        self.uncrawled = []  # none
+        self.do_not_crawl = []  # none
+        self.reset_visit_counter()
+        self.crawled = []  # all nodes
+        for node in self.concept_db.concepts:
+            self.crawled.append(node)
+        self.crawl_path = self.find_shortest_path(center_node, target_node, direction=direction)
 
 
 

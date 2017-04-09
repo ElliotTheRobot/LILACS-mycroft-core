@@ -47,28 +47,6 @@ class LilacsSkill(MycroftSkill):
     def handle_introduce_intent(self, message):
         self.speak_dialog("whatisLILACS")
 
-    # standard questions helper functions
-    def is_this_that(self, this, that, crawler):
-        flag = crawler.drunk_crawl(this, that)
-        return flag
-
-    def examples_of_this(self, this, crawler):
-        crawler.drunk_crawl(this, "no target crawl", direction="childs")
-        examples = []
-        for example in crawler.crawled:
-            examples.append(example)
-        return examples
-
-    def common_this_and_that(self, this, that, crawler):
-        crawler.drunk_crawl(this, "no target crawl")
-        p_crawl = crawler.crawled
-        common = []
-        for node in p_crawl:
-            flag = crawler.drunk_crawl(that, node)
-            if flag:
-                common.append(node)
-        return common
-
     def stop(self):
         pass
 

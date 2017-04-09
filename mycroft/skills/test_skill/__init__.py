@@ -24,6 +24,7 @@ from mycroft.skills.intent_parser import IntentParser, IntentTree
 
 from mycroft.skills.LILACS.concept import ConceptConnector, ConceptCrawler
 from mycroft.skills.LILACS.storage import ConceptStorage
+import random
 
 __author__ = 'jarbas'
 
@@ -60,6 +61,8 @@ class TestSkill(MycroftSkill):
             .require("CompareKeyword").build()
         relation_intent = IntentBuilder("ShortestPathIntent") \
             .require("RelationKeyword").build()
+        talk_intent = IntentBuilder("TalkAboutIntent") \
+            .require("TalkKeyword").build()
 
         # register intents
         self.register_intent(examples_intent,
@@ -70,6 +73,8 @@ class TestSkill(MycroftSkill):
                              self.handle_compare_intent)
         self.register_intent(relation_intent,
                              self.handle_relation_intent)
+        self.register_intent(talk_intent,
+                             self.handle_talk_intent)
 
     def build_intent_tree(self):
         pass
@@ -95,27 +100,41 @@ class TestSkill(MycroftSkill):
                                  child_concepts=child_concepts)
 
         name = "animal"
-        child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
+        child_concepts = {"dog": 2, "cow": 2, "frog": 2, "cat": 2, "spider": 2, "insect": 2, "mammal": 1}
         parent_concepts = {"living being": 1}
         self.knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
     
     # intent handling
-    
+
+    def handle_talk_intent(self, message):
+        start = "joana"
+
+        for node in self.what_is_this(start):
+            if node != start:
+                txt = start + " is " + node
+                self.speak(txt)
+
+        for node in self.examples_of_this(start):
+            if node != start:
+                txt = start + " can be " + node
+                self.speak(txt)
+
     def handle_examples_intent(self, message):
         key = "animal"
         for example in self.examples_of_this(key):
-            self.speak(example + " is an example of " + key)
+            if example != key:
+                self.speak(example + " is an example of " + key)
 
     def handle_compare_intent(self, message):
-        start = "maria"
-        target = "living being"
+        start = "joana"
+        target = "animal"
         flag = self.is_this_that(start, target)
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
 
     def handle_common_intent(self, message):
         start = "maria"
-        target = "joana"
+        target = "frog"
         # what do they have in common
         commons = self.common_this_and_that(start, target)
         for common in commons:
@@ -123,12 +142,13 @@ class TestSkill(MycroftSkill):
 
     def handle_relation_intent(self, message):
         start = "maria"
-        target = "mammal"
+        target = "living being"
         flag = self.is_this_that(start, target)
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
         if flag:
             # what is relationship
-            nodes = self.crawler.find_shortest_path(start, target)
+            self.crawler.explorer_crawler(start, target)
+            nodes = self.crawler.crawl_path
             i = 0
             for node in nodes:
                 if node != target:
@@ -139,9 +159,8 @@ class TestSkill(MycroftSkill):
             commons = self.common_this_and_that(start, target)
             for common in commons:
                 self.speak(start + " are " + common + " like " + target)
-            if commons == []:
+            if not commons:
                 self.speak("I think they don't have anything in common")
-
 
 
 
@@ -174,6 +193,14 @@ class TestSkill(MycroftSkill):
                 common.append(node)
         return common
 
+    def what_is_this(self, this, crawler=None):
+        if crawler is None:
+            crawler = self.crawler
+        crawler.drunk_crawl(this, "no target crawl", direction="parents")
+        examples = []
+        for example in crawler.crawled:
+            examples.append(example)
+        return examples
     # standard methods
     
     def stop(self):

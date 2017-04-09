@@ -137,6 +137,15 @@ class TemplateSkill(MycroftSkill):
                 common.append(node)
         return common
 
+    def what_is_this(self, this, crawler=None):
+        if crawler is None:
+            crawler = ConceptCrawler(concept_connector=self.knowledge)
+        crawler.drunk_crawl(this, "no target crawl", direction="parents")
+        examples = []
+        for example in crawler.crawled:
+            examples.append(example)
+        return examples
+
     # standard methods
     
     def stop(self):

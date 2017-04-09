@@ -19,6 +19,7 @@
 import abc
 import imp
 import time
+import signal
 
 import os.path
 import re
@@ -31,14 +32,14 @@ from mycroft.dialog import DialogLoader
 from mycroft.filesystem import FileSystemAccess
 from mycroft.messagebus.message import Message
 from mycroft.util.log import getLogger
+
 __author__ = 'seanfitz'
 
-PRIMARY_SKILLS = ['intent', 'wake']
-BLACKLISTED_SKILLS = ["template_skill"]
-SKILLS_BASEDIR = dirname(__file__)
-THIRD_PARTY_SKILLS_DIR = ["/opt/mycroft/third_party", "/opt/mycroft/skills"]
-# Note: /opt/mycroft/skills is recommended, /opt/mycroft/third_party
-# is for backwards compatibility
+signal.signal(signal.SIGCHLD, signal.SIG_IGN)
+
+BLACKLISTED_SKILLS = ["send_sms", "media", "template_skill"]
+
+SKILLS_DIR = os.path.dirname(__file__)
 
 MainModule = '__init__'
 
@@ -149,21 +150,12 @@ def create_skill_descriptor(skill_folder):
     return {"name": os.path.basename(skill_folder), "info": info}
 
 
-def load_skills(emitter, skills_root=SKILLS_BASEDIR):
+def load_skills(emitter, skills_root=SKILLS_DIR):
     logger.info("Checking " + skills_root + " for new skills")
     skill_list = []
-    skills = get_skills(skills_root)
-    id = 0
-    for skill in skills:
-        if skill['name'] in PRIMARY_SKILLS:
-            skill_list.append(load_skill(skill, emitter, id))
-            id += 1
+    for skill in get_skills(skills_root):
+        skill_list.append(load_skill(skill, emitter))
 
-    for skill in skills:
-        if (skill['name'] not in PRIMARY_SKILLS and
-                skill['name'] not in BLACKLISTED_SKILLS):
-            skill_list.append(load_skill(skill, emitter, id))
-            id += 1
     return skill_list
 
 
@@ -182,7 +174,6 @@ class MycroftSkill(object):
         self.name = name
         self.bind(emitter)
         self.config_core = ConfigurationManager.get()
-        self.config_apis = self.config_core.get("APIS")
         self.config = self.config_core.get(name)
         self.dialog_renderer = None
         self.file_system = FileSystemAccess(join('skills', name))

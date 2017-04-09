@@ -95,9 +95,9 @@ class TemplateSkill(MycroftSkill):
         parent_concepts = {"living being": 1}
         self.knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
-
+    
     # intent handling
-
+    
     def handle_enable_second_intent(self, message):
         # do stuff
         # climb intent tree
@@ -107,9 +107,9 @@ class TemplateSkill(MycroftSkill):
         # do stuff
         # go back to level one or next or previous...
         self.tree.reset()
-
+    
     # LILACS helper
-
+    
     def is_this_that(self, this, that, crawler=None):
         if crawler is None:
             crawler = ConceptCrawler(concept_connector=self.knowledge)
@@ -138,7 +138,7 @@ class TemplateSkill(MycroftSkill):
         return common
 
     # standard methods
-
+    
     def stop(self):
         # reset intents to start-up state if desired
         self.tree.reset()

@@ -15,5 +15,3 @@ MANIFEST.in
 setup.py
 scripts/logs/*
 logs/*
-mycroft/skills/LILACS/simplejson-2.0.7/
-

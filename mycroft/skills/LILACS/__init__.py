@@ -105,6 +105,10 @@ class LilacsSkill(MycroftSkill):
             for example in self.examples_of_this(key, crawler):
                 self.speak(example + " is an example of " + key)
 
+            # print paths in cli
+            print crawler.find_shortest_path("joana", key)
+            print crawler.find_all_paths("joana", key)
+
     # standard questions helper functions
     def is_this_that(self, this, that, crawler):
         flag = crawler.drunk_crawl(this, that)

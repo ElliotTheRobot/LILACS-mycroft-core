@@ -180,77 +180,54 @@ class ConceptCrawler():
         # count visits to each node
         self.visits = {}
 
-
-    def build_tree(self, center_node, target_node, depth=20, direction="parents", tree = [], step=0):
-        # start in center_node, add all parents / childs
-        parents = []
-        try:
-            self.logger.info("Getting parents of: " + center_node)
-            concepts = self.concept_db.get_parents(center_node)
-            for key in concepts:
-                parents.append(key)
-        except:
-            self.logger.error("no node named " + str(center_node))
-
-        if parents != []:
-            self.logger.info("adding to tree: " + str(parents))
-            tree.append(parents)
-            for node in tree[step]:
-                self.logger.info("Checking next node: " + node)
-                depth -= 1
-                self.logger.info("Current depth: " + str(depth))
-                if depth <= 0:
-                    break
-                tree = self.build_tree(node, target_node, depth, direction, tree, step + 1)
-        return tree
-
-    def find_path(self, center_node, target_node, path=[]):
-        # find first path to connection
-        path = path + [center_node]
-        if center_node == target_node:
-            return path
-
-        if center_node not in self.parents_tree:
-            return None
-
-        for node in self.parents_tree[center_node]:
-            if node not in path:
-                newpath = self.find_path(center_node, target_node, path)
-                if newpath:
-                    return newpath
-        return None
-
-    def find_all_paths(self, center_node, target_node, path=[]):
+    def find_all_paths(self, center_node, target_node, path=[], direction="parents"):
         path = path + [center_node]
 
         if center_node == target_node:
             return [path]
 
-        if center_node not in self.parents_tree:
+        if center_node not in self.concept_db.concepts:
             return []
 
         paths = []
-        for node in self.parents_tree[center_node]:
+
+        if direction == "parents":
+            nodes = self.concept_db.get_parents(center_node)
+        elif direction == "childs":
+            nodes = self.concept_db.get_childs(center_node)
+        else:
+            self.logger.error("Invalid direction")
+            return None
+
+        for node in nodes:
             if node not in path:
-                newpaths = self.find_all_paths(node, target_node, path)
+                newpaths = self.find_all_paths(node, target_node, path, direction)
                 for newpath in newpaths:
                     paths.append(newpath)
         return paths
 
-    def find_shortest_path(self, center_node, target_node, path=[]):
+    def find_shortest_path(self, center_node, target_node, path=[], direction="parents"):
 
         path = path + [center_node]
         if center_node == target_node:
             return path
 
-        if center_node not in self.parents_tree:
-            return None
+        if center_node not in self.concept_db.concepts:
+            return []
 
         shortest = None
 
-        for node in self.parents_tree[center_node]:
+        if direction == "parents":
+            nodes = self.concept_db.get_parents(center_node)
+        elif direction == "childs":
+            nodes = self.concept_db.get_childs(center_node)
+        else:
+            self.logger.error("Invalid direction")
+            return None
+
+        for node in nodes:
             if node not in path:
-                newpath = self.find_shortest_path(node, target_node, path)
+                newpath = self.find_shortest_path(node, target_node, path, direction)
                 if newpath:
                     if not shortest or len(newpath) < len(shortest):
                         shortest = newpath

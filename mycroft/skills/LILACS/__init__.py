@@ -37,77 +37,15 @@ class LilacsSkill(MycroftSkill):
         self.reload_skill = False
 
     def initialize(self):
-        self.storagepath = str(dirname(__file__) + "/.db/")
-        act_intent = IntentBuilder("ActivateIntent") \
-            .require("ActivateKeyword") \
-            .build()
+        intro_intent = IntentBuilder("IntroduceLILACSIntent") \
+            .require("IntroduceKeyword").build()
 
-        self.register_intent(act_intent, self.handle_act_intent)
+        # register intents
+        self.register_intent(intro_intent,
+                             self.handle_introduce_intent)
 
-    def handle_act_intent(self, message):
-        knowledge = ConceptConnector()
-      #  storage = ConceptStorage(self.storagepath)
-
-      #  self.speak("Reading concepts from db test")
-      #  nodenames = {}
-      #  for nodes in storage.getNodesAll():
-      #      nodenames = nodes
-      #      name = nodes
-      #      parent_concepts = storage.getNodeParent(conceptname=str(name))
-      #      child_concepts = storage.getNodeChildren(conceptname=str(name))
-      #      knowledge.create_concept(name, parent_concepts=parent_concepts,
-      #                               child_concepts=child_concepts)
-
-        # create concepts for testing
-        name = "human"
-        child_concepts = {"human_male": 1, "human_female": 1}
-        parent_concepts = {"animal": 2, "mammal": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
-
-        name = "joana"
-        child_concepts = {"human_wife": 1}
-        parent_concepts = {"human_female": 2, "human": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
-
-        name = "maria"
-        child_concepts = {"human_wife": 1}
-        parent_concepts = {"human_female": 2, "human": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
-
-        name = "animal"
-        child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
-        parent_concepts = {"living being": 1}
-        knowledge.create_concept(name, parent_concepts=parent_concepts,
-                                 child_concepts=child_concepts)
-
-
-        # Crawler test
-        crawler = ConceptCrawler(concept_connector=knowledge)
-
-        keys = ["frog", "living being", "mammal", "maria"]
-        start = "joana"
-        for key in keys:
-            target = key
-            # is joana a...
-            flag = self.is_this_that(start, target, crawler)
-            self.log.info("crawl from " + start + "to " + target + "is: " + str(flag))
-            self.speak("answer to is " + start + " a " + target + " is " + str(flag))
-            if not flag:
-                # what do they have in common
-                commons = self.common_this_and_that(start, target, crawler)
-                for common in commons:
-                    self.speak(start + " are " + common + " like " + target)
-
-            #give examples of..
-            for example in self.examples_of_this(key, crawler):
-                self.speak(example + " is an example of " + key)
-
-            # print paths in cli
-            print crawler.find_shortest_path("joana", key)
-            print crawler.find_all_paths("joana", key)
+    def handle_introduce_intent(self, message):
+        self.speak_dialog("whatisLILACS")
 
     # standard questions helper functions
     def is_this_that(self, this, that, crawler):

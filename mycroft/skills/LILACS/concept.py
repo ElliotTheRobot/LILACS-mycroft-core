@@ -181,9 +181,12 @@ class ConceptCrawler():
         self.visits = {}
 
     def find_all_paths(self, center_node, target_node, path=[], direction="parents"):
+        self.logger = CrawlLogger("Crawler", "Explorer")
         path = path + [center_node]
-
+        self.logger.info("Current Node: " + center_node)
         if center_node == target_node:
+            self.logger.info("path found from " + path[0] + " to " + target_node)
+            self.logger.info(path)
             return [path]
 
         if center_node not in self.concept_db.concepts:
@@ -191,12 +194,13 @@ class ConceptCrawler():
 
         paths = []
 
+        self.logger.info("getting " + direction)
         if direction == "parents":
             nodes = self.concept_db.get_parents(center_node)
         elif direction == "childs":
             nodes = self.concept_db.get_childs(center_node)
         else:
-            self.logger.error("Invalid direction")
+            self.logger.error("Invalid crawl direction")
             return None
 
         for node in nodes:
@@ -207,30 +211,20 @@ class ConceptCrawler():
         return paths
 
     def find_shortest_path(self, center_node, target_node, path=[], direction="parents"):
-
-        path = path + [center_node]
-        if center_node == target_node:
-            return path
-
-        if center_node not in self.concept_db.concepts:
-            return []
-
+        self.logger = CrawlLogger("Crawler", "Explorer")
+        self.logger.info("finding all paths from " + center_node + " to " + target_node)
+        paths = self.find_all_paths(center_node, target_node, direction=direction)
         shortest = None
-
-        if direction == "parents":
-            nodes = self.concept_db.get_parents(center_node)
-        elif direction == "childs":
-            nodes = self.concept_db.get_childs(center_node)
-        else:
-            self.logger.error("Invalid direction")
-            return None
-
-        for node in nodes:
-            if node not in path:
-                newpath = self.find_shortest_path(node, target_node, path, direction)
-                if newpath:
-                    if not shortest or len(newpath) < len(shortest):
-                        shortest = newpath
+        for newpath in paths:
+            if not shortest or len(newpath) < len(shortest):
+                shortest = newpath
+        self.logger.info("shortest path is: " + str(shortest))
+        # TODO update vars
+        self.crawled = [] #all nodes
+        self.crawl_path = shortest
+        self.uncrawled = [] #none
+        self.do_not_crawl = [] #none
+        self.visits = {} #all possible
         return shortest
 
     def find_minimum_node_distance(self, center_node, target_node):

@@ -108,7 +108,7 @@ class TestSkill(MycroftSkill):
     # intent handling
 
     def handle_talk_intent(self, message):
-        start = "joana"
+        start = random.choice(self.knowledge.get_concept_names())
 
         for node in self.what_is_this(start):
             if node != start:
@@ -121,33 +121,33 @@ class TestSkill(MycroftSkill):
                 self.speak(txt)
 
     def handle_examples_intent(self, message):
-        key = "animal"
+        key = random.choice(self.knowledge.get_concept_names())
         for example in self.examples_of_this(key):
             if example != key:
                 self.speak(example + " is an example of " + key)
 
     def handle_compare_intent(self, message):
-        start = "joana"
-        target = "animal"
+        start = random.choice(self.knowledge.get_concept_names())
+        target = random.choice(self.knowledge.get_concept_names())
         flag = self.is_this_that(start, target)
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
 
     def handle_common_intent(self, message):
-        start = "maria"
-        target = "frog"
+        start = random.choice(self.knowledge.get_concept_names())
+        target = random.choice(self.knowledge.get_concept_names())
         # what do they have in common
         commons = self.common_this_and_that(start, target)
         for common in commons:
             self.speak(start + " are " + common + " like " + target)
 
     def handle_relation_intent(self, message):
-        start = "maria"
-        target = "living being"
+        start = random.choice(self.knowledge.get_concept_names())
+        target = random.choice(self.knowledge.get_concept_names())
         flag = self.is_this_that(start, target)
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
         if flag:
             # what is relationship
-            self.crawler.explorer_crawler(start, target)
+            self.crawler.explorer_crawl(start, target)
             nodes = self.crawler.crawl_path
             i = 0
             for node in nodes:
@@ -161,8 +161,6 @@ class TestSkill(MycroftSkill):
                 self.speak(start + " are " + common + " like " + target)
             if not commons:
                 self.speak("I think they don't have anything in common")
-
-
 
     # LILACS helper
     

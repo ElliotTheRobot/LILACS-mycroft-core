@@ -81,6 +81,15 @@ class ConceptConnector():
         self.concepts = concepts
         self.logger = getLogger("ConceptConnector")
 
+    def get_concept_names(self):
+        concepts = []
+        for name in self.concepts:
+            concepts.append(name)
+        return concepts
+
+    def get_concepts(self):
+        return self.concepts
+
     def add_concept(self, concept_name, concept):
         if concept_name in self.concepts:
             #  merge fields

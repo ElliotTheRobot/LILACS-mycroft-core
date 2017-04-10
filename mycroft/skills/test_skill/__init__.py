@@ -100,7 +100,7 @@ class TestSkill(MycroftSkill):
                                  child_concepts=child_concepts)
 
         name = "animal"
-        child_concepts = {"dog": 2, "cow": 2, "frog": 2, "cat": 2, "spider": 2, "insect": 2, "mammal": 1}
+        child_concepts = {"dog": 2, "cow": 2, "frog": 2, "cat": 2, "spider": 2, "insect": 1, "mammal": 1}
         parent_concepts = {"living being": 1}
         self.knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
@@ -122,9 +122,12 @@ class TestSkill(MycroftSkill):
 
     def handle_examples_intent(self, message):
         key = random.choice(self.knowledge.get_concept_names())
-        for example in self.examples_of_this(key):
+        examples = self.examples_of_this(key)
+        for example in examples:
             if example != key:
                 self.speak(example + " is an example of " + key)
+        if examples == []:
+            self.speak("i dont know any examples of " + key)
 
     def handle_compare_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())
@@ -147,8 +150,7 @@ class TestSkill(MycroftSkill):
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
         if flag:
             # what is relationship
-            self.crawler.explorer_crawl(start, target)
-            nodes = self.crawler.crawl_path
+            nodes = self.why_is_this_that(start, target)
             i = 0
             for node in nodes:
                 if node != target:
@@ -163,7 +165,14 @@ class TestSkill(MycroftSkill):
                 self.speak("I think they don't have anything in common")
 
     # LILACS helper
-    
+
+    def why_is_this_that(self, this, that, crawler=None):
+        if crawler is None:
+            crawler = self.crawler
+        crawler.explorer_crawl(this, that)
+        nodes = crawler.crawl_path
+        return nodes
+
     def is_this_that(self, this, that, crawler=None):
         if crawler is None:
             crawler = self.crawler
@@ -199,6 +208,7 @@ class TestSkill(MycroftSkill):
         for example in crawler.crawled:
             examples.append(example)
         return examples
+
     # standard methods
     
     def stop(self):

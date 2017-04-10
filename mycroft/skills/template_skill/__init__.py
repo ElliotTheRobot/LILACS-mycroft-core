@@ -116,6 +116,13 @@ class TemplateSkill(MycroftSkill):
         flag = crawler.drunk_crawl(this, that)
         return flag
 
+    def why_is_this_that(self, this, that, crawler=None):
+        if crawler is None:
+            crawler = ConceptCrawler(concept_connector=self.knowledge)
+        crawler.explorer_crawl(this, that)
+        nodes = crawler.crawl_path
+        return nodes
+
     def examples_of_this(self, this, crawler=None):
         if crawler is None:
             crawler = ConceptCrawler(concept_connector=self.knowledge)

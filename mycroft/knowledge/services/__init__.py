@@ -21,5 +21,9 @@ class KnowledgeBackend():
         pass
 
     @abstractmethod
+    def emit_node_info(self, info):
+        pass
+
+    @abstractmethod
     def stop(self):
         pass

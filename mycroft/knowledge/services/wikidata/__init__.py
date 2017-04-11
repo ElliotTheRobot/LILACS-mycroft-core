@@ -11,20 +11,20 @@ __author__ = 'jarbas'
 logger = getLogger(abspath(__file__).split('/')[-2])
 
 
-class WikipediaService(KnowledgeBackend):
-    def __init__(self, config, emitter, name='wikipedia'):
+class WikidataService(KnowledgeBackend):
+    def __init__(self, config, emitter, name='wikidata'):
         self.config = config
         self.process = None
         self.emitter = emitter
         self.name = name
         self.subject = None
-        self.emitter.on('WikipediaKnowledgeAdquire', self._adquire)
+        self.emitter.on('WikidataKnowledgeAdquire', self._adquire)
 
     def set_subject(self, subject):
         self.subject = subject
 
     def _adquire(self, message=None):
-        logger.info('WikipediaKnowledge_Adquire')
+        logger.info('WikidataKnowledge_Adquire')
         if self.subject is None:
             logger.error("No subject to adquire knowledge about")
             return
@@ -33,36 +33,27 @@ class WikipediaService(KnowledgeBackend):
             node_data = {}
             subject = self.subject
             # get knowledge about
-            # TODO exceptions for erros
+            # TODO exception handling for erros
             try:
-                page = wptools.page(subject).get_query()
-                node_data["pic"] = page.image('page')['url']
-                node_data["name"] = page.label
+                page = wptools.page(subject).get_wikidata()
+                # parse for distant child of
                 node_data["description"] = page.description
-                node_data["summary"] = page.extext
-                node_data["url"] = page.url
-                # parse infobox
-                node_data["infobox"] = self.parse_infobox(subject)
+                # direct child of
+                node_data["what"] = page.what
+                # data fields
+                node_data["data"] = page.wikidata
+                # related to
+                # TODO parse and make cousin/child/parent
+                node_data["properties"] = page.props
                 # id info source
-                dict["wikipedia"] = node_data
+                dict["wikidata"] = node_data
                 self.emit_node_info(dict)
             except:
-                logger.error("Could not parse wikipedia for " + str(subject))
-
-    def parse_infobox(self, subject):
-        page = wptools.page(subject).get_parse()
-        data = {}
-        # TODO decent parsing, info is messy
-        for entry in page.infobox:
-            print entry + " : " + page.infobox[entry]
-            data[entry] = page.infobox[entry]
-
-        return data
-
+                logger.error("Could not parse wikidata for " + str(subject))
 
     def adquire(self):
-        logger.info('Call WikipediaKnowledgeAdquire')
-        self.emitter.emit(Message('WikipediaKnowledgeAdquire'))
+        logger.info('Call WikidataKnowledgeAdquire')
+        self.emitter.emit(Message('WikidataKnowledgeAdquire'))
 
     def emit_node_info(self, info):
         # TODO emit node_info for node manager to update/create node
@@ -72,7 +63,7 @@ class WikipediaService(KnowledgeBackend):
                 print key + " : " + str(source[key])
 
     def stop(self):
-        logger.info('WikipediaKnowledge_Stop')
+        logger.info('WikidataKnowledge_Stop')
         self.subject = None
         if self.process:
             self.process.terminate()
@@ -83,6 +74,6 @@ class WikipediaService(KnowledgeBackend):
 def load_service(base_config, emitter):
     backends = base_config.get('backends', [])
     services = [(b, backends[b]) for b in backends
-                if backends[b]['type'] == 'wikipedia']
-    instances = [WikipediaService(s[1], emitter, s[0]) for s in services]
+                if backends[b]['type'] == 'wikidata']
+    instances = [WikidataService(s[1], emitter, s[0]) for s in services]
     return instances

@@ -38,7 +38,6 @@ def getLogger(name="Crawler", crawl_type="Drunk"):
     """
 
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    crawler_name = path + "/" + crawl_type + "_" + name + ".log"
-    logging.basicConfig(format=FORMAT, level=logging.DEBUG)
-    logging.FileHandler(filename=crawler_name, mode='a', encoding=None, delay=0)
+    crawler_log_path = path + "/" + crawl_type + "_" + name + ".log"
+    logging.basicConfig(filename=crawler_log_path, format=FORMAT, level=logging.DEBUG)
     return logging.getLogger(crawl_type+" "+name)

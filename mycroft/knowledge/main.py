@@ -102,7 +102,7 @@ def load_services_callback():
     global default
     global service
 
-    config = ConfigurationManager.get().get("Knowledge")
+    config = ConfigurationManager.get().get("knowledge")
     service = load_services(config, ws)
     logger.info(service)
     default_name = config.get('default-backend', '')
@@ -129,7 +129,6 @@ def _stop(message=None):
     """
     global current
     logger.info('stopping all knowledge services')
-    print current
     if current:
         current.stop()
         current = None
@@ -155,8 +154,8 @@ def adquire(subject, prefered_service):
     else:  # Fall back to asking user?
         logger.error("no service")
         return
-    service.set_subject(subject)
-    service.adquire()
+
+    service.adquire(subject)
     current = service
 
 
@@ -167,13 +166,15 @@ def _adquire(message):
     """
     global service
     logger.info('LILACS_KnowledgeService_adquire')
-    logger.info(message.data['subject'])
+    logger.info("subject: " + str(message.data['subject']))
 
     subject = message.data['subject']
 
+    logger.info("utterance: " + str(message.data['utterance']))
+
     # Find if the user wants to use a specific backend
     for s in service:
-        logger.info(s.name)
+        #logger.info(s.name)
         if s.name in message.data['utterance']:
             prefered_service = s
             logger.info(s.name + ' would be prefered')

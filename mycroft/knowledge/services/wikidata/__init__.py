@@ -17,25 +17,22 @@ class WikidataService(KnowledgeBackend):
         self.process = None
         self.emitter = emitter
         self.name = name
-        self.subject = None
         self.emitter.on('WikidataKnowledgeAdquire', self._adquire)
 
-    def set_subject(self, subject):
-        self.subject = subject
 
     def _adquire(self, message=None):
         logger.info('WikidataKnowledge_Adquire')
-        if self.subject is None:
+        subject = message.data["subject"]
+        if subject is None:
             logger.error("No subject to adquire knowledge about")
             return
         else:
             dict = {}
             node_data = {}
-            subject = self.subject
             # get knowledge about
             # TODO exception handling for erros
             try:
-                page = wptools.page(subject).get_wikidata()
+                page = wptools.page(subject, silent=True, verbose=False).get_wikidata()
                 # parse for distant child of
                 node_data["description"] = page.description
                 # direct child of
@@ -51,20 +48,18 @@ class WikidataService(KnowledgeBackend):
             except:
                 logger.error("Could not parse wikidata for " + str(subject))
 
-    def adquire(self):
+    def adquire(self, subject):
         logger.info('Call WikidataKnowledgeAdquire')
-        self.emitter.emit(Message('WikidataKnowledgeAdquire'))
+        self.emitter.emit(Message('WikidataKnowledgeAdquire', {"subject": subject}))
 
     def emit_node_info(self, info):
         # TODO emit node_info for node manager to update/create node
         for source in info:
-            print source
-            for key in source:
-                print key + " : " + str(source[key])
+            for key in info[source]:
+                print key + " : " + str(info[source][key])
 
     def stop(self):
         logger.info('WikidataKnowledge_Stop')
-        self.subject = None
         if self.process:
             self.process.terminate()
             self.process = None

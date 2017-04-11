@@ -23,7 +23,8 @@ from mycroft.util.log import getLogger
 from mycroft.skills.intent_parser import IntentParser, IntentTree
 
 from mycroft.skills.LILACS.concept import ConceptConnector, ConceptCrawler
-from mycroft.skills.LILACS.storage import ConceptStorage
+from mycroft.skills.knowledgeservice import KnowledgeService
+
 import random
 
 __author__ = 'jarbas'
@@ -37,7 +38,8 @@ class TestSkill(MycroftSkill):
         super(TestSkill, self).__init__(name="TestSkill")
         # concept connector
         self.knowledge = ConceptConnector()
-        self.crawler=None
+        self.crawler = None
+        self.service = None
 
     def initialize(self):
         # initialize self intent parser
@@ -50,6 +52,8 @@ class TestSkill(MycroftSkill):
         self.create_concepts()
         # initialize crawler
         self.crawler = ConceptCrawler(concept_connector=self.knowledge)
+        # initialize knowledge service
+        self.service = KnowledgeService(self.emitter)
 
     def build_intents(self):
         # build
@@ -63,6 +67,8 @@ class TestSkill(MycroftSkill):
             .require("RelationKeyword").build()
         talk_intent = IntentBuilder("TalkAboutIntent") \
             .require("TalkKeyword").build()
+        test_intent = IntentBuilder("TestKnowledgeIntent") \
+            .require("TestKeyword").build()
 
         # register intents
         self.register_intent(examples_intent,
@@ -75,6 +81,8 @@ class TestSkill(MycroftSkill):
                              self.handle_relation_intent)
         self.register_intent(talk_intent,
                              self.handle_talk_intent)
+        self.register_intent(test_intent,
+                             self.handle_test_knowledge_backend_intent)
 
     def build_intent_tree(self):
         pass
@@ -106,6 +114,10 @@ class TestSkill(MycroftSkill):
                                  child_concepts=child_concepts)
     
     # intent handling
+
+    def handle_test_knowledge_backend_intent(self, message):
+        self.service.adquire("dog", "wikipedia")
+        self.service.adquire("elon musk", "wikidata")
 
     def handle_talk_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())

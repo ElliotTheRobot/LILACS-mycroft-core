@@ -17,10 +17,6 @@ class KnowledgeBackend():
         pass
 
     @abstractmethod
-    def set_subject(self, subject):
-        pass
-
-    @abstractmethod
     def emit_node_info(self, info):
         pass
 

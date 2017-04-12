@@ -74,11 +74,27 @@ class WikiHowService(KnowledgeBackend):
         ex_steps = []
         step_html = soup.findAll("div", {"class": "step"})
         for html in step_html:
-            trash = str(html.find("script"))
-            trash = trash.replace("<script>", "").replace("</script>", "").replace(";", "")
             step = html.find("b")
             step = step.text
+
+            trash = str(html.find("script"))
+            trash = trash.replace("<script>", "").replace("</script>", "").replace(";", "")
             ex_step = html.text.replace(trash, "")
+
+            trash_i = ex_step.find("//<![CDATA[")
+            trash_e = ex_step.find(">")
+            trash = ex_step[trash_i:trash_e + 1]
+            ex_step = ex_step.replace(trash, "")
+
+            trash_i = ex_step.find("http://")
+            trash_e = ex_step.find(".mp4")
+            trash = ex_step[trash_i:trash_e + 4]
+            ex_step = ex_step.replace(trash, "")
+
+            trash = "WH.performance.mark('step1_rendered');"
+            ex_step = ex_step.replace(trash, "")
+            ex_step = ex_step.replace("\n", "")
+
             steps.append(step)
             ex_steps.append(ex_step)
 
@@ -86,12 +102,14 @@ class WikiHowService(KnowledgeBackend):
         pic_links = []
         pic_html = soup.findAll("a", {"class": "image lightbox"})
         for html in pic_html:
+            html = html.find("img")
             i = str(html).find("data-src=")
             pic = str(html)[i:].replace('data-src="', "")
             i = pic.find('"')
-            pic_links.append(pic[:i])
+            pic = pic[:i]
+            pic_links.append(pic)
 
-        return title, steps, ex_steps, pic_links
+        return title, steps, ex_steps, pic_links, url
 
     def how_to(self, subject):
         how_tos = {}
@@ -102,7 +120,7 @@ class WikiHowService(KnowledgeBackend):
         for link in links:
             how_to = {}
             # get steps and pics
-            title, steps, descript, pics = self.get_steps(link)
+            title, steps, descript, pics, link = self.get_steps(link)
             how_to["title"] = title
             how_to["steps"] = steps
             how_to["detailed"] = descript
@@ -114,7 +132,7 @@ class WikiHowService(KnowledgeBackend):
     def random_how_to(self):
         link = "http://www.wikihow.com/Special:Randomizer"
         # get steps and pics
-        title, steps, descript, pics = self.get_steps(link)
+        title, steps, descript, pics, link = self.get_steps(link)
         how_to = {}
         how_to["title"] = title
         how_to["steps"] = steps

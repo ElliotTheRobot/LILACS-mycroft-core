@@ -37,13 +37,6 @@ class WikiHowService(KnowledgeBackend):
             except:
                 logger.error("Could not parse wikihow for " + str(subject))
 
-
-    def get_title(self, link):
-        # get title of this how-to
-        # print "Getting title of " + link
-        title = link.replace("http://www.wikihow.com/", "").replace("-", " ")
-        return title
-
     def search_wikihow(self, search_term):
         # print "Seaching wikihow for " + search_term
         search_url = "http://www.wikihow.com/wikiHowTo?search="
@@ -71,6 +64,11 @@ class WikiHowService(KnowledgeBackend):
         # open url
         html = self.get_html(url)
         soup = bs4.BeautifulSoup(html, "lxml")
+        # get title
+        title_html = soup.findAll("h1", {"class": "firstHeading"})
+        for html in title_html:
+            url = "http:" + html.find("a").get("href")
+        title = url.replace("http://www.wikihow.com/", "").replace("-", " ")
         # get steps
         steps = []
         ex_steps = []
@@ -93,7 +91,7 @@ class WikiHowService(KnowledgeBackend):
             i = pic.find('"')
             pic_links.append(pic[:i])
 
-        return steps, ex_steps, pic_links
+        return title, steps, ex_steps, pic_links
 
     def how_to(self, subject):
         how_tos = {}
@@ -103,10 +101,8 @@ class WikiHowService(KnowledgeBackend):
             return
         for link in links:
             how_to = {}
-            # how to title
-            title = self.get_title(link)
             # get steps and pics
-            steps, descript, pics = self.get_steps(link)
+            title, steps, descript, pics = self.get_steps(link)
             how_to["title"] = title
             how_to["steps"] = steps
             how_to["detailed"] = descript
@@ -114,6 +110,18 @@ class WikiHowService(KnowledgeBackend):
             how_to["url"] = link
             how_tos[title] = how_to
         return how_tos
+
+    def random_how_to(self):
+        link = "http://www.wikihow.com/Special:Randomizer"
+        # get steps and pics
+        title, steps, descript, pics = self.get_steps(link)
+        how_to = {}
+        how_to["title"] = title
+        how_to["steps"] = steps
+        how_to["detailed"] = descript
+        how_to["pics"] = pics
+        how_to["url"] = link
+        return how_to
 
     def adquire(self, subject):
         logger.info('Call WikihowKnowledgeAdquire')

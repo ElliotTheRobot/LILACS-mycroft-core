@@ -13,7 +13,7 @@ class KnowledgeBackend():
         pass
 
     @abstractmethod
-    def adquire(self):
+    def adquire(self, subject):
         pass
 
     @abstractmethod

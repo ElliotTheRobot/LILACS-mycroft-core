@@ -1,14 +1,6 @@
 import requests
 import bs4
 
-
-def get_title(link):
-    # get title of this how-to
-    # print "Getting title of " + link
-    title = link.replace("http://www.wikihow.com/", "").replace("-", " ")
-    return title
-
-
 def search_wikihow(search_term):
     #print "Seaching wikihow for " + search_term
     search_url = "http://www.wikihow.com/wikiHowTo?search="
@@ -38,6 +30,13 @@ def get_steps(url):
     # open url
     html = get_html(url)
     soup = bs4.BeautifulSoup(html, "lxml")
+
+    # get title
+    title_html = soup.findAll("h1", {"class": "firstHeading"})
+    for html in title_html:
+        url = "http:" + html.find("a").get("href")
+    title = url.replace("http://www.wikihow.com/", "").replace("-", " ")
+
     # get steps
     steps = []
     ex_steps = []
@@ -60,10 +59,10 @@ def get_steps(url):
         i = pic.find('"')
         pic_links.append(pic[:i])
 
-    return steps, ex_steps, pic_links
+    return title, steps, ex_steps, pic_links
 
 
-def how_to(subject):
+def get_how_to(subject):
     how_tos = {}
     links = search_wikihow(subject)
     if links == []:
@@ -71,10 +70,8 @@ def how_to(subject):
         return
     for link in links:
         how_to = {}
-        # how to title
-        title = get_title(link)
         # get steps and pics
-        steps, descript, pics = get_steps(link)
+        title, steps, descript, pics = get_steps(link)
         how_to["title"] = title
         how_to["steps"] = steps
         how_to["detailed"] = descript
@@ -83,14 +80,38 @@ def how_to(subject):
         how_tos[title] = how_to
     return how_tos
 
+def random_how_to():
+    link = "http://www.wikihow.com/Special:Randomizer"
+    # get steps and pics
+    title, steps, descript, pics = get_steps(link)
+    how_to = {}
+    how_to["title"] = title
+    how_to["steps"] = steps
+    how_to["detailed"] = descript
+    how_to["pics"] = pics
+    how_to["url"] = link
+    return how_to
 
-def main():
-    how_tos = how_to("boil an egg")
-    for how in how_tos:
-        print "How to " + how
-        i = 0
-        for step in how_tos[how]["steps"]:
-            print "step " + str(i) + " : " + step
+
+#### example
+
+# get random how to
+how_to = random_how_to()
+print how_to["title"]
+print how_to["steps"]
+
+# search how tos about
+subject = "worship satan"
+how_tos = get_how_to(subject)
+for how in how_tos:
+    print "\nHow to " + how
+    i = 0
+    for step in how_tos[how]["steps"]:
+        print "\nstep " + str(i) + " : " + step
+        try:
             print how_tos[how]["pics"][i]
-            i += 1
-        break
+        except:
+            print "no pic for this step"
+        i += 1
+    print "\n\n"
+

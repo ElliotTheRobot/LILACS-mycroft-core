@@ -1,32 +1,36 @@
 {
-    "cow": [
+    "animal": [
         {
+            "name" : "animal",
             "parents": [
                         {
-                            "1" : "mammal",
-                            "2" : "animal"
+                            "1" : "alive"
                         }
                        ],
             "children": [
                         {
-                            "1" : "female",
-                            "2" : "mother",
-                            "3" : "milk"
+                            "1" : "dog",
+                            "2" : "cow",
+                            "3" : "frog",
+                            "4" : "cat",
+                            "5" : "spider",
+                            "6" : "insect"
                         }
                         ],
-            "synonymns" : [
+            "attrib": [
                             {
-                            "1" : "Ox",
-                            "2" : "Cattle"
+                                "type" :    "life",
+                                "synonymns" : [],
+                                "antonyms" : [],
+                                "data_dict" : "Cow is the nickname for cattle, and the name of adult female cattle.",
+                                "last_update" : "2017-04-04"
                             }
-                          ],
-            "antonyms" : [],
-            "data_dict": "Cow is the nickname for cattle, and the name of adult female cattle.", 
-            "last_update": "2017-04-04"
+                         ]
         }
     ],
     "human": [
         {
+            "name" : "human",
             "parents": [
                         {
                             "1" : "mammal",
@@ -36,43 +40,52 @@
             "children": [
                         {
                             "1" : "male",
-                            "2" : "female",
-                            "3" : "name"
+                            "2" : "female"
                         }
                        ],
-            "synonymns" : [
+            "attrib": [
                             {
-                            "1" : "hominid",
-                            "2" : "homo sapien"
+                                "type"  :   "life",
+                                "synonymns" : [
+                                                {
+                                                    "1" : "hominid",
+                                                    "2" : "homo sapien"
+                                                }
+                                             ],
+                                "antonyms" : [],
+                                "data_dict": "Modern humans (Homo sapiens, primarily ssp. Homo sapiens sapiens) are the only extant members of Hominina tribe (or human tribe), a branch of the tribe Hominini belonging to the family of great apes. They are characterized by erect posture and bipedal locomotion; manual dexterity and increased tool use, compared to other animals; and a general trend toward larger, more complex brains and societies.[3][4]",
+                                "last_update": "2017-04-04"
                             }
-                          ],
-            "antonyms" : [],
-            "data_dict": "Modern humans (Homo sapiens, primarily ssp. Homo sapiens sapiens) are the only extant members of Hominina tribe (or human tribe), a branch of the tribe Hominini belonging to the family of great apes. They are characterized by erect posture and bipedal locomotion; manual dexterity and increased tool use, compared to other animals; and a general trend toward larger, more complex brains and societies.[3][4]", 
-            "last_update": "2017-04-04"
+                      ]
         }
     ],
-    "Joanna": [
+    "joana": [
         {
+            "name" : "joana",
             "parents": [
                         {
                             "1" : "female",
-                            "2" : "human",
-                            "3" : "animal"
+                            "2" : "human"
                         }
                        ],
             "children": [
                         {
-                            "1" : "James"
+                            "1" : "wife"
                         }
                        ],
-            "synonymns" : [
+            "attrib": [
                             {
-                            "1" : "Patsy"
+                                "type"  :   "person",
+                                "synonymns" : [
+                                                {
+                                                    "1" : "Patsy"
+                                                }
+                                            ],
+                                "antonyms" : [],
+                                "data_dict": "Joanna Lamond Lumley, OBE FRGS (born 1 May 1946) is an English actress,[1] voice-over artist, former model, author and activist. She won two BAFTA TV Awards for her role as Patsy Stone in the sitcom Absolutely Fabulous (1992–2012), and was nominated for the 2011 Tony Award for Best Featured Actress in a Play for the Broadway revival of La Bête. In 2013, she received the Special Recognition Award at the National Television Awards.",
+                                "last_update": "2017-04-05"
                             }
-                          ],
-            "antonyms" : [],
-            "data_dict": "Joanna Lamond Lumley, OBE FRGS (born 1 May 1946) is an English actress,[1] voice-over artist, former model, author and activist. She won two BAFTA TV Awards for her role as Patsy Stone in the sitcom Absolutely Fabulous (1992–2012), and was nominated for the 2011 Tony Award for Best Featured Actress in a Play for the Broadway revival of La Bête. In 2013, she received the Special Recognition Award at the National Television Awards.",
-            "last_update": "2017-04-05"
+                       ]
         }
     ]
 }

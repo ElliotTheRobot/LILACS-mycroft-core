@@ -19,6 +19,9 @@ class ConceptNode():
         self.child_concepts = child_concepts
         self.data = {}
 
+    def get_parents(self):
+        return self.parent_concepts;
+
     def add_synonim(self, synonim):
         if synonim not in self.synonims:
             self.synonims.append(synonim)
@@ -91,21 +94,20 @@ class ConceptConnector():
                 name = nodes
                 node_antonimns = []
                 node_synonims = []
-                parent_concepts = []
-                child_concepts = []
+                node_parent_concepts = {}
+                node_child_concepts = {}
                 for node_details in self.concepts[name]:
                     for node_parents in node_details["parents"]:
-                        parent_concepts = node_parents
+                        node_parent_concepts = node_parents
                     for node_childs in node_details["children"]:
-                        child_concepts = node_childs
-                    for node_attribs in node_details["attrib"]:
-                        for node_synonyms in node_attribs["synonymns"]:
-                            node_synonims = node_synonyms
-                        for node_antonyms in node_attribs["antonyms"]:
+                        node_child_concepts = node_childs
+                    for node_synonyms in node_details["synonymns"]:
+                        node_synonims = node_synonyms
+                    for node_antonyms in node_details["antonyms"]:
                             node_antonimns = node_antonyms
 
-                self.create_concept(name, data=self.concepts, parent_concepts=parent_concepts,
-                                          child_concepts=child_concepts, synonims=node_synonyms,
+                self.create_concept(name, data=self.concepts, parent_concepts=node_parent_concepts,
+                                          child_concepts=node_child_concepts, synonims=node_synonims,
                                             antonims=node_antonimns)
                 self.storageLoaded = True
 
@@ -131,9 +133,13 @@ class ConceptConnector():
     def add_concept(self, concept_name, concept):
         if concept_name in self.concepts:
             #  merge fields
+            self.logger.info("### Concept found: " + str(concept_name))
+
             for parent in concept.parent_concepts:
                 if parent not in self.get_parents(concept_name):
-                    self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts[parent])
+                    self.logger.info(("Adding parent node: " + parent))
+                    #self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts[parent])
+
             for child in concept.child_concepts:
                 if child not in self.get_childs(concept_name):
                     self.concepts[concept_name].add_child(child, gen=concept.child_concepts[child])
@@ -143,6 +149,7 @@ class ConceptConnector():
             for synonim in concept.synonims:
                 if synonim not in self.concepts[concept_name].synonims:
                     self.concepts[concept_name].synonims.add_synonim(synonim)
+
         else:
             self.concepts.setdefault(concept_name, concept)
 
@@ -164,16 +171,23 @@ class ConceptConnector():
     def create_concept(self, new_concept_name, data={},
                            child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
 
+        self.logger.info(("### Creating new concept: " + str(new_concept_name)))
         # safe - checking
         if new_concept_name in parent_concepts:
             parent_concepts.pop(new_concept_name)
         if new_concept_name in child_concepts:
             child_concepts.pop(new_concept_name)
 
+
         # handle new concept
         concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
                               synonims=synonims, antonims=antonims)
+        self.logger.info(("### New ConceptNode created."))
+
         self.add_concept(new_concept_name, concept)
+
+
+
 
         # TODO: write new concept to json file
         #       create a dict/array from all elements added here, and if:
@@ -206,6 +220,7 @@ class ConceptConnector():
             #add parent to child
             self.logger.info("adding parent: " + new_concept_name + " to child: " + concept_name)
             self.concepts[concept_name].add_parent(new_concept_name, gen=gen)
+
 
 
 class ConceptCrawler():

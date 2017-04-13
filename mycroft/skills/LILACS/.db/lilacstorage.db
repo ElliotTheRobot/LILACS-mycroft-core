@@ -17,17 +17,17 @@
                             "6" : "insect"
                         }
                         ],
+            "type" :    "life",
+            "synonymns" : [],
+            "antonyms" : [
+						{
+							"0" : "plant",
+							"1" : "house",
+							"2" : "rock"
+						}
+					     ],
             "attrib": [
                             {
-                                "type" :    "life",
-                                "synonymns" : [],
-                                "antonyms" : [
-						{
-							"0" : "plant", 
-							"1" : "house", 
-							"2" : "rock"
-						}	
-					     ],
                                 "data_dict" : "Cow is the nickname for cattle, and the name of adult female cattle.",
                                 "last_update" : "2017-04-04"
                             }
@@ -49,16 +49,16 @@
                             "2" : "female"
                         }
                        ],
+            "type"  :   "life",
+            "synonymns" : [
+                            {
+                                "1" : "hominid",
+                                "2" : "homo sapien"
+                            }
+                         ],
+            "antonyms" : [],
             "attrib": [
                             {
-                                "type"  :   "life",
-                                "synonymns" : [
-                                                {
-                                                    "1" : "hominid",
-                                                    "2" : "homo sapien"
-                                                }
-                                             ],
-                                "antonyms" : [],
                                 "data_dict": "Modern humans (Homo sapiens, primarily ssp. Homo sapiens sapiens) are the only extant members of Hominina tribe (or human tribe), a branch of the tribe Hominini belonging to the family of great apes. They are characterized by erect posture and bipedal locomotion; manual dexterity and increased tool use, compared to other animals; and a general trend toward larger, more complex brains and societies.[3][4]",
                                 "last_update": "2017-04-04"
                             }
@@ -79,15 +79,15 @@
                             "1" : "wife"
                         }
                        ],
+            "type"  :   "person",
+            "synonymns" : [
+                            {
+                                "1" : "Patsy"
+                            }
+                        ],
+            "antonyms" : [],
             "attrib": [
                             {
-                                "type"  :   "person",
-                                "synonymns" : [
-                                                {
-                                                    "1" : "Patsy"
-                                                }
-                                            ],
-                                "antonyms" : [],
                                 "data_dict": "Joanna Lamond Lumley, OBE FRGS (born 1 May 1946) is an English actress,[1] voice-over artist, former model, author and activist. She won two BAFTA TV Awards for her role as Patsy Stone in the sitcom Absolutely Fabulous (1992–2012), and was nominated for the 2011 Tony Award for Best Featured Actress in a Play for the Broadway revival of La Bête. In 2013, she received the Special Recognition Award at the National Television Awards.",
                                 "last_update": "2017-04-05"
                             }

@@ -9,7 +9,6 @@ __authors__ = ["jarbas", "heinzschmidt"]
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
-
 class ConceptNode():
     def __init__(self, name, data={}, parent_concepts={},
         child_concepts={}, synonims=[], antonims=[]):
@@ -75,11 +74,30 @@ class ConceptNode():
     def remove_child(self, child_name):
         self.child_concepts.pop(child_name)
 
-
 class ConceptConnector():
     def __init__(self, concepts = {}):
         self.concepts = concepts
         self.logger = getLogger("ConceptConnector")
+        self.storageLoaded = False
+        self.load_storage()
+        self.logger.info("storage loaded")
+
+    def load_storage(self):
+        try:
+            for nodes in self.concepts:
+                name = nodes["name"]
+                parent_concepts = nodes["parents"]
+                child_concepts = nodes["children"]
+                self.create_concept(name, parent_concepts=parent_concepts,
+                                          child_concepts=child_concepts)
+            self.storageLoaded = True
+
+        except Exception as loaderr:
+            self.logger.info("ERROR " + str(loaderr.message))
+            self.storageLoaded = False
+
+    def is_storage_loaded(self):
+        return self.storageLoaded
 
     def get_concept_names(self):
         concepts = []
@@ -124,7 +142,7 @@ class ConceptConnector():
         return self.concepts[concept_name].synonims
 
     def create_concept(self, new_concept_name, data={},
-                       child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
+                           child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
 
         self.logger.info("processing concept " + new_concept_name)
 
@@ -140,6 +158,12 @@ class ConceptConnector():
         concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
                               synonims=synonims, antonims=antonims)
         self.add_concept(new_concept_name, concept)
+
+        # TODO: write new concept to json file
+        #       create a dict/array from all elements added here, and if:
+        #           - node doesn't exist - write to json file
+        #           - node exists - check last_update attrib, if older than 5 mins, update json file
+        #           - node exists, but no last_update value, update in json file
 
         # handle parent concepts
         for concept_name in parent_concepts:

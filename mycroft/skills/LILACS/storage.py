@@ -1,58 +1,44 @@
 import json
-
-__authors__ = ["jarbas", "heinzschmidt"]
+from pprint import pprint
 
 class ConceptStorage():
-    _dataStorageType = ""
-    _dataStorageUser = ""
-    _dataStoragePass = ""
     _dataStorageDB = ""
     _dataConnection = None
     _dataConnStatus = 0
-    _dataJSON = None
+    _dataJSON = {}
     _storagepath = ""
 
-    def __init__(self, storagepath, storagetype="json", database="lilacstorage.db"):
+    def __init__(self, storagepath, database="lilacstorage.db"):
         self._storagepath = storagepath
-        self._dataStorageType = storagetype
         self._dataStorageDB = database
         self.datastore_connect()
 
     def datastore_connect(self):
-        if (self._dataStorageType == "sqllite3"):
-            """try:
-                self._dataConnection = sqllite3.connect(self._dataStorageDB)
-                self._dataConnStatus = 1
-            except Exception as sqlerr:
-                # log something
-                print(("Database connection failed" + str(sqlerr)))
-                self._dataConnStatus = 0
-            """
-        elif (self._dataStorageType == "json"):
-            with open(self._storagepath + self._dataStorageDB) \
-                    as datastore:
-                self._dataJSON = json.load(datastore)
+            #with open(self._storagepath + self._dataStorageDB) \
+            #        as datastore:
+            with open(self._storagepath + self._dataStorageDB, 'r') as myfile:
+                file_content = myfile.read().replace("{}", "")
+                self._dataJSON = json.loads(file_content)
 
             if (self._dataJSON):
                 self._dataConnStatus = 1
             else:
                 self._dataConnStatus = 0
 
-    def getNodesAll(self):
+    def get_nodes_names(self):
         returnVal = {}
         if (self._dataConnStatus == 1):
-            # for p in self._dataJSON[]:
             returnVal = self._dataJSON
-            return returnVal
-
-    def getNodeDataDictionary(self, conceptname="cow"):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                returnVal["data_dict"] = str(p["data_dict"])
         return returnVal
 
-    def getNodeParent(self, conceptname="cow", generation=None):
+    def get_nodes_list(self):
+        returnVal = {}
+        if (self._dataConnStatus == 1):
+            nodenames = self._dataJSON
+            returnVal = nodenames
+        return returnVal
+
+    def get_node_parents(self, conceptname="human", generation=None):
         returnVal = {}
         if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
@@ -65,7 +51,7 @@ class ConceptStorage():
                             returnVal = parent[str(generation)]
         return returnVal
 
-    def getNodeChildren(self, conceptname="cow", generation=None):
+    def get_node_children(self, conceptname="human", generation=None):
         returnVal = {}
         if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
@@ -78,35 +64,12 @@ class ConceptStorage():
                             returnVal = child[str(generation)]
         return returnVal
 
-    def getNodeSynonymn(self, conceptname="cow", generation=None):
+    def get_node_attributes(self, conceptname="human"):
         returnVal = {}
         if (self._dataConnStatus == 1):
             for node in self._dataJSON[conceptname]:
-                if (generation is None):
-                    for synonymn in node["synonymns"]:
-                        returnVal = synonymn
-                elif (generation <= len(node["synonymns"])):
-                    for synonymn in node["synonymns"]:
-                        if synonymn[str(generation)]:
-                            returnVal = synonymn[str(generation)]
-            return returnVal
+                if(len(node["attrib"]) > 0):
+                    for attribnodes in node["attrib"]:
+                        returnVal = attribnodes;
 
-    def getNodeAntonymn(self, conceptname="cow", generation=None):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for node in self._dataJSON[conceptname]:
-                if (generation is None):
-                    for synonymn in node["antonymns"]:
-                        returnVal = synonymn
-                elif (generation <= len(node["antonymns"])):
-                    for synonymn in node["antonymns"]:
-                        if synonymn[str(generation)]:
-                            returnVal = synonymn[str(generation)]
-            return returnVal
 
-    def getNodeLastUpdate(self, conceptname="cow"):
-        returnVal = {}
-        if (self._dataConnStatus == 1):
-            for p in self._dataJSON[conceptname]:
-                returnVal["last_update"] = str(p["last_update"])
-        return returnVal

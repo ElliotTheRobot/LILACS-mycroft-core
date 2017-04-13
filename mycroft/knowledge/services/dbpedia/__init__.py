@@ -71,6 +71,7 @@ class DBpediaService(KnowledgeBackend):
         for source in info:
             for key in info[source]:
                 print "\n" + key + " : " + str(info[source][key])
+        self.emitter.emit(Message('DBPediaResult', {"dbpedia": info}))
 
     def stop(self):
         logger.info('DBpediaKnowledge_Stop')

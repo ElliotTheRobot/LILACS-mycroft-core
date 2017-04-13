@@ -65,6 +65,7 @@ class WikipediaService(KnowledgeBackend):
         for source in info:
             for key in info[source]:
                 print "\n" + key + " : " + str(info[source][key])
+        self.emitter.emit(Message('WikipediaKnowledgeResult', {"wikipedia": info}))
 
     def stop(self):
         logger.info('WikipediaKnowledge_Stop')

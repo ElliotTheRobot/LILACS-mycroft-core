@@ -150,6 +150,7 @@ class WikiHowService(KnowledgeBackend):
         for source in info:
             for key in info[source]:
                 print "\n" + key + " : " + str(info[source][key])
+        self.emitter.emit(Message('WikihowKnowledgeResult', {"wikihow": info}))
 
     def stop(self):
         logger.info('WikihowKnowledge_Stop')

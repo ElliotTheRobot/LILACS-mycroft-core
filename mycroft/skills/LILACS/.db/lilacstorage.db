@@ -21,7 +21,13 @@
                             {
                                 "type" :    "life",
                                 "synonymns" : [],
-                                "antonyms" : [],
+                                "antonyms" : [
+						{
+							"0" : "plant", 
+							"1" : "house", 
+							"2" : "rock"
+						}	
+					     ],
                                 "data_dict" : "Cow is the nickname for cattle, and the name of adult female cattle.",
                                 "last_update" : "2017-04-04"
                             }

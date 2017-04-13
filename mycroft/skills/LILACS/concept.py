@@ -75,6 +75,9 @@ class ConceptNode():
         self.child_concepts.pop(child_name)
 
 class ConceptConnector():
+
+    storageLoaded = False
+
     def __init__(self, concepts = {}):
         self.concepts = concepts
         self.logger = getLogger("ConceptConnector")
@@ -85,18 +88,35 @@ class ConceptConnector():
     def load_storage(self):
         try:
             for nodes in self.concepts:
-                name = nodes["name"]
-                parent_concepts = nodes["parents"]
-                child_concepts = nodes["children"]
-                self.create_concept(name, parent_concepts=parent_concepts,
-                                          child_concepts=child_concepts)
-            self.storageLoaded = True
+                name = nodes
+                node_antonimns = []
+                node_synonims = []
+                parent_concepts = []
+                child_concepts = []
+                for node_details in self.concepts[name]:
+                    for node_parents in node_details["parents"]:
+                        parent_concepts = node_parents
+                    for node_childs in node_details["children"]:
+                        child_concepts = node_childs
+                    for node_attribs in node_details["attrib"]:
+                        for node_synonyms in node_attribs["synonymns"]:
+                            node_synonims = node_synonyms
+                        for node_antonyms in node_attribs["antonyms"]:
+                            node_antonimns = node_antonyms
+
+                self.create_concept(name, data=self.concepts, parent_concepts=parent_concepts,
+                                          child_concepts=child_concepts, synonims=node_synonyms,
+                                            antonims=node_antonimns)
+                self.storageLoaded = True
+
+                self.logger.info("### Set : " + str(self.storageLoaded) + " ####")
 
         except Exception as loaderr:
             self.logger.info("ERROR " + str(loaderr.message))
             self.storageLoaded = False
 
     def is_storage_loaded(self):
+        self.logger.info("### Asked for : " + str(self.storageLoaded) + " ####")
         return self.storageLoaded
 
     def get_concept_names(self):
@@ -144,9 +164,6 @@ class ConceptConnector():
     def create_concept(self, new_concept_name, data={},
                            child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
 
-        self.logger.info("processing concept " + new_concept_name)
-
-
         # safe - checking
         if new_concept_name in parent_concepts:
             parent_concepts.pop(new_concept_name)
@@ -154,7 +171,6 @@ class ConceptConnector():
             child_concepts.pop(new_concept_name)
 
         # handle new concept
-        self.logger.info("creating concept node for: " + new_concept_name)
         concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
                               synonims=synonims, antonims=antonims)
         self.add_concept(new_concept_name, concept)

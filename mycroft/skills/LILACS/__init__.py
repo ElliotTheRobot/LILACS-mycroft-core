@@ -73,8 +73,6 @@ class LilacsSkill(MycroftSkill):
 
         nodes = storage_inst.get_nodes_names()
 
-        for node in nodes:
-            self.speak(node)
         try:
 
             knowledge = ConceptConnector(concepts=nodes)

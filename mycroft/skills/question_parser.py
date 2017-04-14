@@ -25,7 +25,7 @@ class EnglishQuestionParser():
                 "(?P<Query1>.*) (?P<QuestionVerb>is|are|was|were) "
                 "(?P<Query2>.*)"),
             re.compile(
-                ".*(?P<QuestionWord>who|what|when|where|why|which|how) "
+                ".*(?P<QuestionWord>who|what|when|where|why|which|how|give examples) "
                 "(?P<QuestionVerb>\w+) (?P<Query>.*)")
         ]
 

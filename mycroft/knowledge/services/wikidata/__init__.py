@@ -57,6 +57,7 @@ class WikidataService(KnowledgeBackend):
         for source in info:
             for key in info[source]:
                 print key + " : " + str(info[source][key])
+        self.emitter.emit(Message('WikidataKnowledgeResult', {"wikidata": info}))
 
     def stop(self):
         logger.info('WikidataKnowledge_Stop')

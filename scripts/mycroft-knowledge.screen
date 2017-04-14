@@ -1,3 +1,0 @@
-deflog on
-logfile scripts/logs/mycroft-knowledge.log
-logfile flush 1

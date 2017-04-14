@@ -1,20 +1,3 @@
-# Copyright 2016 Mycroft AI, Inc.
-#
-# This file is part of Mycroft Core.
-#
-# Mycroft Core is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Mycroft Core is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
-
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
@@ -24,8 +7,10 @@ from mycroft.skills.intent_parser import IntentParser, IntentTree
 
 from mycroft.skills.LILACS.concept import ConceptConnector, ConceptCrawler
 from mycroft.skills.knowledgeservice import KnowledgeService
+from mycroft.skills.question_parser import EnglishQuestionParser
 
 import random
+from time import sleep
 
 __author__ = 'jarbas'
 
@@ -40,6 +25,8 @@ class TestSkill(MycroftSkill):
         self.knowledge = ConceptConnector()
         self.crawler = None
         self.service = None
+        self.question_parser = EnglishQuestionParser
+
 
     def initialize(self):
         # initialize self intent parser
@@ -54,6 +41,14 @@ class TestSkill(MycroftSkill):
         self.crawler = ConceptCrawler(concept_connector=self.knowledge)
         # initialize knowledge service
         self.service = KnowledgeService(self.emitter)
+        # register messagebus signals
+        # self.register_signals()
+
+   # def register_signals(self):
+   #     self.emitter.on("WikipediaKnowledgeResult", self.end_wait)
+   #     self.emitter.on("WikidataKnowledgeResult", self.end_wait)
+   #     self.emitter.on("WikihowKnowledgeResult", self.end_wait)
+   #     self.emitter.on("DBPediaKnowledgeResult", self.end_wait)
 
     def build_intents(self):
         # build
@@ -112,12 +107,20 @@ class TestSkill(MycroftSkill):
         parent_concepts = {"living being": 1}
         self.knowledge.create_concept(name, parent_concepts=parent_concepts,
                                  child_concepts=child_concepts)
-    
-    # intent handling
 
     def handle_test_knowledge_backend_intent(self, message):
-        self.service.adquire("dog", "wikipedia")
-        self.service.adquire("elon musk", "wikidata")
+        self.speak("Testing wikipedia backend")
+        self.service.adquire("pig", "wikipedia")
+        sleep(5)
+        self.speak("Testing wikidata backend")
+        self.service.adquire("Johnny Cash", "wikidata")
+        sleep(5)
+        self.speak("Testing wikihow backend")
+        self.service.adquire("buy bitcoin", "wikihow")
+        sleep(15)
+        self.speak("Testing dbpedia backend")
+        self.service.adquire("animals", "dbpedia")
+        sleep(5)
 
     def handle_talk_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())

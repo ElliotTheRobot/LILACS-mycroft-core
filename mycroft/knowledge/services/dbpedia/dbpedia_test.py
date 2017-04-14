@@ -22,3 +22,4 @@ for annotation in annotations:
     #dbpedia link
     url = annotation["URI"]
     print "link: " + url
+

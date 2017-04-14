@@ -1,0 +1,62 @@
+{
+    "maria": [
+        {
+            "name" : "Maria Jones",
+            "parents": [
+                        {
+                            "1" : "human",
+                            "2" : "female"
+                        }
+                       ],
+            "children": [
+                        {
+                            "1" : "girl",
+                            "2" : "pregnant",
+                            "3" : "wife"
+                        }
+                        ],
+            "type" :    "human",
+            "synonyms" : [],
+            "antonyms" : [],
+            "attrib": [
+                            {
+                                "data_dict" : "",
+                                "last_update" : "2017-04-04"
+                            }
+                         ]
+        }
+    ],
+    "mcdonalds": [
+        {
+            "name" : "McDonald's",
+            "parents": [
+                        {
+                            "1" : "restaurant",
+                            "2" : "take away"
+                        }
+                       ],
+            "children": [
+                        {
+                            "1" : "hamburger",
+                            "2" : "mcnugget",
+                            "3" : "fast food"
+                        }
+                        ],
+            "type" :    "restaurant chain",
+            "synonyms" : [
+                        {
+                            "1" : "McD",
+                            "2" : "Mickey D"
+                        }
+                        ],
+            "antonyms" : [],
+            "attrib": [
+                            {
+                                "data_dict" : "McDonald's (or simply as McD) is an American hamburger and fast food restaurant chain. It was founded in 1940 as a barbecue restaurant operated by Richard and Maurice McDonald. In 1948, they reorganized their business as a hamburger stand, using production line principles. ",
+                                "last_update" : "2017-04-04"
+                            }
+                         ]
+        }
+    ],
+
+}

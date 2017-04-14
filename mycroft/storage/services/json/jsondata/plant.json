@@ -1,0 +1,35 @@
+{
+    "plant": [
+        {
+            "name" : "plant",
+            "parents": [
+                        {
+                            "1" : "flora"
+                        }
+                       ],
+            "children": [
+                        {
+                            "1" : "tree",
+                            "2" : "flower",
+                            "3" : "grass",
+                            "4" : "fruit",
+                            "5" : "herb",
+                            "6" : "vegetable"
+                        }
+                        ],
+            "type" :    "life",
+            "synonyms" : [],
+            "antonyms" : [
+						{
+							"0" : "animal"
+						}
+					     ],
+            "attrib": [
+                            {
+                                "data_dict" : "Plants are mainly multicellular, predominantly photosynthetic eukaryotes of the kingdom Plantae.",
+                                "last_update" : "2017-04-04"
+                            }
+                         ]
+        }
+    ]
+}

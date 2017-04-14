@@ -49,16 +49,37 @@ class LILACSQuestionParser():
         self.parser = EnglishQuestionParser()
         self.host = "http://spotlight.sztaki.hu:2222/rest/annotate"
 
+    def process_entitys(self, text):
+
+        subjects, parents, synonims = self.tag_from_dbpedia(text)
+        center = 666
+        center_node = ""
+        for node in subjects:
+            if subjects[node] < center:
+                center = subjects[node]
+                center_node = node
+
+        target = 666
+        #TODO better select target mechanism
+        target_node = ""
+        for node in subjects:
+            if subjects[node] < target and node != center_node:
+                target = subjects[node]
+                target_node = node
+
+        parse = self.poor_parse(text)
+        question = parse["QuestionWord"]
+        middle = [node for node in subjects if node != center_node and node != target_node]
+        return center_node, target_node, parents, synonims, middle, question
+
     def poor_parse(self, text):
-        subjects, parents = self.tag_from_dbpedia(text)
-        print "parents : " + str(parents)
-        print "nodes: " + str(subjects)
         return self.parser.parse(text)
 
     def tag_from_dbpedia(self, text):
         annotations = spotlight.annotate(self.host, text)
         subjects = {}
         parents = []
+        synonims = {}
         for annotation in annotations:
             # how sure we are this is about this dbpedia entry
             score = annotation["similarityScore"]
@@ -69,33 +90,40 @@ class LILACSQuestionParser():
             # smaller is closer to be main topic of sentence
             offset = annotation["offset"]
             #print "offset: " + str(offset)
-            if float(score) < 0.5:
+            # TODO tweak this value and make configuable
+            if float(score) < 0.4:
                 continue
             subjects.setdefault(subject, offset)
             # categorie of this <- linked nodes <- parsing for dbpedia search
-            types = annotation["types"].split(",")
-            for type in types:
-                #print "type: " + type
-                parents.append(type.replace("DBpedia:",""))
+            if annotation["types"]:
+                types = annotation["types"].split(",")
+                for type in types:
+                    #print "type: " + type
+                    type = type.replace("DBpedia:", "")
+                    if type not in parents:
+                        parents.append(type)
             # dbpedia link
-           # url = annotation["URI"]
+            url = annotation["URI"]
             #print "link: " + url
+            dbpedia_name = url.replace("http://dbpedia.org/resource/", "")
+            if dbpedia_name.lower() not in subject:
+                synonims.setdefault(subject, dbpedia_name.lower())
 
-        return subjects, parents
+        return subjects, parents, synonims
 
 
 
 parser = LILACSQuestionParser()
-text = "how to kill a chicken"
-print "\nQuestion: " + text
-print parser.poor_parse(text)
-print "\nQuestion: " + text
-text = "what is a frog"
-print "\nQuestion: " + text
-print parser.poor_parse(text)
-text = "why are humans living beings"
-print "\nQuestion: " + text
-print parser.poor_parse(text)
-text = "give examples of animals"
-print "\nQuestion: " + text
-print parser.poor_parse(text)
+
+questions = ["how to kill animals ( a cow ) and make meat", "what is a living being", "why are humans living beings", "give examples of animals"]
+
+for text in questions:
+    center_node, target_node, parents, synonims, midle, question = parser.process_entitys(text)
+    print "\nQuestion: " + text
+    print "question_type: " + question
+    print "center_node: " + center_node
+    print "target_node: " + target_node
+    print "parents: " + str(parents)
+    print "relevant_nodes: " + str(midle)
+    print "synonims: " + str(synonims)
+

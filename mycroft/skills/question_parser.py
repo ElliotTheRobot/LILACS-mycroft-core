@@ -73,7 +73,7 @@ class LILACSQuestionParser():
             # smaller is closer to be main topic of sentence
             offset = annotation["offset"]
             #print "offset: " + str(offset)
-            if float(score) < 0.65:
+            if float(score) < 0.5:
                 continue
             subjects.setdefault(subject, offset)
             # categorie of this <- linked nodes <- parsing for dbpedia search
@@ -91,10 +91,15 @@ class LILACSQuestionParser():
 
 parser = LILACSQuestionParser()
 text = "how to kill a chicken"
+print "\nQuestion: " + text
 print parser.poor_parse(text)
+print "\nQuestion: " + text
 text = "what is a frog"
+print "\nQuestion: " + text
 print parser.poor_parse(text)
-text = "why are humans animals"
+text = "why are humans living beings"
+print "\nQuestion: " + text
 print parser.poor_parse(text)
+print "\nQuestion: " + text
 text = "give examples of animals"
 print parser.poor_parse(text)

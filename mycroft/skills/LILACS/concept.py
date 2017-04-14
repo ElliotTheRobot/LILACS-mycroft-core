@@ -44,7 +44,6 @@ class ConceptNode():
 
         if parent_name not in self.parent_concepts:
             self.parent_concepts.setdefault(parent_name, gen)
-
         elif parent_name in self.parent_concepts and update:
             self.parent_concepts[parent_name] = gen
 
@@ -83,49 +82,96 @@ class ConceptConnector():
     storageLoaded = False
 
     def __init__(self, concepts = {}):
-        self.conceptCollection = []
         self.concepts = concepts
         self.logger = getLogger("ConceptConnector")
         self.storageLoaded = False
-        self.load_json()
+        self.load_storage()
+        self.logger.info("storage loaded")
 
-    def load_json(self):
-
+    def load_storage(self):
         try:
             for nodes in self.concepts:
                 name = nodes
                 node_antonimns = []
                 node_synonims = []
-                node_parent_concepts = []
-                node_child_concepts = []
+                node_parent_concepts = {}
+                node_child_concepts = {}
                 for node_details in self.concepts[name]:
                     for node_parents in node_details["parents"]:
-                        for node_parent in node_parents.values():
-                            node_parent_concepts.append(node_parent)
+                        node_parent_concepts = node_parents
                     for node_childs in node_details["children"]:
-                        for children in node_childs.values():
-                            node_child_concepts.append(children)
-                    for node_synonyms in node_details["synonymns"]:
-                        for synonymn in node_synonyms.values():
-                            node_synonims.append(synonymn)
+                        node_child_concepts = node_childs
+                    for node_synonyms in node_details["synonyms"]:
+                        node_synonims = node_synonyms
                     for node_antonyms in node_details["antonyms"]:
-                        for antonymn in node_antonyms.values():
-                            node_antonimns.append(antonymn)
+                            node_antonimns = node_antonyms
 
                 self.create_concept(name, data=self.concepts, parent_concepts=node_parent_concepts,
                                           child_concepts=node_child_concepts, synonims=node_synonims,
                                             antonims=node_antonimns)
-
                 self.storageLoaded = True
 
+                self.logger.info("### Set : " + str(self.storageLoaded) + " ####")
 
         except Exception as loaderr:
             self.logger.info("ERROR " + str(loaderr.message))
             self.storageLoaded = False
 
-    def create_concept(self, new_concept_name, data={},
-                           child_concepts=[], parent_concepts=[], synonims=[], antonims=[]):
+    def is_storage_loaded(self):
+        self.logger.info("### Asked for : " + str(self.storageLoaded) + " ####")
+        return self.storageLoaded
 
+    def get_concept_names(self):
+        concepts = []
+        for name in self.concepts:
+            concepts.append(name)
+        return concepts
+
+    def get_concepts(self):
+        return self.concepts
+
+    def add_concept(self, concept_name, concept):
+        if concept_name in self.concepts:
+            #  merge fields
+            self.logger.info("### Concept found: " + str(concept_name))
+
+            for parent in concept.parent_concepts:
+                if parent not in self.get_parents(concept_name):
+                    self.logger.info(("Adding parent node: " + parent))
+                    #self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts[parent])
+
+            for child in concept.child_concepts:
+                if child not in self.get_childs(concept_name):
+                    self.concepts[concept_name].add_child(child, gen=concept.child_concepts[child])
+            for antonim in concept.antonims:
+                if antonim not in self.concepts[concept_name].antonims:
+                    self.concepts[concept_name].antonims.add_antonim(antonim)
+            for synonim in concept.synonims:
+                if synonim not in self.concepts[concept_name].synonims:
+                    self.concepts[concept_name].synonims.add_synonim(synonim)
+
+        else:
+            self.concepts.setdefault(concept_name, concept)
+
+    def remove_concept(self, concept_name):
+        self.concepts.pop(concept_name)
+
+    def get_childs(self, concept_name):
+        return self.concepts[concept_name].child_concepts
+
+    def get_parents(self, concept_name):
+        return self.concepts[concept_name].parent_concepts
+
+    def get_antonims(self, concept_name):
+        return self.concepts[concept_name].antonims
+
+    def get_synonims(self, concept_name):
+        return self.concepts[concept_name].synonims
+
+    def create_concept(self, new_concept_name, data={},
+                           child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
+
+        self.logger.info(("### Creating new concept: " + str(new_concept_name)))
         # safe - checking
         if new_concept_name in parent_concepts:
             parent_concepts.pop(new_concept_name)
@@ -136,20 +182,22 @@ class ConceptConnector():
         # handle new concept
         concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
                               synonims=synonims, antonims=antonims)
+        self.logger.info(("### New ConceptNode created."))
 
-
-        # NOTE: IT FAILS AT THE NEXT CALL
         self.add_concept(new_concept_name, concept)
+
+
+
 
         # TODO: write new concept to json file
         #       create a dict/array from all elements added here, and if:
         #           - node doesn't exist - write to json file
         #           - node exists - check last_update attrib, if older than 5 mins, update json file
         #           - node exists, but no last_update value, update in json file
-        """
+
         # handle parent concepts
         for concept_name in parent_concepts:
-            self.logger.info("### Checking if parent node exists: " + concept_name)
+            self.logger.info("checking if parent node exists: " + concept_name)
             gen = parent_concepts[concept_name]
             # create parent if it doesnt exist
             if concept_name not in self.concepts:
@@ -172,101 +220,6 @@ class ConceptConnector():
             #add parent to child
             self.logger.info("adding parent: " + new_concept_name + " to child: " + concept_name)
             self.concepts[concept_name].add_parent(new_concept_name, gen=gen)
-        """
-
-    def add_concept(self, concept_name, concept):
-
-        self.logger.info(" ### NODE DATA: ")
-
-        # NO errors up to here
-        concept_in_parent = False
-        for concept_instances in self.conceptCollection:
-            if concept_name == str(concept_instances.name):
-                for parent in concept.parent_concepts:
-                    concept_in_parent = True
-
-        if not concept_in_parent:
-            for concept_instances in self.conceptCollection:
-                if concept_name == str(concept_instances.name):
-                    concept_instances.add_parent(parent)
-
-        #        for parent in concept.parent_concepts:
-        #            if parent not in self.get_parents(concept_name):
-        #                self.logger.info(("Adding parent node: " + parent))
-        #                self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts)
-
-        """
-
-        if concept_name in self.conceptCollection:
-            #  merge fields
-
-            for parent in concept.parent_concepts:
-                if parent not in self.get_parents(concept_name):
-                    self.logger.info(("Adding parent node: " + parent))
-                    self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts)
-
-            for child in concept.child_concepts:
-                if child not in self.get_childs(concept_name):
-                    self.concepts[concept_name].add_child(child, gen=concept.child_concepts[child])
-            for antonim in concept.antonims:
-                if antonim not in self.concepts[concept_name].antonims:
-                    self.concepts[concept_name].antonims.add_antonim(antonim)
-            for synonim in concept.synonims:
-                if synonim not in self.concepts[concept_name].synonims:
-                    self.concepts[concept_name].synonims.add_synonim(synonim)
-        else:
-            self.concepts.setdefault(concept_name, concept)
-        """
-        self.conceptCollection.append(concept)
-
-
-    def is_storage_loaded(self):
-        self.logger.info("### Asked for : " + str(self.storageLoaded) + " ####")
-        return self.storageLoaded
-
-    def get_concept_names(self):
-        concepts = []
-        for name in self.concepts:
-            concepts.append(name)
-        return concepts
-
-    def get_concepts(self):
-        return self.concepts
-
-    def remove_concept(self, concept_name):
-        self.concepts.pop(concept_name)
-
-    def get_parents(self, concept_name):
-        thisparents = []
-        for node_details in self.concepts[concept_name]:
-            for node_parents in node_details["parents"]:
-                for node_parent in node_parents.values():
-                    thisparents.append(node_parent)
-        return thisparents
-
-    def get_childs(self, concept_name):
-        thischildren = []
-        for node_details in self.concepts[concept_name]:
-            for node_children in node_details["children"]:
-                for node_child in node_children.values():
-                    thischildren.append(node_child)
-        return thischildren
-
-    def get_antonims(self, concept_name):
-        thisantonyms = []
-        for node_details in self.concepts[concept_name]:
-            for node_antonims in node_details["antonyms"]:
-                for node_anto in node_antonims.values():
-                    thisantonyms.append(node_anto)
-        return thisantonyms
-
-    def get_synonims(self, concept_name):
-        thissinonyms = []
-        for node_details in self.concepts[concept_name]:
-            for node_synonims in node_details["synonyms"]:
-                for node_sino in node_synonims.values():
-                    thissinonyms.append(node_sino)
-        return thissinonyms
 
 
 

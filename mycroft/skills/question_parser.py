@@ -1,11 +1,7 @@
 
 import re
 
-from mycroft.util.log import getLogger
-
 import spotlight
-
-LOG = getLogger(__name__)
 
 
 class EnglishQuestionParser():
@@ -100,6 +96,6 @@ print parser.poor_parse(text)
 text = "why are humans living beings"
 print "\nQuestion: " + text
 print parser.poor_parse(text)
-print "\nQuestion: " + text
 text = "give examples of animals"
+print "\nQuestion: " + text
 print parser.poor_parse(text)

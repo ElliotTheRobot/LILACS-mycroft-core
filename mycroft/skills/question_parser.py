@@ -52,7 +52,6 @@ class LILACSQuestionParser():
     def process_entitys(self, text):
 
         subjects, parents, synonims = self.tag_from_dbpedia(text)
-
         center = 666
         center_node = ""
         for node in subjects:
@@ -61,6 +60,7 @@ class LILACSQuestionParser():
                 center_node = node
 
         target = 666
+        #TODO better select target mechanism
         target_node = ""
         for node in subjects:
             if subjects[node] < target and node != center_node:
@@ -69,8 +69,8 @@ class LILACSQuestionParser():
 
         parse = self.poor_parse(text)
         question = parse["QuestionWord"]
-
-        return center_node, target_node, parents, synonims, question
+        middle = [node for node in subjects if node != center_node and node != target_node]
+        return center_node, target_node, parents, synonims, middle, question
 
     def poor_parse(self, text):
         return self.parser.parse(text)
@@ -90,6 +90,7 @@ class LILACSQuestionParser():
             # smaller is closer to be main topic of sentence
             offset = annotation["offset"]
             #print "offset: " + str(offset)
+            # TODO tweak this value and make configuable
             if float(score) < 0.4:
                 continue
             subjects.setdefault(subject, offset)
@@ -98,7 +99,9 @@ class LILACSQuestionParser():
                 types = annotation["types"].split(",")
                 for type in types:
                     #print "type: " + type
-                    parents.append(type.replace("DBpedia:",""))
+                    type = type.replace("DBpedia:", "")
+                    if type not in parents:
+                        parents.append(type)
             # dbpedia link
             url = annotation["URI"]
             #print "link: " + url
@@ -111,39 +114,16 @@ class LILACSQuestionParser():
 
 
 parser = LILACSQuestionParser()
-text = "how to kill a chicken"
-print "\nQuestion: " + text
-center_node, target_node, parents, synonims, question = parser.process_entitys(text)
-print "center_node: " + center_node
-print "synonims: " + str(synonims)
-print "target_node: " + target_node
-print "parents: " + str(parents)
-print "question_type: " + question
 
+questions = ["how to kill animals ( a cow ) and make meat", "what is a living being", "why are humans living beings", "give examples of animals"]
 
-text = "what is a frog"
-print "\nQuestion: " + text
-center_node, target_node, parents, synonims, question = parser.process_entitys(text)
-print "center_node: " + center_node
-print "synonims: " + str(synonims)
-print "target_node: " + target_node
-print "parents: " + str(parents)
-print "question_type: " + question
+for text in questions:
+    center_node, target_node, parents, synonims, midle, question = parser.process_entitys(text)
+    print "\nQuestion: " + text
+    print "question_type: " + question
+    print "center_node: " + center_node
+    print "target_node: " + target_node
+    print "parents: " + str(parents)
+    print "relevant_nodes: " + str(midle)
+    print "synonims: " + str(synonims)
 
-text = "why are humans living beings"
-print "\nQuestion: " + text
-center_node, target_node, parents, synonims, question = parser.process_entitys(text)
-print "center_node: " + center_node
-print "synonims: " + str(synonims)
-print "target_node: " + target_node
-print "parents: " + str(parents)
-print "question_type: " + question
-
-text = "give examples of animals"
-print "\nQuestion: " + text
-center_node, target_node, parents, synonims, question = parser.process_entitys(text)
-print "center_node: " + center_node
-print "synonims: " + str(synonims)
-print "target_node: " + target_node
-print "parents: " + str(parents)
-print "question_type: " + question

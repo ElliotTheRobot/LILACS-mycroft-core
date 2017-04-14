@@ -71,6 +71,7 @@ class LilacsSkill(MycroftSkill):
 
         self.speak("Storage class created")
 
+        nodes = {}
         nodes = storage_inst.get_nodes_names()
 
         try:
@@ -84,6 +85,7 @@ class LilacsSkill(MycroftSkill):
 
         except Exception as Mainerr:
             self.speak("Mainerr " + str(Mainerr.message))
+
 
     # standard questions helper functions
     def is_this_that(self, this, that, crawler):

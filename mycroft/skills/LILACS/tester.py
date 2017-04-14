@@ -9,7 +9,9 @@ print("Storage class created")
 
 nodesdb = storage_inst.get_nodes_names()
 
+print(storage_inst.get_node_parents("joana"))
 
+"""
 def add_concept(concept_name, concept, concepts):
     if concept_name in concepts:
         #  merge fields
@@ -43,7 +45,7 @@ def get_synonims(self, concept_name):
 
 add_concept("Santa", )
 
-"""
+
 for nodes in nodesdb:
     name = nodes
     for node_details in nodesdb[name]:

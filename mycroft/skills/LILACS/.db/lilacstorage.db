@@ -18,7 +18,7 @@
                         }
                         ],
             "type" :    "life",
-            "synonymns" : [],
+            "synonyms" : [],
             "antonyms" : [
 						{
 							"0" : "plant",
@@ -50,7 +50,7 @@
                         }
                        ],
             "type"  :   "life",
-            "synonymns" : [
+            "synonyms" : [
                             {
                                 "1" : "hominid",
                                 "2" : "homo sapien"
@@ -80,7 +80,7 @@
                         }
                        ],
             "type"  :   "person",
-            "synonymns" : [
+            "synonyms" : [
                             {
                                 "1" : "Patsy"
                             }

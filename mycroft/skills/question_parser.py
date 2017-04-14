@@ -51,7 +51,7 @@ class LILACSQuestionParser():
 
     def process_entitys(self, text):
 
-        subjects, parents = self.tag_from_dbpedia(text)
+        subjects, parents, synonims = self.tag_from_dbpedia(text)
 
         center = 666
         center_node = ""
@@ -70,7 +70,7 @@ class LILACSQuestionParser():
         parse = self.poor_parse(text)
         question = parse["QuestionWord"]
 
-        return center_node, target_node, parents, question
+        return center_node, target_node, parents, synonims, question
 
     def poor_parse(self, text):
         return self.parser.parse(text)
@@ -79,6 +79,7 @@ class LILACSQuestionParser():
         annotations = spotlight.annotate(self.host, text)
         subjects = {}
         parents = []
+        synonims = {}
         for annotation in annotations:
             # how sure we are this is about this dbpedia entry
             score = annotation["similarityScore"]
@@ -99,18 +100,22 @@ class LILACSQuestionParser():
                     #print "type: " + type
                     parents.append(type.replace("DBpedia:",""))
             # dbpedia link
-           # url = annotation["URI"]
+            url = annotation["URI"]
             #print "link: " + url
+            dbpedia_name = url.replace("http://dbpedia.org/resource/", "")
+            if dbpedia_name.lower() not in subject:
+                synonims.setdefault(subject, dbpedia_name.lower())
 
-        return subjects, parents
+        return subjects, parents, synonims
 
 
 
 parser = LILACSQuestionParser()
 text = "how to kill a chicken"
 print "\nQuestion: " + text
-center_node, target_node, parents, question = parser.process_entitys(text)
+center_node, target_node, parents, synonims, question = parser.process_entitys(text)
 print "center_node: " + center_node
+print "synonims: " + str(synonims)
 print "target_node: " + target_node
 print "parents: " + str(parents)
 print "question_type: " + question
@@ -118,24 +123,27 @@ print "question_type: " + question
 
 text = "what is a frog"
 print "\nQuestion: " + text
-center_node, target_node, parents, question = parser.process_entitys(text)
+center_node, target_node, parents, synonims, question = parser.process_entitys(text)
 print "center_node: " + center_node
+print "synonims: " + str(synonims)
 print "target_node: " + target_node
 print "parents: " + str(parents)
 print "question_type: " + question
 
 text = "why are humans living beings"
 print "\nQuestion: " + text
-center_node, target_node, parents, question = parser.process_entitys(text)
+center_node, target_node, parents, synonims, question = parser.process_entitys(text)
 print "center_node: " + center_node
+print "synonims: " + str(synonims)
 print "target_node: " + target_node
 print "parents: " + str(parents)
 print "question_type: " + question
 
 text = "give examples of animals"
 print "\nQuestion: " + text
-center_node, target_node, parents, question = parser.process_entitys(text)
+center_node, target_node, parents, synonims, question = parser.process_entitys(text)
 print "center_node: " + center_node
+print "synonims: " + str(synonims)
 print "target_node: " + target_node
 print "parents: " + str(parents)
 print "question_type: " + question

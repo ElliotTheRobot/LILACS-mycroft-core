@@ -49,10 +49,30 @@ class LILACSQuestionParser():
         self.parser = EnglishQuestionParser()
         self.host = "http://spotlight.sztaki.hu:2222/rest/annotate"
 
-    def poor_parse(self, text):
+    def process_entitys(self, text):
+
         subjects, parents = self.tag_from_dbpedia(text)
-        print "parents : " + str(parents)
-        print "nodes: " + str(subjects)
+
+        center = 666
+        center_node = ""
+        for node in subjects:
+            if subjects[node] < center:
+                center = subjects[node]
+                center_node = node
+
+        target = 666
+        target_node = ""
+        for node in subjects:
+            if subjects[node] < target and node != center_node:
+                target = subjects[node]
+                target_node = node
+
+        parse = self.poor_parse(text)
+        question = parse["QuestionWord"]
+
+        return center_node, target_node, parents, question
+
+    def poor_parse(self, text):
         return self.parser.parse(text)
 
     def tag_from_dbpedia(self, text):
@@ -69,14 +89,15 @@ class LILACSQuestionParser():
             # smaller is closer to be main topic of sentence
             offset = annotation["offset"]
             #print "offset: " + str(offset)
-            if float(score) < 0.5:
+            if float(score) < 0.4:
                 continue
             subjects.setdefault(subject, offset)
             # categorie of this <- linked nodes <- parsing for dbpedia search
-            types = annotation["types"].split(",")
-            for type in types:
-                #print "type: " + type
-                parents.append(type.replace("DBpedia:",""))
+            if annotation["types"]:
+                types = annotation["types"].split(",")
+                for type in types:
+                    #print "type: " + type
+                    parents.append(type.replace("DBpedia:",""))
             # dbpedia link
            # url = annotation["URI"]
             #print "link: " + url
@@ -88,14 +109,33 @@ class LILACSQuestionParser():
 parser = LILACSQuestionParser()
 text = "how to kill a chicken"
 print "\nQuestion: " + text
-print parser.poor_parse(text)
-print "\nQuestion: " + text
+center_node, target_node, parents, question = parser.process_entitys(text)
+print "center_node: " + center_node
+print "target_node: " + target_node
+print "parents: " + str(parents)
+print "question_type: " + question
+
+
 text = "what is a frog"
 print "\nQuestion: " + text
-print parser.poor_parse(text)
+center_node, target_node, parents, question = parser.process_entitys(text)
+print "center_node: " + center_node
+print "target_node: " + target_node
+print "parents: " + str(parents)
+print "question_type: " + question
+
 text = "why are humans living beings"
 print "\nQuestion: " + text
-print parser.poor_parse(text)
+center_node, target_node, parents, question = parser.process_entitys(text)
+print "center_node: " + center_node
+print "target_node: " + target_node
+print "parents: " + str(parents)
+print "question_type: " + question
+
 text = "give examples of animals"
 print "\nQuestion: " + text
-print parser.poor_parse(text)
+center_node, target_node, parents, question = parser.process_entitys(text)
+print "center_node: " + center_node
+print "target_node: " + target_node
+print "parents: " + str(parents)
+print "question_type: " + question

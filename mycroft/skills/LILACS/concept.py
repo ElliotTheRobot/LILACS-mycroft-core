@@ -294,6 +294,28 @@ class ConceptConnector():
     def get_synonims(self, concept_name):
         return self.concepts[concept_name].get_synonims()
 
+    def get_cousins(self, concept_name):
+        return self.concepts[concept_name].get_cousins()
+
+    def get_parts(self, concept_name):
+        return self.concepts[concept_name].get_parts()
+
+    def get_part_off(self, concept_name):
+        return self.concepts[concept_name].get_part_off()
+
+    def get_spawn(self, concept_name):
+        return self.concepts[concept_name].get_spawn()
+
+    def get_spawned_by(self, concept_name):
+        return self.concepts[concept_name].get_spawned_by()
+
+    def get_consumes(self, concept_name):
+        return self.concepts[concept_name].get_consumes()
+
+    def get_consumed_by(self, concept_name):
+        return self.concepts[concept_name].get_consumed_by()
+
+
     def create_concept(self, new_concept_name, data={},
                            child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
 

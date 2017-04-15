@@ -78,30 +78,29 @@ class LILACSQuestionParser():
     def tag_from_dbpedia(self, text):
         annotations = spotlight.annotate(self.host, text)
         subjects = {}
-        parents = []
+        parents = {}
         synonims = {}
         for annotation in annotations:
+
             # how sure we are this is about this dbpedia entry
             score = annotation["similarityScore"]
-            #print "\nscore : " + str(score)
             # entry we are talking about
             subject = annotation["surfaceForm"]
-            #print "subject: " + subject
             # smaller is closer to be main topic of sentence
             offset = annotation["offset"]
-            #print "offset: " + str(offset)
             # TODO tweak this value and make configuable
             if float(score) < 0.4:
                 continue
             subjects.setdefault(subject, offset)
             # categorie of this <- linked nodes <- parsing for dbpedia search
             if annotation["types"]:
+                p = []
                 types = annotation["types"].split(",")
                 for type in types:
-                    #print "type: " + type
                     type = type.replace("DBpedia:", "")
                     if type not in parents:
-                        parents.append(type)
+                        p.append(type)
+                parents.setdefault(subject, p)
             # dbpedia link
             url = annotation["URI"]
             #print "link: " + url

@@ -141,7 +141,7 @@ class TestSkill(MycroftSkill):
         for example in examples:
             if example != key:
                 self.speak(example + " is an example of " + key)
-        if examples == []:
+        if not examples:
             self.speak("i dont know any examples of " + key)
 
     def handle_compare_intent(self, message):
@@ -200,7 +200,8 @@ class TestSkill(MycroftSkill):
         crawler.drunk_crawl(this, "no target crawl", direction="childs")
         examples = []
         for example in crawler.crawled:
-            examples.append(example)
+            if example != this:
+                examples.append(example)
         return examples
 
     def common_this_and_that(self, this, that, crawler=None):

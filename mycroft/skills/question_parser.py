@@ -112,18 +112,20 @@ class LILACSQuestionParser():
         return subjects, parents, synonims
 
 
+def test_qp():
+    parser = LILACSQuestionParser()
 
-parser = LILACSQuestionParser()
+    questions = ["how to kill animals ( a cow ) and make meat", "what is a living being", "why are humans living beings", "give examples of animals"]
 
-questions = ["how to kill animals ( a cow ) and make meat", "what is a living being", "why are humans living beings", "give examples of animals"]
+    for text in questions:
+        center_node, target_node, parents, synonims, midle, question = parser.process_entitys(text)
+        print "\nQuestion: " + text
+        print "question_type: " + question
+        print "center_node: " + center_node
+        print "target_node: " + target_node
+        print "parents: " + str(parents)
+        print "relevant_nodes: " + str(midle)
+        print "synonims: " + str(synonims)
 
-for text in questions:
-    center_node, target_node, parents, synonims, midle, question = parser.process_entitys(text)
-    print "\nQuestion: " + text
-    print "question_type: " + question
-    print "center_node: " + center_node
-    print "target_node: " + target_node
-    print "parents: " + str(parents)
-    print "relevant_nodes: " + str(midle)
-    print "synonims: " + str(synonims)
-
+if __name__ == '__main__':
+	test_qp()

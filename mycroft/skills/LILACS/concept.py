@@ -10,21 +10,94 @@ def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
 class ConceptNode():
+    ''' 
+    Node:
+       name:
+       type: "informational"   <- all discussed nodes so far are informational
+       Connections:
+           synonims: []  <- is the same as
+           antonims: [] <- can never be related to
+           parents: []  <- is an instance of
+           childs: [] <- can have the following instances 
+           cousins: [] <- somewhat related subjects 
+           spawns: []  <- what comes from this?
+           spawned_by: [] <- where does this come from?
+           consumes: [] <- what does this need/spend ?
+           consumed_by: []  <- what consumes this?
+           parts : [ ] <- what smaller nodes can this be divided into?
+           part_off: [ ] <- what can be made out of this?
+       Data:
+            description: wikidata description_field
+            abstract: dbpedia abstract
+            summary: wikipedia_summary
+            pics: [ wikipedia pic, dbpedia pic ]
+            infobox: {wikipedia infobox}
+            wikidata: {wikidata_dict}
+            props: [wikidata_properties] <- if we can parse this appropriatly we can make connections
+            links: [ wikipedia link, dbpedia link  ]
+            external_links[ suggested links from dbpedia]
+    '''
+
     def __init__(self, name, data={}, parent_concepts={},
-        child_concepts={}, synonims=[], antonims=[]):
+        child_concepts={}, synonims=[], antonims=[], cousins = [],
+        spawns = [], spawned_by = [], consumes = [], consumed_by = [],
+        parts = [], part_off=[], type="info"):
         self.name = name
-        self.synonims = synonims
-        self.antonims = antonims
-        self.parent_concepts = parent_concepts
-        self.child_concepts = child_concepts
-        self.data = {}
+        self.type = type
+        self.data = data
+        self.connections = {}
+        self.connections.setdefault("parents", parent_concepts)
+        self.connections.setdefault("childs", child_concepts)
+        self.connections.setdefault("synonims", synonims)
+        self.connections.setdefault("antonims", antonims)
+        self.connections.setdefault("cousins", cousins)
+        self.connections.setdefault("spawns", spawns)
+        self.connections.setdefault("spawned_by", spawned_by)
+        self.connections.setdefault("consumes", consumes)
+        self.connections.setdefault("consumed_by", consumed_by)
+        self.connections.setdefault("parts", parts)
+        self.connections.setdefault("part_off", part_off)
 
     def get_parents(self):
-        return self.parent_concepts;
+        return self.connections["parents"];
+
+    def get_childs(self):
+        return self.connections["childs"];
+
+    def get_cousins(self):
+        return self.connections["cousins"];
+
+    def get_consumes(self):
+        return self.connections["consumes"];
+
+    def get_consumed_by(self):
+        return self.connections["consumed_by"];
+
+    def get_spawn(self):
+        return self.connections["spawns"];
+
+    def get_spawned_by(self):
+        return self.connections["spawned_by"];
+
+    def get_parts(self):
+        return self.connections["parts"];
+
+    def get_part_off(self):
+        return self.connections["part_off"];
+
+    def get_synonims(self):
+        return self.connections["synonims"];
+
+    def get_antonims(self):
+        return self.connections["antonims"];
 
     def add_synonim(self, synonim):
-        if synonim not in self.synonims:
-            self.synonims.append(synonim)
+        if synonim not in self.connections["synonims"]:
+            self.connections["synonims"].append(synonim)
+
+    def add_antonim(self, antonim):
+        if antonim not in self.connections["antonims"]:
+            self.connections["antonims"].append(antonim)
 
     def add_data(self, key, data={}):
         if key in self.data:
@@ -39,32 +112,124 @@ class ConceptNode():
             return
 
         # a node cannot be a parent and a child (would it make sense in some corner case?)
-        if parent_name in self.child_concepts:
+        if parent_name in self.connections["childs"]:
             return
 
-        if parent_name not in self.parent_concepts:
-            self.parent_concepts.setdefault(parent_name, gen)
-        elif parent_name in self.parent_concepts and update:
-            self.parent_concepts[parent_name] = gen
+        if parent_name not in self.connections["parents"]:
+            self.connections["parents"].setdefault(parent_name, gen)
+        elif parent_name in self.connections["parents"] and update:
+            self.connections["parents"][parent_name] = gen
 
     def add_child(self, child_name, gen=1, update = True):
         # a node cannot be a child of itself
         if child_name == self.name:
             return
 
-        if child_name in self.parent_concepts:
+        if child_name in self.connections["parents"]:
             return
 
-        if child_name not in self.child_concepts:
-            self.child_concepts.setdefault(child_name, gen)
-        elif child_name in self.child_concepts and update:
-            self.child_concepts[child_name] = gen
+        if child_name not in self.connections["childs"]:
+            self.connections["childs"].setdefault(child_name, gen)
+        elif child_name in self.connections["childs"] and update:
+            self.connections["childs"][child_name] = gen
+
+    def add_cousin(self, cousin):
+        if cousin not in self.connections["cousins"]:
+            self.connections["cousins"].append(cousin)
+
+    def add_spawn(self, spawn):
+        if spawn not in self.connections["spawns"]:
+            self.connections["spawns"].append(spawn)
+
+    def add_spawned_by(self, spawned_by):
+        if spawned_by not in self.connections["spawned_by"]:
+            self.connections["spawned_by"].append(spawned_by)
+
+    def add_consumes(self, consumes):
+        if consumes not in self.connections["consumes"]:
+            self.connections["consumes"].append(consumes)
+
+    def add_consumed_by(self, consumed_by):
+        if consumed_by not in self.connections["consumed_by"]:
+            self.connections["consumed_by"].append(consumed_by)
+
+    def add_part(self, part):
+        if part not in self.connections["parts"]:
+            self.connections["parts"].append(part)
+
+    def add_part_off(self, part_off):
+        if part_off not in self.connections["part_off"]:
+            self.connections["part_off"].append(part_off)
 
     def remove_synonim(self, synonim):
         i = 0
-        for name in self.synonims:
+        for name in self.connections["synonims"]:
             if name == synonim:
-                self.child_concepts.pop(i)
+                self.connections["synonims"].pop(i)
+                return
+            i += 1
+
+    def remove_antonim(self, antonim):
+        i = 0
+        for name in self.connections["antonims"]:
+            if name == antonim:
+                self.connections["antonims"].pop(i)
+                return
+            i += 1
+
+    def remove_cousin(self, cousin):
+        i = 0
+        for name in self.connections["cousins"]:
+            if name == cousin:
+                self.connections["cousins"].pop(i)
+                return
+            i += 1
+
+    def remove_part(self, part):
+        i = 0
+        for name in self.connections["parts"]:
+            if name == part:
+                self.connections["parts"].pop(i)
+                return
+            i += 1
+
+    def remove_part_off(self, part_off):
+        i = 0
+        for name in self.connections["part_off"]:
+            if name == part_off:
+                self.connections["part_off"].pop(i)
+                return
+            i += 1
+
+    def remove_consumes(self, consumes):
+        i = 0
+        for name in self.connections["consumes"]:
+            if name == consumes:
+                self.connections["consumes"].pop(i)
+                return
+            i += 1
+
+    def remove_consumed_by(self, consumed_by):
+        i = 0
+        for name in self.connections["consumed_by"]:
+            if name == consumed_by:
+                self.connections["consumed_by"].pop(i)
+                return
+            i += 1
+
+    def remove_spawns(self, spawn):
+        i = 0
+        for name in self.connections["spawns"]:
+            if name == spawn:
+                self.connections["spawns"].pop(i)
+                return
+            i += 1
+
+    def remove_spawned_by(self, spawned_by):
+        i = 0
+        for name in self.connections["spawned_by"]:
+            if name == spawned_by:
+                self.connections["spawned_by"].pop(i)
                 return
             i += 1
 
@@ -72,10 +237,10 @@ class ConceptNode():
         self.data.pop(key)
 
     def remove_parent(self, parent_name):
-        self.parent_concepts.pop(parent_name)
+        self.connections["parents"].pop(parent_name)
 
     def remove_child(self, child_name):
-        self.child_concepts.pop(child_name)
+        self.connections["childs"].pop(child_name)
 
 class ConceptConnector():
 
@@ -84,42 +249,6 @@ class ConceptConnector():
     def __init__(self, concepts = {}):
         self.concepts = concepts
         self.logger = getLogger("ConceptConnector")
-        self.storageLoaded = False
-        self.load_storage()
-        self.logger.info("storage loaded")
-
-    def load_storage(self):
-        try:
-            for nodes in self.concepts:
-                name = nodes
-                node_antonimns = []
-                node_synonims = []
-                node_parent_concepts = {}
-                node_child_concepts = {}
-                for node_details in self.concepts[name]:
-                    for node_parents in node_details["parents"]:
-                        node_parent_concepts = node_parents
-                    for node_childs in node_details["children"]:
-                        node_child_concepts = node_childs
-                    for node_synonyms in node_details["synonyms"]:
-                        node_synonims = node_synonyms
-                    for node_antonyms in node_details["antonyms"]:
-                            node_antonimns = node_antonyms
-
-                self.create_concept(name, data=self.concepts, parent_concepts=node_parent_concepts,
-                                          child_concepts=node_child_concepts, synonims=node_synonims,
-                                            antonims=node_antonimns)
-                self.storageLoaded = True
-
-                self.logger.info("### Set : " + str(self.storageLoaded) + " ####")
-
-        except Exception as loaderr:
-            self.logger.info("ERROR " + str(loaderr.message))
-            self.storageLoaded = False
-
-    def is_storage_loaded(self):
-        self.logger.info("### Asked for : " + str(self.storageLoaded) + " ####")
-        return self.storageLoaded
 
     def get_concept_names(self):
         concepts = []
@@ -135,20 +264,19 @@ class ConceptConnector():
             #  merge fields
             self.logger.info("### Concept found: " + str(concept_name))
 
-            for parent in concept.parent_concepts:
+            for parent in concept.get_parents():
                 if parent not in self.get_parents(concept_name):
                     self.logger.info(("Adding parent node: " + parent))
-                    #self.concepts[concept_name].add_parent(parent, gen=concept.parent_concepts[parent])
-
-            for child in concept.child_concepts:
+                    self.concepts[concept_name].add_parent(parent, gen=concept.get_parents()[parent])
+            for child in concept.connections["childs"]:
                 if child not in self.get_childs(concept_name):
-                    self.concepts[concept_name].add_child(child, gen=concept.child_concepts[child])
-            for antonim in concept.antonims:
+                    self.concepts[concept_name].add_child(child, gen=concept.get_childs()[child])
+            for antonim in concept.connections["antonims"]:
                 if antonim not in self.concepts[concept_name].antonims:
-                    self.concepts[concept_name].antonims.add_antonim(antonim)
-            for synonim in concept.synonims:
+                    self.concepts[concept_name].connections["antonims"].add_antonim(antonim)
+            for synonim in concept.connections["synonims"]:
                 if synonim not in self.concepts[concept_name].synonims:
-                    self.concepts[concept_name].synonims.add_synonim(synonim)
+                    self.concepts[concept_name].connections["synonims"].add_synonim(synonim)
 
         else:
             self.concepts.setdefault(concept_name, concept)
@@ -157,21 +285,22 @@ class ConceptConnector():
         self.concepts.pop(concept_name)
 
     def get_childs(self, concept_name):
-        return self.concepts[concept_name].child_concepts
+        return self.concepts[concept_name].get_childs()
 
     def get_parents(self, concept_name):
-        return self.concepts[concept_name].parent_concepts
+        return self.concepts[concept_name].get_parents()
 
     def get_antonims(self, concept_name):
-        return self.concepts[concept_name].antonims
+        return self.concepts[concept_name].get_antonims()
 
     def get_synonims(self, concept_name):
-        return self.concepts[concept_name].synonims
+        return self.concepts[concept_name].get_synonims()
 
     def create_concept(self, new_concept_name, data={},
                            child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):
 
         self.logger.info(("### Creating new concept: " + str(new_concept_name)))
+
         # safe - checking
         if new_concept_name in parent_concepts:
             parent_concepts.pop(new_concept_name)
@@ -185,15 +314,6 @@ class ConceptConnector():
         self.logger.info(("### New ConceptNode created."))
 
         self.add_concept(new_concept_name, concept)
-
-
-
-
-        # TODO: write new concept to json file
-        #       create a dict/array from all elements added here, and if:
-        #           - node doesn't exist - write to json file
-        #           - node exists - check last_update attrib, if older than 5 mins, update json file
-        #           - node exists, but no last_update value, update in json file
 
         # handle parent concepts
         for concept_name in parent_concepts:

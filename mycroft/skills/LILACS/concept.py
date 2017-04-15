@@ -244,8 +244,6 @@ class ConceptNode():
 
 class ConceptConnector():
 
-    storageLoaded = False
-
     def __init__(self, concepts = {}):
         self.concepts = concepts
         self.logger = getLogger("ConceptConnector")

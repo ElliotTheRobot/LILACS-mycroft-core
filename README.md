@@ -13,6 +13,108 @@ Deducing answers and gathering knowledge for offline usage. Lilacs will be calle
 
 This fork will be merged / released as add-on when it is complete
 
+### Info-node structure
+
+information and their relationship is stored in concept nodes, kinda like a single subjet at a time
+
+
+    Node:
+        name:
+        type: "informational"   <- all discussed nodes so far are informational
+        Connections:
+            synonims: []  <- is the same as
+            antonims: [] <- can never be related to
+            parents: []  <- is an instance of
+            childs: [] <- can have the following instances 
+            cousins: [] <- somewhat related subjects 
+            spawns: []  <- what comes from this?
+            spawned_by: [] <- where does this come from?
+            consumes: [] <- what does this need/spend ?
+            consumed_by: []  <- what consumes this?
+            parts : [ ] <- what smaller nodes can this be divided into?
+            part_off: [ ] <- what can be made out of this?
+        Data:
+             description: wikidata description_field
+             abstract: dbpedia abstract
+             summary: wikipedia_summary
+             pics: [ wikipedia pic, dbpedia pic ]
+             infobox: {wikipedia infobox}
+             wikidata: {wikidata_dict}
+             props: [wikidata_properties] <- if we can parse this appropriatly we can make connections
+             links: [ wikipedia link, dbpedia link  ]
+             external_links[ suggested links from dbpedia]
+
+
+### Questions LILACS can answer
+
+a question parser is in place so mycroft knows whats being asked
+
+      Question: how to kill animals ( a cow ) and make meat
+      question_type: how
+      center_node: kill
+      target_node: animals
+      parents: {u'animals': [u'Species', u'Eukaryote', u'Animal'], u'cow': [u'Species', u'Eukaryote', u'Animal', u'Mammal']}
+      relevant_nodes: [u'meat', u'cow']
+      synonims: {u'kill': u'murder', u'cow': u'cattle'}
+
+
+there are a few basic question prototypes already, much more to come
+
+
+      - compare -> is "this" and example of "that"
+
+> Speak: answer to is frog a cat is False
+
+      - examples -> give examples of "this"
+
+> Speak: joana is an example of human
+
+> Speak: maria is an example of human
+
+
+      - common -> "this" and "that" are both "something"
+
+> Speak: frog are animal like human
+
+> Speak: frog are living being like human
+
+      - what -> "this" is "that", "that other thing" and "something"
+
+> Speak: cow is animal
+
+> Speak: cow is living being
+
+      - why? -> "this" is A, A is B, B is C, C is "that", therefore "this" is "that"
+
+> Speak: answer to is frog a living being is True
+
+> Speak: frog is animal
+
+> Speak: animal is living being
+
+
+      - how? -> step 1, step 2, step 3
+      
+This is currently difficult to answer using nodes, wikihow backend handles these
+
+    How to Hardboil Eggs in a Microwave
+    
+    step 0 : Place your eggs in a microwave safe bowl.
+    http://pad1.whstatic.com/images/thumb/b/b2/Hardboil-Eggs-in-a-Microwave-Step-1-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-1-Version-3.jpg
+    step 1 : Add water to the bowl.
+    http://pad2.whstatic.com/images/thumb/a/a5/Hardboil-Eggs-in-a-Microwave-Step-2-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-2-Version-3.jpg
+    step 2 : Pour one tablespoon of salt into the bowl.
+    http://pad1.whstatic.com/images/thumb/5/53/Hardboil-Eggs-in-a-Microwave-Step-3-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-3-Version-3.jpg
+    step 3 : Cook the eggs for up to 12 minutes.
+    http://pad3.whstatic.com/images/thumb/9/9b/Hardboil-Eggs-in-a-Microwave-Step-4-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-4-Version-3.jpg
+    step 4 : Let the eggs cool down before you touch them.
+    http://pad2.whstatic.com/images/thumb/1/10/Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg
+    step 5 : Enjoy your hard-boiled eggs.
+    http://pad1.whstatic.com/images/thumb/8/80/Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg
+   
+
+
+
 
 
 Mycroft [![Build Status](https://travis-ci.org/MycroftAI/mycroft-core.svg?branch=master)](https://travis-ci.org/MycroftAI/mycroft-core)

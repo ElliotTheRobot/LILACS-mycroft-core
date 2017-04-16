@@ -6,11 +6,12 @@ See Core issue : https://github.com/MycroftAI/mycroft-core/issues/629
 
 ### Purpose
 
-Deducing answers / gathering knowledge for offline usage. Lilacs will be called when no intent is matched and no answer is given in wolpham alpha 
+Deducing answers and gathering knowledge for offline usage. Lilacs will be called when no intent is matched 
 
-### NOTE
+![alt tag](https://cloud.githubusercontent.com/assets/24976917/25067732/cfb7ec46-2244-11e7-9d54-1cf68a3e8a44.jpg)
 
-This fork will be merged with the main core when it is complete and approved
+
+This fork will be merged / released as add-on when it is complete
 
 
 

@@ -37,6 +37,7 @@ This knowledge comes both in the form of connections/properties of subjects and 
 - Wikidata
 - Dbpedia
 - Wikihow
+- Wordnik
 - Ask user
 
 ### Info-node structure
@@ -155,6 +156,186 @@ This is currently difficult to answer using nodes, wikihow backend handles these
     step 5 : Enjoy your hard-boiled eggs.
     http://pad1.whstatic.com/images/thumb/8/80/Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg
 
+
+
+
+### Current Output from each knowledge backend
+
+still working on parsing all this, but currently we can fetch the following info
+
+
+Wolfram Alpha
+
+        question: what are humans
+        answer: human (animal) is Homo sapiens
+
+Wikipedia
+
+
+        name : Elon Musk
+
+        description : entrepreneur and inventor from South Africa
+
+        url : https://en.wikipedia.org/wiki/Elon_Musk
+
+        pic : https://upload.wikimedia.org/wikipedia/commons/4/49/Elon_Musk_2015.jpg
+
+        summary : Elon Reeve Musk (/ˈiːlɒn ˈmʌsk/; born June 28, 1971) is a South African-born Canadian-American business magnate, investor, engineer, and inventor.
+
+        He is the founder, CEO, and CTO of SpaceX; co-founder, CEO, and product
+        architect of Tesla Inc.; co-founder and chairman of SolarCity; co-chairman of
+        OpenAI; co-founder of Zip2; and founder of X.com, which merged with Confinity
+        and took the name PayPal. As of March 2017, he has an estimated net worth of
+        $13.9 billion, making him the 80th wealthiest person in the world. In December
+        2016, Musk was ranked 21st on Forbes list of The World's Most Powerful People.......
+
+
+        known_for : [[SpaceX]], [[PayPal]], [[Tesla Inc.]], [[Hyperloop]], [[SolarCity]], [[OpenAI]], [[The Boring Company]], [[Neuralink]], [[Zip2]]
+
+        citizenship : {{Plainlist|
+        *South African (1971–present)
+        *Canadian (1971–present)
+        *American (2002–present)
+        }}
+
+        image : Elon Musk 2015.jpg
+
+        birth_place : [[Pretoria]], [[Transvaal Province|Transvaal]], [[South Africa]]
+
+        networth : [[US$]]14 Billion (March 31, 2017)
+
+        spouse : {{Plainlist|
+
+            |Marriage|[[Justine Musk]]|2000|2008|reason|=|divorced|
+            [[Talulah Riley]] (|abbr|m.|married| 2010–|abbr|div.|divorced| 2012; |abbr|m.|married| 2013–|abbr|div.|divorced| 2016)|ref|{{Cite news|url=https://www.theguardian.com/technology/2016/mar/21/elon-musk-talulah-riley-file-divorce-second-marriage|title=Actor Talulah Riley files to divorce billionaire Elon Musk, again|date=March 21, 2016|accessdate=April 20, 2016|work=[[The Guardian]]|quote="The pair first married in 2010 and divorced in 2012. They remarried 18 months later."}}||ref| name="withdrawn"|{{cite web|url=http://www.dailymail.co.uk/news/article-3185591/Elon-Musk-withdraws-divorce-papers-against-wife-Talulah-Riley-one-month-pair-spotted-holding-hands-Allen-Company-conference.html|title=Elon Musk withdraws Talulah Riley divorce papers after being spotted at Allen & Company conference|date=August 5, 2015|work=Mail Online}}||
+            }}
+
+        children : 6 sons
+
+        occupation : Entrepreneur, engineer, inventor, investor
+
+       .... infobox not fully shown here
+
+Wikidata
+
+        subject: Stephen Fry
+
+        description: English comedian, actor, writer, presenter, and activist
+
+        what: human
+
+        data:
+        website : http://www.stephenfry.com
+        category : Category:Stephen Fry
+        citizenship : United Kingdom
+        image : Stephen Fry cropped.jpg
+        instance : human
+        IMDB : nm0000410
+        birth : +1957-08-24T00:00:00Z
+        movement : atheism
+
+        properties:
+        P135 : [u'Q7066']
+        P345 : [u'nm0000410']
+        P910 : [u'Q8817795']
+        P27 : [u'Q145']
+        P856 : [u'http://www.stephenfry.com']
+        P569 : [u'+1957-08-24T00:00:00Z']
+        P18 : [u'Stephen Fry cropped.jpg']
+        P31 : [u'Q5']
+
+
+
+Dbpedia
+
+        subject: meat
+        picture
+        [u'http://commons.wikimedia.org/wiki/Special:FilePath/FoodMeat.jpg']
+        see_also
+        [u'http://dbpedia.org/resource/Red_meat', u'http://dbpedia.org/resource/Fishing_industry', u'http://dbpedia.org/resource/History_of_agriculture']
+        abstract
+        Meat is animal flesh that is eaten as food.:1 Humans are omnivorous, and have hunted and killed animals for meat since prehistoric times. The advent of civilization allowed the domestication of animals such as chickens, sheep, pigs and cattle, and eventually their use in meat production on an industrial scale. Meat is mainly composed of water, protein, and fat, and is usually eaten together with other food. It is edible raw, but is normally eaten after it has been cooked and seasoned or processed in a variety of ways. Unprocessed meat will spoil or rot within hours or days as a result of infection with and decomposition by bacteria and fungi. Most often, meat refers to skeletal muscle and associated fat and other tissues, but it may also describe other edible tissues such as offal.:1 Meat is sometimes also used in a more restrictive sense – the flesh of mammalian species (pigs, cattle, lambs, etc.) raised and prepared for human consumption, to the exclusion of fish, other seafood, poultry or other animals.
+        primary
+        [u'http://en.wikipedia.org/wiki/Meat']
+        same_as
+        [u'http://el.dbpedia.org/resource/\u039a\u03c1\u03ad\u03b1\u03c2', u'http://yago-knowledge.org/resource/Meatatarian', u'http://id.dbpedia.org/resource/Daging', u'http://pt.dbpedia.org/resource/Carne', u'http://nl.dbpedia.org/resource/Vlees', u'http://pl.dbpedia.org/resource/Mi\u0119so', u'http://eu.dbpedia.org/resource/Haragi', u'http://de.dbpedia.org/resource/Fleisch', u'http://cs.dbpedia.org/resource/Maso', u'http://ko.dbpedia.org/resource/\uace0\uae30', u'http://es.dbpedia.org/resource/Carne', u'http://ja.dbpedia.org/resource/\u98df\u8089', u'http://it.dbpedia.org/resource/Carne', u'http://wikidata.dbpedia.org/resource/Q10990', u'http://fr.dbpedia.org/resource/Viande', u'http://dbpedia.org/resource/Meat']
+        external_links
+        [u'http://www.iarc.fr/en/media-centre/iarcnews/pdf/Monographs-Q&A.pdf', u'http://www.meatscience.org/', u'http://www.qualitionary.eu/index.php?title=Meat', u'http://www.iarc.fr/en/media-centre/iarcnews/pdf/Monographs-Q&A_Vol114.pdf']
+        derived_from
+        [u'http://en.wikipedia.org/wiki/Meat?oldid=708154109']
+        related_subjects
+        [u'http://dbpedia.org/resource/Category:Meat_industry', u'http://dbpedia.org/resource/Category:Meat']
+
+
+
+WikiHow
+
+
+        How to Hardboil Eggs in a Microwave
+        step 0 : Place your eggs in a microwave safe bowl.
+        http://pad1.whstatic.com/images/thumb/b/b2/Hardboil-Eggs-in-a-Microwave-Step-1-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-1-Version-3.jpg
+        step 1 : Add water to the bowl.
+        http://pad2.whstatic.com/images/thumb/a/a5/Hardboil-Eggs-in-a-Microwave-Step-2-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-2-Version-3.jpg
+        step 2 : Pour one tablespoon of salt into the bowl.
+        http://pad1.whstatic.com/images/thumb/5/53/Hardboil-Eggs-in-a-Microwave-Step-3-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-3-Version-3.jpg
+        step 3 : Cook the eggs for up to 12 minutes.
+        http://pad3.whstatic.com/images/thumb/9/9b/Hardboil-Eggs-in-a-Microwave-Step-4-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-4-Version-3.jpg
+        step 4 : Let the eggs cool down before you touch them.
+        http://pad2.whstatic.com/images/thumb/1/10/Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg
+        step 5 : Enjoy your hard-boiled eggs.
+        http://pad1.whstatic.com/images/thumb/8/80/Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg
+        step 6 : Use this method for safe, even cooking.
+        http://pad1.whstatic.com/images/thumb/4/4f/Hardboil-Eggs-in-a-Microwave-Step-1-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-1-Version-2.jpg
+        step 7 : Lightly grease two bowls.
+        http://pad1.whstatic.com/images/thumb/8/84/Hardboil-Eggs-in-a-Microwave-Step-2-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-2-Version-2.jpg
+        step 8 : Separate the egg whites and egg yolks.
+        http://pad2.whstatic.com/images/thumb/2/2a/Hardboil-Eggs-in-a-Microwave-Step-3-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-3-Version-2.jpg
+        step 9 : Pierce the egg yolks.
+        http://pad3.whstatic.com/images/thumb/b/b4/Hardboil-Eggs-in-a-Microwave-Step-4-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-4-Version-2.jpg
+        step 10 : Cover each bowl.
+        http://pad2.whstatic.com/images/thumb/1/15/Hardboil-Eggs-in-a-Microwave-Step-5-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-5-Version-2.jpg
+        step 11 : Cook the white at medium or low power.
+        http://pad1.whstatic.com/images/thumb/d/d7/Hardboil-Eggs-in-a-Microwave-Step-6-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-2.jpg
+        step 12 : Cook the yolk for 20 to 30 seconds per yolk.
+        http://pad1.whstatic.com/images/thumb/7/73/Hardboil-Eggs-in-a-Microwave-Step-7.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-7.jpg
+        step 13 : Let the egg stand for two or three minutes.
+        http://pad2.whstatic.com/images/thumb/1/12/Hardboil-Eggs-in-a-Microwave-Step-8.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-8.jpg
+
+
+
+ConceptNet
+
+
+            node: chicken
+            is a: [u'food', u'meat']
+            has a: []
+            used for: []
+            related to: [u'bird', u'hen', u'rooster', u'animal', u'farm', u'poultry', u'eggs', u'food', u'fowl', u'egg', u'meat', u'fried', u'wings']
+            desires: []
+            capable of: [u'cross road', u'lay eggs', u'produce eggs']
+            found at: []
+            example usage: [u'[[chicken]] is related to [[bird]]', u'[[chicken]] is related to [[hen]]', u'[[the chicken]] can [[cross the road]]', u'[[chicken]] is related to [[rooster]]', u'[[chicken]] is related to [[animal]]', u'[[chicken]] is a type of [[food]]', u'[[chicken]] is related to [[farm]]', u'[[chicken]] is related to [[poultry]]', u'[[chicken]] is related to [[eggs]]', u'[[chicken]] is related to [[food]]', u'[[chicken]] is a type of [[meat]]', u'[[chicken]] is related to [[fowl]]', u'[[chicken]] is related to [[egg]]', u'[[chicken]] is related to [[meat]]', u'[[chicken]] is related to [[fried]]', u'[[a chicken]] can [[lay eggs]]', u'[[A chicken]] can [[produce eggs]]', u'[[chicken]] is related to [[wings]]']
+            related nodes: []
+
+
+WordNik
+
+        definitions:
+        A member of the genus Homo and especially of the species H. sapiens.
+        A person:  the extraordinary humans who explored Antarctica.
+        A human being, whether man, woman or child.
+        A human being.
+        A human being; a member of the family of mankind.
+
+        relationships:
+        synonym : [u'hominal', u'hominine', u'humanistic', u'earthborn', u'mortal', u'humane', u'earthling', u'clod', u'Christian', u'man']
+        unknown : [u'Religion & Spirituality', u'Health & Medicine', u'History', u'Science', u'LGBTQ']
+        equivalent : [u'fallible', u'hominine', u'hominal', u'hominid', u'anthropomorphous', u'earthborn', u'imperfect', u'humanlike', u'anthropomorphic', u'weak']
+        cross-reference : [u'human sign']
+        rhyme : [u'Neumann', u'Newman', u'Schuman', u'Schumann', u'Truman', u'acumen', u'albumin', u'bitumen', u'crewman', u'cumin']
+        etymologically-related-term : [u'humanity', u'humanitarian', u'humane', u'humanitarianism']
+        same-context : [u'own', u'natural', u'individual', u'young', u'national', u'religious', u'pleonastic', u'ill', u'active', u'every']
+        antonym : [u'divine', u'devilish', u'superhuman', u'deity', u'animal']
 
 
 

@@ -38,11 +38,15 @@ class ConceptNetService(KnowledgeBackend):
                 related = []
                 examples = []
                 location = []
+                other = []
 
                 obj = requests.get('http://api.conceptnet.io/c/en/' + subject).json()
                 for edge in obj["edges"]:
                     rel = edge["rel"]["label"]
                     node = edge["end"]["label"]
+                    start = edge["start"]["label"]
+                    if start != node and start not in other:
+                        other.append(start)
                     if rel == "IsA":
                         node = node.replace("a ", "").replace("an ", "")
                         if node not in parents:
@@ -69,7 +73,9 @@ class ConceptNetService(KnowledgeBackend):
                     if usage is not None:
                         examples.append(usage)
                 # id info source
-                dict.setdefault("conceptnet", {"IsA":parents, "CapableOf":capable, "HasA":has, "Desires":desires, "UsedFor":used, "RelatedTo":related, "AtLocation":location, "surfaceText":examples})
+                dict.setdefault("conceptnet", {"RelatedNodes": other, "IsA": parents, "CapableOf": capable, "HasA": has,
+                                               "Desires": desires, "UsedFor": used, "RelatedTo": related,
+                                               "AtLocation": location, "surfaceText": examples})
                 self.emit_node_info(dict)
             except:
                 logger.error("Could not parse conceptnet for " + str(subject))

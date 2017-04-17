@@ -13,6 +13,32 @@ Deducing answers and gathering knowledge for offline usage. Lilacs will be calle
 
 This fork will be merged / released as add-on when it is complete
 
+The idea is that mycroft gathers knowledge about anything it hears, searches info on several possible backends when asked, and learns from user input
+
+This knowledge comes both in the form of connections/properties of subjects and text info, this allows mycroft:
+
+- to be vocally programmed about relationships of things (music tastes, family relationships)
+- to gather all the info from the internet, more backends can be added any time
+- to deduce answers from node relationships and answer several kinds of questions
+- to be more personal
+    - "individual" knowledge between units
+    - a "personality" depending on usage history
+    - can "talk/rant" about subjects
+- store gathered knowledge in several fashions
+    - collective database
+    - personal database
+
+
+### Where does the knowledge come from
+
+- WolframAlpha
+- ConceptNet
+- Wikipedia
+- Wikidata
+- Dbpedia
+- Wikihow
+- Ask user
+
 ### Info-node structure
 
 information and their relationship is stored in concept nodes, kinda like a single subjet at a time
@@ -58,7 +84,24 @@ a question parser is in place so mycroft knows whats being asked
       synonims: {u'kill': u'murder', u'cow': u'cattle'}
 
 
-there are a few basic question prototypes already, much more to come
+
+There is a wolfram alpha knowledge backend, this should answer most questions
+
+        question: how much wood can a woodchuck chuck
+        answer:  A woodchuck would chuck all the wood he could chuck if a woodchuck could chuck wood.,
+        According to the tongue twister, although the paper "The Ability of Woodchucks to Chuck Cellulose Fibers" by P.A. Paskevich and T.B. Shea in Annals of Improbable Research vol. 1, no. 4, pp. 4-9, July/August 1995, concluded that a woodchuck can chuck 361.9237001 cubic centimeters of wood per day.
+
+        question: when will the world end
+        answer: time until the end of the world is 5 billion years, (The world will effectively end 5 billion years from now when the Sun becomes a red giant. As a red giant, the Sun will lose roughly 30% of its mass and (without tidal effects) the Earth will move to an orbit 1.7 AU from the Sun when the star reaches its maximum radius. Therefore, the planet is expected to escape envelopment by the expanded Sun's sparse outer atmosphere, though most, if not all, remaining life will be destroyed because of the Sun's increased luminosity. However, a more recent simulation indicates that Earth's orbit will decay due to tidal effects and drag, causing it to enter the red giant Sun's atmosphere and be destroyed.)
+
+        question: does god exist
+        answer:  I'm sorry, but a poor computational knowledge engine, no matter how powerful, not capable of providing a simple answer to that question.
+
+        question: what are humans
+        answer: human (animal) is Homo sapiens
+
+
+the core of LILACS is meant to be used when wolfram doesnt know, or there is no internet connection, much more to come
 
 
       - compare -> is "this" and example of "that"
@@ -111,8 +154,6 @@ This is currently difficult to answer using nodes, wikihow backend handles these
     http://pad2.whstatic.com/images/thumb/1/10/Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg
     step 5 : Enjoy your hard-boiled eggs.
     http://pad1.whstatic.com/images/thumb/8/80/Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg
-   
-
 
 
 

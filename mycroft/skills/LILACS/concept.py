@@ -3,11 +3,13 @@ from mycroft.util.log import getLogger
 import random
 import math
 
+
 __authors__ = ["jarbas", "heinzschmidt"]
 
 
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
+
 
 class ConceptNode():
     ''' 
@@ -242,6 +244,7 @@ class ConceptNode():
     def remove_child(self, child_name):
         self.connections["childs"].pop(child_name)
 
+
 class ConceptConnector():
 
     def __init__(self, concepts = {}):
@@ -360,7 +363,6 @@ class ConceptConnector():
             #add parent to child
             self.logger.info("adding parent: " + new_concept_name + " to child: " + concept_name)
             self.concepts[concept_name].add_parent(new_concept_name, gen=gen)
-
 
 
 class ConceptCrawler():
@@ -609,7 +611,4 @@ class ConceptCrawler():
         for node in self.concept_db.concepts:
             self.crawled.append(node)
         self.crawl_path = self.find_shortest_path(center_node, target_node, direction=direction)
-
-
-
 

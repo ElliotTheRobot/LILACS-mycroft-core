@@ -184,4 +184,27 @@ def ask_wolfram(query, lang="en-us"):
     return response
 
 
-print ask_wolfram("how much wood can a woodchuck chuck")
+
+query = "how much wood can a woodchuck chuck"
+responses = ask_wolfram(query)
+print "\nquestion: " + query
+for response in responses:
+    print "answer: " + response
+
+query = "when will the world end"
+responses = ask_wolfram(query)
+print "\nquestion: " + query
+for response in responses:
+    print "answer: " + response
+
+query = "does god exist"
+responses = ask_wolfram(query)
+print "\nquestion: " + query
+for response in responses:
+    print "answer: " + response
+
+query = "what are humans"
+responses = ask_wolfram(query)
+print "\nquestion: " + query
+for response in responses:
+    print "answer: " + response

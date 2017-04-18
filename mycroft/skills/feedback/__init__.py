@@ -46,46 +46,20 @@ class FeedbackSkill(MycroftSkill):
                              self.handle_negative_feedback_intent)
 
         #self.emitter.on("sentiment_result", self.handle_sentiment_result)
-        self.emitter.on("feedback_id", self.handle_skill_id_feedback)
 
 
     def handle_positive_feedback_intent(self, message):
         utterance = message.data["utterance"]
         # evaluate sentiment from sentiment analisys service?
         # self.emitter.emit(Message("sentiment_request",{"utterances":utterance}))
-        self.waiting = True
-        while self.waiting:
-            pass
         self.result = "positive"
-        # send message to last active_skill
-        self.emitter.emit(Message("do_feedback",
-                                  {"sentiment":self.result,
-                                   "skill_id":self.active_skill,
-                                  # "conf+":self.positive_conf,
-                                  # "conf-":self.negative_conf,
-                                   "utterance":utterance}))
 
 
     def handle_negative_feedback_intent(self, message):
         utterance = message.data["utterance"]
         # evaluate sentiment from sentiment analisys service?
         # self.emitter.emit(Message("sentiment_request",{"utterances":utterance}))
-        self.waiting = True
-        while self.waiting:
-            pass
         self.result = "negative"
-        # send message to last active_skill
-        self.emitter.emit(Message("feedback_" + str(self.active_skill),
-                                  {"sentiment": self.result,
-                                   # "conf+":self.positive_conf,
-                                   # "conf-":self.negative_conf,
-                                   "utterance": utterance}))
-
-
-    def handle_skill_id_feedback(self, message):
-        self.active_skill = message.data["active_skill"]
-        self.waiting = False
-
 
     def handle_sentiment_result(self, message):
         self.result = message.data["result"]

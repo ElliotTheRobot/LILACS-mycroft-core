@@ -37,7 +37,7 @@ __author__ = 'seanfitz'
 
 signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
-BLACKLISTED_SKILLS = ["send_sms", "media", "template_skill", "test_skill"]
+BLACKLISTED_SKILLS = ["send_sms", "media", "template_skill"]
 
 SKILLS_DIR = os.path.dirname(__file__)
 

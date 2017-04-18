@@ -267,23 +267,6 @@ WikiHow
         http://pad2.whstatic.com/images/thumb/1/10/Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-5-Version-3.jpg
         step 5 : Enjoy your hard-boiled eggs.
         http://pad1.whstatic.com/images/thumb/8/80/Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-3.jpg
-        step 6 : Use this method for safe, even cooking.
-        http://pad1.whstatic.com/images/thumb/4/4f/Hardboil-Eggs-in-a-Microwave-Step-1-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-1-Version-2.jpg
-        step 7 : Lightly grease two bowls.
-        http://pad1.whstatic.com/images/thumb/8/84/Hardboil-Eggs-in-a-Microwave-Step-2-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-2-Version-2.jpg
-        step 8 : Separate the egg whites and egg yolks.
-        http://pad2.whstatic.com/images/thumb/2/2a/Hardboil-Eggs-in-a-Microwave-Step-3-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-3-Version-2.jpg
-        step 9 : Pierce the egg yolks.
-        http://pad3.whstatic.com/images/thumb/b/b4/Hardboil-Eggs-in-a-Microwave-Step-4-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-4-Version-2.jpg
-        step 10 : Cover each bowl.
-        http://pad2.whstatic.com/images/thumb/1/15/Hardboil-Eggs-in-a-Microwave-Step-5-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-5-Version-2.jpg
-        step 11 : Cook the white at medium or low power.
-        http://pad1.whstatic.com/images/thumb/d/d7/Hardboil-Eggs-in-a-Microwave-Step-6-Version-2.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-6-Version-2.jpg
-        step 12 : Cook the yolk for 20 to 30 seconds per yolk.
-        http://pad1.whstatic.com/images/thumb/7/73/Hardboil-Eggs-in-a-Microwave-Step-7.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-7.jpg
-        step 13 : Let the egg stand for two or three minutes.
-        http://pad2.whstatic.com/images/thumb/1/12/Hardboil-Eggs-in-a-Microwave-Step-8.jpg/aid238320-v4-728px-Hardboil-Eggs-in-a-Microwave-Step-8.jpg
-
 
 
 ConceptNet

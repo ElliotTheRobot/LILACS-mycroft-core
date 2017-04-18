@@ -1,13 +1,14 @@
-from mycroft.knowledge.services import KnowledgeBackend
-from mycroft.util.log import getLogger
-from mycroft.messagebus.message import Message
-
+import json
 from os.path import abspath
 
 import spotlight
-import json
 import urlfetch
 
+from mycroft.messagebus.message import Message
+from mycroft.skills.LILACS_knowledge.services import KnowledgeBackend
+from mycroft.util.log import getLogger
+
+# TODO read this from config
 host = "http://spotlight.sztaki.hu:2222/rest/annotate"
 
 __author__ = 'jarbas'

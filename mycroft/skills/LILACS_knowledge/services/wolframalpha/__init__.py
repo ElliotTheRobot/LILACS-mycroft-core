@@ -2,12 +2,12 @@ import re
 from os.path import abspath
 
 import wolframalpha
-from mycroft.skills.question_parser import LILACSQuestionParser
 from requests import HTTPError
 
 from mycroft.configuration import ConfigurationManager
-from mycroft.knowledge.services import KnowledgeBackend
 from mycroft.messagebus.message import Message
+from mycroft.skills.LILACS_core.question_parser import LILACSQuestionParser
+from mycroft.skills.LILACS_knowledge.services import KnowledgeBackend
 from mycroft.util.log import getLogger
 
 PIDS = ['Value', 'NotableFacts:PeopleData', 'BasicInformation:PeopleData',

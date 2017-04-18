@@ -1,10 +1,10 @@
-from mycroft.knowledge.services import KnowledgeBackend
-from mycroft.util.log import getLogger
-from mycroft.messagebus.message import Message
-
 from os.path import abspath
 
 import requests
+
+from mycroft.messagebus.message import Message
+from mycroft.skills.LILACS_knowledge.services import KnowledgeBackend
+from mycroft.util.log import getLogger
 
 __author__ = 'jarbas'
 

@@ -97,7 +97,6 @@ then
   start-mycroft voice
   sleep 3
   start-mycroft skills
-  start-mycroft knowledge
   start-mycroft cli --quiet
   exit 0
 elif [[ "$1" == "start" && "$2" == "-v" ]]
@@ -106,13 +105,11 @@ then
   start-mycroft voice
   sleep 3
   start-mycroft skills
-  start-mycroft knowledge
   exit 0
 elif [[ "$1" == "start" && "$2" == "-c" ]]
 then
   start-mycroft service
   start-mycroft skills
-  start-mycroft knowledge
   start-mycroft cli
   exit 0
 elif [[ "$1" == "start" && "$2" == "-d" ]]
@@ -129,7 +126,6 @@ then
   sleep 3
   stop-mycroft skills
   stop-mycroft cli
-  stop-mycroft knowledge
   exit 0
 elif [[ "$1" == "restart" && -z "$2" ]]
 then

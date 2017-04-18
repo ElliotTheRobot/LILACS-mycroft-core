@@ -1,14 +1,14 @@
-from mycroft.knowledge.services import KnowledgeBackend
-from mycroft.util.log import getLogger
-from mycroft.messagebus.message import Message
-
+import re
 from os.path import abspath
 
-import re
 import wolframalpha
-from requests import HTTPError
-from mycroft.configuration import ConfigurationManager
 from mycroft.skills.question_parser import LILACSQuestionParser
+from requests import HTTPError
+
+from mycroft.configuration import ConfigurationManager
+from mycroft.knowledge.services import KnowledgeBackend
+from mycroft.messagebus.message import Message
+from mycroft.util.log import getLogger
 
 PIDS = ['Value', 'NotableFacts:PeopleData', 'BasicInformation:PeopleData',
         'Definition', 'DecimalApproximation']

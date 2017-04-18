@@ -16,15 +16,15 @@
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import re
 from StringIO import StringIO
 
-import re
 import wolframalpha
+from mycroft.skills.question_parser import LILACSQuestionParser
 from requests import HTTPError
 
 from mycroft.api import Api
 from mycroft.util.log import getLogger
-from mycroft.skills.question_parser import LILACSQuestionParser
 
 __author__ = 'seanfitz'
 

@@ -16,16 +16,16 @@
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from threading import Thread
+from time import sleep
+
 from adapt.intent import IntentBuilder
+from mycroft.skills.LILACS_core.knowledgeservice import KnowledgeService
+from mycroft.skills.LILACS_core.question_parser import LILACSQuestionParser
+
+from mycroft.messagebus.message import Message
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
-from mycroft.messagebus.message import Message
-
-from mycroft.skills.question_parser import LILACSQuestionParser
-from mycroft.skills.knowledgeservice import KnowledgeService
-
-from time import sleep
-from threading import Thread
 
 __author__ = 'jarbas'
 

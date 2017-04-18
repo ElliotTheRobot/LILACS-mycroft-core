@@ -15,20 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
-from adapt.intent import IntentBuilder
-from mycroft.skills.core import MycroftSkill
-from mycroft.util.log import getLogger
-from mycroft.messagebus.message import Message
+from threading import Thread
+from time import sleep
 
+from adapt.intent import IntentBuilder
+from mycroft.skills.LILACS_core.knowledgeservice import KnowledgeService
+from mycroft.skills.LILACS_core.question_parser import LILACSQuestionParser
+
+from mycroft.messagebus.message import Message
 from mycroft.skills.LILACS_core.concept import ConceptCrawler, ConceptConnector
-from mycroft.skills.LILACS_core.storage import ConceptStorage
-from mycroft.skills.knowledgeservice import KnowledgeService
-from mycroft.skills.question_parser import LILACSQuestionParser
 # import helper questions functions
 from mycroft.skills.LILACS_core.questions import *
-
-from time import sleep
-from threading import Thread
+from mycroft.skills.LILACS_core.storage import ConceptStorage
+from mycroft.skills.core import MycroftSkill
+from mycroft.util.log import getLogger
 
 logger = getLogger("Skills")
 
@@ -103,8 +103,10 @@ class LilacsSkill(MycroftSkill):
     def parse_utterance(self, utterance):
         # get question type from utterance
         center_node, target_node, parents, synonims, midle, question = self.parser.process_entitys(utterance)
+        # TODO try to load concepts from storage
         # TODO input relevant nodes in connector
         # TODO update crawler with new nodes
+        # TODO save nodes in storage
         return center_node, target_node, parents, synonims, midle, question
 
     def deduce_answer(self, utterance):
@@ -115,8 +117,6 @@ class LilacsSkill(MycroftSkill):
         self.last_target = target_node
         self.last_question = utterance
         self.last_question_type = question
-        # TODO try to load concepts from storage
-        # TODO create/update concepts from available info and save
         # TODO maybe add question verb to parser, may be needed for disambiguation between types
         # TODO add more question types
         # who|what|when|where|why|which|whose|how|give examples
@@ -142,7 +142,6 @@ class LilacsSkill(MycroftSkill):
         elif question == "talk" or question == "rant":
             pass
         elif question == "in common":
-            # what do this and that have in common / what is the relationship between / unreachable needs parsing
             self.answered = self.handle_relation(center_node, target_node)
         elif question == "is" or question == "are" :
             self.answered = self.handle_compare_intent(center_node, target_node)
@@ -170,9 +169,7 @@ class LilacsSkill(MycroftSkill):
 
     def handle_relation(self, center_node, target_node):
         commons = common_this_and_that(center_node, target_node, self.crawler)
-        print commons
         for common in commons:
-            print common
             self.speak(center_node + " are " + common + " like " + target_node)
         if commons == []:
             self.speak(center_node + " and " + target_node + " have nothing in common")

@@ -50,7 +50,7 @@ class DBpediaService(KnowledgeBackend):
                     node["offset"] = offset
                     # categorie of this <- linked nodes <- parsing for dbpedia search
                     types = annotation["types"].split(",")
-                    node["types"] = types
+                    node["parents"] = types
                     # dbpedia link
                     url = annotation["URI"]
                     node["url"] = url
@@ -68,54 +68,53 @@ class DBpediaService(KnowledgeBackend):
         data = urlfetch.fetch(url=u)
         json_data = json.loads(data.content)
         dbpedia = {}
+        dbpedia["related_subjects"] = []
+        dbpedia["picture"] = []
+        dbpedia["external_links"] = []
+        dbpedia["abstract"] = ""
         for j in json_data[link]:
             if "#seeAlso" in j:
                 # complimentary nodes
-                dbpedia["see_also"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
-                    dbpedia["see_also"].append(value)
+                    value = entry["value"].replace("http://dbpedia.org/resource/", "").replace("_", " ").encode("utf8")
+                    dbpedia["related_subjects"].append(value)
             elif "wikiPageExternalLink" in j:
                 # links about this subject
-                dbpedia["external_links"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
+                    value = entry["value"].encode("utf8")
                     dbpedia["external_links"].append(value)
             elif "subject" in j:
                 # relevant nodes
-                dbpedia["related_subjects"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
+                    value = entry["value"].replace("http://dbpedia.org/resource/Category:", "").replace("_",
+                                                                                                        " ").encode(
+                        "utf8")
                     dbpedia["related_subjects"].append(value)
             elif "abstract" in j:
                 # english description
                 dbpedia["abstract"] = \
-                [abstract['value'] for abstract in json_data[link][j] if abstract['lang'] == 'en'][0]
+                    [abstract['value'] for abstract in json_data[link][j] if abstract['lang'] == 'en'][0].encode("utf8")
             elif "depiction" in j:
                 # pictures
-                dbpedia["picture"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
+                    value = entry["value"].encode("utf8")
                     dbpedia["picture"].append(value)
             elif "isPrimaryTopicOf" in j:
                 # usually original wikipedia link
-                dbpedia["primary"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
-                    #dbpedia["primary"].append(value)
+                    value = entry["value"].encode("utf8")
+                    # dbpedia["primary"].append(value)
             elif "wasDerivedFrom" in j:
                 # usually wikipedia link at scrap date
-                dbpedia["derived_from"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
-                    #dbpedia["derived_from"].append(value)
+                    value = entry["value"].encode("utf8")
+                    # dbpedia["derived_from"].append(value)
             elif "owl#sameAs" in j:
                 # links to dbpedia in other languages
-                dbpedia["same_as"] = []
                 for entry in json_data[link][j]:
-                    value = entry["value"]
+                    value = entry["value"].encode("utf8")
                     if "resource" in value:
-                        #dbpedia["same_as"].append(value)
+                        # dbpedia["same_as"].append(value)
                         pass
 
         return dbpedia

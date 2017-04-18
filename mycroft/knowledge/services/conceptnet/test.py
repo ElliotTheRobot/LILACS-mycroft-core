@@ -1,5 +1,5 @@
 import requests
-subject = "life"
+subject = "satan"
 
 parents = []
 capable = []

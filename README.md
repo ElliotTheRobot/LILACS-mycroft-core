@@ -86,22 +86,6 @@ a question parser is in place so mycroft knows whats being asked
 
 
 
-There is a wolfram alpha knowledge backend, this should answer most questions
-
-        question: how much wood can a woodchuck chuck
-        answer:  A woodchuck would chuck all the wood he could chuck if a woodchuck could chuck wood.,
-        According to the tongue twister, although the paper "The Ability of Woodchucks to Chuck Cellulose Fibers" by P.A. Paskevich and T.B. Shea in Annals of Improbable Research vol. 1, no. 4, pp. 4-9, July/August 1995, concluded that a woodchuck can chuck 361.9237001 cubic centimeters of wood per day.
-
-        question: when will the world end
-        answer: time until the end of the world is 5 billion years, (The world will effectively end 5 billion years from now when the Sun becomes a red giant. As a red giant, the Sun will lose roughly 30% of its mass and (without tidal effects) the Earth will move to an orbit 1.7 AU from the Sun when the star reaches its maximum radius. Therefore, the planet is expected to escape envelopment by the expanded Sun's sparse outer atmosphere, though most, if not all, remaining life will be destroyed because of the Sun's increased luminosity. However, a more recent simulation indicates that Earth's orbit will decay due to tidal effects and drag, causing it to enter the red giant Sun's atmosphere and be destroyed.)
-
-        question: does god exist
-        answer:  I'm sorry, but a poor computational knowledge engine, no matter how powerful, not capable of providing a simple answer to that question.
-
-        question: what are humans
-        answer: human (animal) is Homo sapiens
-
-
 the core of LILACS is meant to be used when wolfram doesnt know, or there is no internet connection, much more to come
 
 
@@ -166,11 +150,15 @@ still working on parsing all this, but currently we can fetch the following info
 
 Wolfram Alpha
 
+        question: frog
+        answer: frogs, toads... (animals) is Anura
+        parents: {u'toads': [u'species', u'eukaryote', u'animal', u'amphibian'], u'animals': [u'species', u'eukaryote', u'animal']}
+        relevant_nodes: [u'frogs', u'anura', u'toads', u'animals']
+        synonims: {u'anura': u'frog'}
+
+
         question: do aliens exist?
         answer: Drake equation : number of communicating civilizations in the Milky Way, 10
-        question_type: unknown
-        center_node: aliens
-        target_node: exist
         parents: {}
         relevant_nodes: [u'milky', u'communicating', u'civilizations', u'drake equation', u'number']
         synonims: {u'aliens': u'extraterrestrial life', u'exist': u'existence', u'communicating': u'communication'}
@@ -254,23 +242,13 @@ Wikidata
 
 Dbpedia
 
-        subject: meat
-        picture
-        [u'http://commons.wikimedia.org/wiki/Special:FilePath/FoodMeat.jpg']
-        see_also
-        [u'http://dbpedia.org/resource/Red_meat', u'http://dbpedia.org/resource/Fishing_industry', u'http://dbpedia.org/resource/History_of_agriculture']
-        abstract
-        Meat is animal flesh that is eaten as food.:1 Humans are omnivorous, and have hunted and killed animals for meat since prehistoric times. The advent of civilization allowed the domestication of animals such as chickens, sheep, pigs and cattle, and eventually their use in meat production on an industrial scale. Meat is mainly composed of water, protein, and fat, and is usually eaten together with other food. It is edible raw, but is normally eaten after it has been cooked and seasoned or processed in a variety of ways. Unprocessed meat will spoil or rot within hours or days as a result of infection with and decomposition by bacteria and fungi. Most often, meat refers to skeletal muscle and associated fat and other tissues, but it may also describe other edible tissues such as offal.:1 Meat is sometimes also used in a more restrictive sense – the flesh of mammalian species (pigs, cattle, lambs, etc.) raised and prepared for human consumption, to the exclusion of fish, other seafood, poultry or other animals.
-        primary
-        [u'http://en.wikipedia.org/wiki/Meat']
-        same_as
-        [u'http://el.dbpedia.org/resource/\u039a\u03c1\u03ad\u03b1\u03c2', u'http://yago-knowledge.org/resource/Meatatarian', u'http://id.dbpedia.org/resource/Daging', u'http://pt.dbpedia.org/resource/Carne', u'http://nl.dbpedia.org/resource/Vlees', u'http://pl.dbpedia.org/resource/Mi\u0119so', u'http://eu.dbpedia.org/resource/Haragi', u'http://de.dbpedia.org/resource/Fleisch', u'http://cs.dbpedia.org/resource/Maso', u'http://ko.dbpedia.org/resource/\uace0\uae30', u'http://es.dbpedia.org/resource/Carne', u'http://ja.dbpedia.org/resource/\u98df\u8089', u'http://it.dbpedia.org/resource/Carne', u'http://wikidata.dbpedia.org/resource/Q10990', u'http://fr.dbpedia.org/resource/Viande', u'http://dbpedia.org/resource/Meat']
-        external_links
-        [u'http://www.iarc.fr/en/media-centre/iarcnews/pdf/Monographs-Q&A.pdf', u'http://www.meatscience.org/', u'http://www.qualitionary.eu/index.php?title=Meat', u'http://www.iarc.fr/en/media-centre/iarcnews/pdf/Monographs-Q&A_Vol114.pdf']
-        derived_from
-        [u'http://en.wikipedia.org/wiki/Meat?oldid=708154109']
-        related_subjects
-        [u'http://dbpedia.org/resource/Category:Meat_industry', u'http://dbpedia.org/resource/Category:Meat']
+        subject: living beings
+        link: http://dbpedia.org/resource/Life
+        picture : ['http://commons.wikimedia.org/wiki/Special:FilePath/Ruwenpflanzen.jpg']
+        abstract : Life is a characteristic distinguishing physical entities having biological processes (such as signaling and self-sustaining processes) from those that do not, either because such functions have ceased (death), or because they lack such functions and are classified as inanimate. Various forms of life exist such as plants, animals, fungi, protists, archaea, and bacteria. The criteria can at times be ambiguous and may or may not define viruses, viroids or potential artificial life as living. Biology is the primary science concerned with the study of life, although many other sciences are involved. Throughout history there have been many theories about life including materialism, hylomorphism and vitalism. Even today it is a challenge for scientists and philosophers to define life. The smallest contiguous unit of life is called an organism. Organisms are composed of one or more cells, undergo metabolism, maintain homeostasis, can grow, respond to stimuli, reproduce (either sexually or asexually) and, through evolution, adapt to their environment in successive generations. A diverse array of living organisms can be found in the biosphere of Earth, and the properties common to these organisms are a carbon- and water-based cellular form with complex organization and heritable genetic information. Abiogenesis is the natural process of life arising from non-living matter, such as simple organic compounds. The earliest life on Earth arose at least 3.5 billion years ago, during the Eoarchean Era when sufficient crust had solidified following the molten Hadean Eon. The earliest physical evidence of life on Earth is biogenic graphite from 3.7 billion-year-old metasedimentary rocks found in Western Greenland and microbial mat fossils in 3.48 billion-year-old sandstone found in Western Australia. Some theories, such as the Late Heavy Bombardment theory, suggest that life on Earth may have started even earlier, as early as 4.1-4.4 billion years ago. According to one of the researchers, "If life arose relatively quickly on Earth ... then it could be common in the universe." The mechanism by which life began on Earth is unknown, although many hypotheses have been formulated. Since emerging, life has evolved into a variety of forms, which have been classified into a hierarchy of taxa. Life can survive and thrive in a wide range of conditions. Nonetheless, it is estimated that 99 percent of all species, amounting to over five billion species, that ever lived on Earth are extinct. Estimates on the number of Earth's current species range from 10 million to 14 million, of which about 1.2 million have been documented and over 86 percent have not yet been described. The chemistry leading to life may have begun shortly after the Big Bang, 13.8 billion years ago, during a habitable epoch when the Universe was only 10–17 million years old. Though life is confirmed only on the Earth, many think that extraterrestrial life is not only plausible, but probable or inevitable. Other planets and moons in the Solar System and other planetary systems are being examined for evidence of having once supported simple life, and projects such as SETI are trying to detect radio transmissions from possible alien civilizations.
+        abstact :
+        external_links : ['http://astro-ecology.com/', 'http://rationalphilosophy.net/index.php/the-book', 'http://www.edge.org/3rd_culture/kauffman03/kauffman_index.html', 'http://www.astro-ecology.com/PDFSeedingtheUniverse2005Book.pdf', 'http://plato.stanford.edu/entries/life/', 'http://logic-law.com/index.php?title=The_Kingdoms_of_Life']
+        related_subjects : ['Life', 'Entropy', 'Biology', 'Nature', 'Life']
 
 
 

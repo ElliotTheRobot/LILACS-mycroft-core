@@ -183,13 +183,10 @@ def wolfram_to_nodes(query, lang="en-us"):
 
     print "\nquestion: " + query
     print "answer: " + response
-    print "question_type: " + question
-    print "center_node: " + center_node
-    print "target_node: " + target_node
     print "parents: " + str(parents)
     print "relevant_nodes: " + str(midle)
     print "synonims: " + str(synonims)
 
 wolfram_to_nodes("frog")
-wolfram_to_nodes("cat")
-wolfram_to_nodes("human")
+wolfram_to_nodes("do aliens exist?")
+wolfram_to_nodes("when will the world end")

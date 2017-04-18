@@ -19,7 +19,8 @@ def scrap_resource_page(link):
             # complimentary nodes
             for entry in json_data[link][j]:
                 value = entry["value"].replace("http://dbpedia.org/resource/", "").replace("_", " ").encode("utf8")
-                dbpedia["related_subjects"].append(value)
+                if value not in dbpedia["related_subjects"]:
+                    dbpedia["related_subjects"].append(value)
         elif "wikiPageExternalLink" in j:
             # links about this subject
             for entry in json_data[link][j]:
@@ -29,7 +30,8 @@ def scrap_resource_page(link):
             # relevant nodes
             for entry in json_data[link][j]:
                 value = entry["value"].replace("http://dbpedia.org/resource/Category:", "").replace("_", " ").encode("utf8")
-                dbpedia["related_subjects"].append(value)
+                if value not in dbpedia["related_subjects"]:
+                    dbpedia["related_subjects"].append(value)
         elif "abstract" in j:
             # english description
             dbpedia["abstract"] = \

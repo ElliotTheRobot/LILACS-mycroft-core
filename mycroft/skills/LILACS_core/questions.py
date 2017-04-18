@@ -4,7 +4,7 @@
 # standard questions helper functions
 
 
-def why_is_this_that(self, this, that, crawler=None):
+def why_is_this_that(this, that, crawler=None):
     if crawler is None:
         return None
     crawler.explorer_crawl(this, that)
@@ -12,7 +12,7 @@ def why_is_this_that(self, this, that, crawler=None):
     return nodes
 
 
-def is_this_that(self, this, that, crawler=None):
+def is_this_that(this, that, crawler=None):
     if crawler is None:
         return None
     flag = crawler.drunk_crawl(this, that)

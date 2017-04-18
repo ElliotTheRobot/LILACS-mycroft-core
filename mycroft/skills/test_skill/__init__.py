@@ -5,9 +5,10 @@ from mycroft.util.log import getLogger
 
 from mycroft.skills.intent_parser import IntentParser, IntentTree
 
-from mycroft.skills.LILACS.concept import ConceptConnector, ConceptCrawler
+from mycroft.skills.LILACS_core.concept import ConceptConnector, ConceptCrawler
 from mycroft.skills.knowledgeservice import KnowledgeService
 from mycroft.skills.question_parser import EnglishQuestionParser
+from mycroft.skills.LILACS_core.questions import *
 
 import random
 from time import sleep
@@ -111,7 +112,7 @@ class TestSkill(MycroftSkill):
     def handle_test_knowledge_backend_intent(self, message):
 
         subj = "human"
-        backend = "wolfram alpha"
+        backend = "wordnik"
 
         self.speak("Testing " + backend + " backend")
 
@@ -125,19 +126,19 @@ class TestSkill(MycroftSkill):
     def handle_talk_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())
 
-        for node in self.what_is_this(start):
+        for node in what_is_this(start):
             if node != start:
                 txt = start + " is " + node
                 self.speak(txt)
 
-        for node in self.examples_of_this(start):
+        for node in examples_of_this(start):
             if node != start:
                 txt = start + " can be " + node
                 self.speak(txt)
 
     def handle_examples_intent(self, message):
         key = random.choice(self.knowledge.get_concept_names())
-        examples = self.examples_of_this(key)
+        examples = examples_of_this(key)
         for example in examples:
             if example != key:
                 self.speak(example + " is an example of " + key)
@@ -147,25 +148,25 @@ class TestSkill(MycroftSkill):
     def handle_compare_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())
         target = random.choice(self.knowledge.get_concept_names())
-        flag = self.is_this_that(start, target)
+        flag = is_this_that(start, target)
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
 
     def handle_common_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())
         target = random.choice(self.knowledge.get_concept_names())
         # what do they have in common
-        commons = self.common_this_and_that(start, target)
+        commons = common_this_and_that(start, target)
         for common in commons:
             self.speak(start + " are " + common + " like " + target)
 
     def handle_relation_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())
         target = random.choice(self.knowledge.get_concept_names())
-        flag = self.is_this_that(start, target)
+        flag = is_this_that(start, target)
         self.speak("answer to is " + start + " a " + target + " is " + str(flag))
         if flag:
             # what is relationship
-            nodes = self.why_is_this_that(start, target)
+            nodes = why_is_this_that(start, target)
             i = 0
             for node in nodes:
                 if node != target:
@@ -173,57 +174,11 @@ class TestSkill(MycroftSkill):
                 i += 1
         else:
             # what do they have in common
-            commons = self.common_this_and_that(start, target)
+            commons = common_this_and_that(start, target)
             for common in commons:
                 self.speak(start + " are " + common + " like " + target)
             if not commons:
                 self.speak("I think they don't have anything in common")
-
-    # LILACS helper
-
-    def why_is_this_that(self, this, that, crawler=None):
-        if crawler is None:
-            crawler = self.crawler
-        crawler.explorer_crawl(this, that)
-        nodes = crawler.crawl_path
-        return nodes
-
-    def is_this_that(self, this, that, crawler=None):
-        if crawler is None:
-            crawler = self.crawler
-        flag = crawler.drunk_crawl(this, that)
-        return flag
-
-    def examples_of_this(self, this, crawler=None):
-        if crawler is None:
-            crawler = self.crawler
-        crawler.drunk_crawl(this, "no target crawl", direction="childs")
-        examples = []
-        for example in crawler.crawled:
-            if example != this:
-                examples.append(example)
-        return examples
-
-    def common_this_and_that(self, this, that, crawler=None):
-        if crawler is None:
-            crawler = self.crawler
-        crawler.drunk_crawl(this, "no target crawl")
-        p_crawl = crawler.crawled
-        common = []
-        for node in p_crawl:
-            flag = crawler.drunk_crawl(that, node)
-            if flag:
-                common.append(node)
-        return common
-
-    def what_is_this(self, this, crawler=None):
-        if crawler is None:
-            crawler = self.crawler
-        crawler.drunk_crawl(this, "no target crawl", direction="parents")
-        examples = []
-        for example in crawler.crawled:
-            examples.append(example)
-        return examples
 
     # standard methods
     

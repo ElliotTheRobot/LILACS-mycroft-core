@@ -111,7 +111,7 @@ class LILACS_curiosity_skill(MycroftSkill):
             # if flag get info for nodes
             # TODO use appropriate backends
             if self.get_node_info:
-                backend = "wolfram alpha"
+                backend = "dbpedia"
                 for node in nodes:
                     node_info = self.service.adquire(node, backend)
                     print node_info

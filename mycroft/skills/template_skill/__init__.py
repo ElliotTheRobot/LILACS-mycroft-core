@@ -22,8 +22,8 @@ from mycroft.util.log import getLogger
 
 from mycroft.skills.intent_parser import IntentParser, IntentTree
 
-from mycroft.skills.LILACS.concept import ConceptConnector, ConceptCrawler
-from mycroft.skills.LILACS.storage import ConceptStorage
+from mycroft.skills.LILACS_core.concept import ConceptConnector, ConceptCrawler
+from mycroft.skills.LILACS_core.questions import *
 
 __author__ = 'jarbas'
 
@@ -107,51 +107,6 @@ class TemplateSkill(MycroftSkill):
         # do stuff
         # go back to level one or next or previous...
         self.tree.reset()
-    
-    # LILACS helper
-    
-    def is_this_that(self, this, that, crawler=None):
-        if crawler is None:
-            crawler = ConceptCrawler(concept_connector=self.knowledge)
-        flag = crawler.drunk_crawl(this, that)
-        return flag
-
-    def why_is_this_that(self, this, that, crawler=None):
-        if crawler is None:
-            crawler = ConceptCrawler(concept_connector=self.knowledge)
-        crawler.explorer_crawl(this, that)
-        nodes = crawler.crawl_path
-        return nodes
-
-    def examples_of_this(self, this, crawler=None):
-        if crawler is None:
-            crawler = ConceptCrawler(concept_connector=self.knowledge)
-        crawler.drunk_crawl(this, "no target crawl", direction="childs")
-        examples = []
-        for example in crawler.crawled:
-            examples.append(example)
-        return examples
-
-    def common_this_and_that(self, this, that, crawler=None):
-        if crawler is None:
-            crawler = ConceptCrawler(concept_connector=self.knowledge)
-        crawler.drunk_crawl(this, "no target crawl")
-        p_crawl = crawler.crawled
-        common = []
-        for node in p_crawl:
-            flag = crawler.drunk_crawl(that, node)
-            if flag:
-                common.append(node)
-        return common
-
-    def what_is_this(self, this, crawler=None):
-        if crawler is None:
-            crawler = ConceptCrawler(concept_connector=self.knowledge)
-        crawler.drunk_crawl(this, "no target crawl", direction="parents")
-        examples = []
-        for example in crawler.crawled:
-            examples.append(example)
-        return examples
 
     # standard methods
     

@@ -166,8 +166,14 @@ still working on parsing all this, but currently we can fetch the following info
 
 Wolfram Alpha
 
-        question: what are humans
-        answer: human (animal) is Homo sapiens
+        question: do aliens exist?
+        answer: Drake equation : number of communicating civilizations in the Milky Way, 10
+        question_type: unknown
+        center_node: aliens
+        target_node: exist
+        parents: {}
+        relevant_nodes: [u'milky', u'communicating', u'civilizations', u'drake equation', u'number']
+        synonims: {u'aliens': u'extraterrestrial life', u'exist': u'existence', u'communicating': u'communication'}
 
 Wikipedia
 

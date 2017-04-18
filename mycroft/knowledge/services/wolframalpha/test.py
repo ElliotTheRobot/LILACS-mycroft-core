@@ -24,46 +24,11 @@ from requests import HTTPError
 
 from mycroft.api import Api
 from mycroft.util.log import getLogger
+from mycroft.skills.question_parser import LILACSQuestionParser
 
 __author__ = 'seanfitz'
 
 LOG = getLogger(__name__)
-
-
-class EnglishQuestionParser(object):
-    """
-    Poor-man's english question parser. Not even close to conclusive, but
-    appears to construct some decent w|a queries and responses.
-    """
-
-    def __init__(self):
-        self.regexes = [
-            re.compile(
-                ".*(?P<QuestionWord>who|what|when|where|why|which|whose) "
-                "(?P<Query1>.*) (?P<QuestionVerb>is|are|was|were) "
-                "(?P<Query2>.*)"),
-            re.compile(
-                ".*(?P<QuestionWord>who|what|when|where|why|which|how) "
-                "(?P<QuestionVerb>\w+) (?P<Query>.*)")
-        ]
-
-    def _normalize(self, groupdict):
-        if 'Query' in groupdict:
-            return groupdict
-        elif 'Query1' and 'Query2' in groupdict:
-            return {
-                'QuestionWord': groupdict.get('QuestionWord'),
-                'QuestionVerb': groupdict.get('QuestionVerb'),
-                'Query': ' '.join([groupdict.get('Query1'), groupdict.get(
-                    'Query2')])
-            }
-
-    def parse(self, utterance):
-        for regex in self.regexes:
-            match = regex.match(utterance)
-            if match:
-                return self._normalize(match.groupdict())
-        return None
 
 
 class WAApi(Api):
@@ -80,8 +45,6 @@ class WAApi(Api):
 
 PIDS = ['Value', 'NotableFacts:PeopleData', 'BasicInformation:PeopleData',
         'Definition', 'DecimalApproximation']
-
-question_parser = EnglishQuestionParser()
 
 key = "7WE57H-AEJTU5U3HV"
 client = wolframalpha.Client(key)
@@ -183,28 +146,50 @@ def ask_wolfram(query, lang="en-us"):
 
     return response
 
+def parse_is(txt):
+
+   # if center_node:
+   #     parent = parse_is(txt)
+   #     if parent:
+   #         parents.setdefault(center_node, [parent])
+
+    txt = txt.lower()
+    parent = None
+    if " is " in txt:
+        i = txt.find("is ")
+        parent = txt[i+3:]
+    return parent
+
+def wolfram_to_nodes(query, lang="en-us"):
+    parser = LILACSQuestionParser()
+    responses = ask_wolfram(query)
+    txt = query.lower().replace("the ", "").replace("an ", "").replace("a ", "")
+    center_node, target_node, parents, synonims, midle, question = parser.process_entitys(txt)
+
+    response = responses[0]
 
 
-query = "how much wood can a woodchuck chuck"
-responses = ask_wolfram(query)
-print "\nquestion: " + query
-for response in responses:
+    txt = response.lower().replace("the ", "").replace("an ", "").replace("a ", "")
+    if txt != "no answer":
+        midle2, parents2, synonims2= parser.tag_from_dbpedia(txt)
+
+        for parent in parents2:
+            if parent not in parents:
+                parents.setdefault(parent, parents2[parent])
+        midle += midle2
+        for synonim in synonims2:
+            synonims.setdefault(synonim, synonims2[synonim])
+
+
+    print "\nquestion: " + query
     print "answer: " + response
+    print "question_type: " + question
+    print "center_node: " + center_node
+    print "target_node: " + target_node
+    print "parents: " + str(parents)
+    print "relevant_nodes: " + str(midle)
+    print "synonims: " + str(synonims)
 
-query = "when will the world end"
-responses = ask_wolfram(query)
-print "\nquestion: " + query
-for response in responses:
-    print "answer: " + response
-
-query = "does god exist"
-responses = ask_wolfram(query)
-print "\nquestion: " + query
-for response in responses:
-    print "answer: " + response
-
-query = "what are humans"
-responses = ask_wolfram(query)
-print "\nquestion: " + query
-for response in responses:
-    print "answer: " + response
+wolfram_to_nodes("frog")
+wolfram_to_nodes("cat")
+wolfram_to_nodes("human")

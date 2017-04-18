@@ -8,6 +8,7 @@ import re
 import wolframalpha
 from requests import HTTPError
 from mycroft.configuration import ConfigurationManager
+from mycroft.skills.question_parser import LILACSQuestionParser
 
 PIDS = ['Value', 'NotableFacts:PeopleData', 'BasicInformation:PeopleData',
         'Definition', 'DecimalApproximation']
@@ -26,6 +27,7 @@ class WolframAlpha(KnowledgeBackend):
         self.emitter.on('WolframAlphaKnowledgeAdquire', self._adquire)
         self.api = ConfigurationManager.get().get("WolframAlphaSkill").get("api_key")
         self.client = wolframalpha.Client(self.api)
+        self.parser = LILACSQuestionParser()
 
     def _adquire(self, message=None):
         logger.info('WolframAlphaKnowledge_Adquire')
@@ -38,7 +40,8 @@ class WolframAlpha(KnowledgeBackend):
             # get knowledge about
             # TODO exceptions for erros
             try:
-                node_data = self.ask_wolfram("how much wood can a woodchuck chuck")
+                response, parents, synonims, midle = self.wolfram_to_nodes()
+                node_data = {"answer":response, "parents":parents, "synonims":synonims, "relevant":midle}
                 # id info source
                 dict["wolfram_alpha"] = node_data
                 self.emit_node_info(dict)
@@ -56,6 +59,27 @@ class WolframAlpha(KnowledgeBackend):
             for key in info[source]:
                 print "\n" + key + " : " + str(info[source][key])
         self.emitter.emit(Message('WolframAlphaKnowledgeResult', {"wolfam_alpha": info}))
+
+    def wolfram_to_nodes(self, query, lang="en-us"):
+
+        responses = self.ask_wolfram(query)
+        txt = query.lower().replace("the ", "").replace("an ", "").replace("a ", "")
+        center_node, target_node, parents, synonims, midle, question = self.parser.process_entitys(txt)
+
+        response = responses[0]
+
+        txt = response.lower().replace("the ", "").replace("an ", "").replace("a ", "")
+        if txt != "no answer":
+            midle2, parents2, synonims2 = self.parser.tag_from_dbpedia(txt)
+
+            for parent in parents2:
+                if parent not in parents:
+                    parents.setdefault(parent, parents2[parent])
+            midle += midle2
+            for synonim in synonims2:
+                synonims.setdefault(synonim, synonims2[synonim])
+
+        return response, parents, synonims, midle
 
     def get_result(self, res):
         try:

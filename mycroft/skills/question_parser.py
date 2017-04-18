@@ -68,7 +68,10 @@ class LILACSQuestionParser():
                 target_node = node
 
         parse = self.poor_parse(text)
-        question = parse["QuestionWord"]
+        try:
+            question = parse["QuestionWord"]
+        except:
+            question = "unknown"
         middle = [node for node in subjects if node != center_node and node != target_node]
         return center_node, target_node, parents, synonims, middle, question
 
@@ -76,38 +79,41 @@ class LILACSQuestionParser():
         return self.parser.parse(text)
 
     def tag_from_dbpedia(self, text):
-        annotations = spotlight.annotate(self.host, text)
+        text = text.lower()
         subjects = {}
         parents = {}
         synonims = {}
-        for annotation in annotations:
+        try:
+            annotations = spotlight.annotate(self.host, text)
+            for annotation in annotations:
 
-            # how sure we are this is about this dbpedia entry
-            score = annotation["similarityScore"]
-            # entry we are talking about
-            subject = annotation["surfaceForm"]
-            # smaller is closer to be main topic of sentence
-            offset = annotation["offset"]
-            # TODO tweak this value and make configuable
-            if float(score) < 0.4:
-                continue
-            subjects.setdefault(subject, offset)
-            # categorie of this <- linked nodes <- parsing for dbpedia search
-            if annotation["types"]:
-                p = []
-                types = annotation["types"].split(",")
-                for type in types:
-                    type = type.replace("DBpedia:", "")
-                    if type not in parents:
-                        p.append(type)
-                parents.setdefault(subject, p)
-            # dbpedia link
-            url = annotation["URI"]
-            #print "link: " + url
-            dbpedia_name = url.replace("http://dbpedia.org/resource/", "")
-            if dbpedia_name.lower() not in subject:
-                synonims.setdefault(subject, dbpedia_name.lower())
-
+                # how sure we are this is about this dbpedia entry
+                score = annotation["similarityScore"]
+                # entry we are talking about
+                subject = annotation["surfaceForm"].lower()
+                # smaller is closer to be main topic of sentence
+                offset = annotation["offset"]
+                # TODO tweak this value and make configuable
+                if float(score) < 0.4:
+                    continue
+                subjects.setdefault(subject, offset)
+                # categorie of this <- linked nodes <- parsing for dbpedia search
+                if annotation["types"]:
+                    p = []
+                    types = annotation["types"].split(",")
+                    for type in types:
+                        type = type.replace("DBpedia:", "").replace("Schema:", "").replace("Http://xmlns.com/foaf/0.1/", "").lower()
+                        if type not in p:
+                            p.append(type)
+                    parents.setdefault(subject, p)
+                # dbpedia link
+                url = annotation["URI"]
+                #print "link: " + url
+                dbpedia_name = url.replace("http://dbpedia.org/resource/", "").replace("_", " ")
+                if dbpedia_name.lower() not in subject:
+                    synonims.setdefault(subject, dbpedia_name.lower())
+        except:
+            pass
         return subjects, parents, synonims
 
 

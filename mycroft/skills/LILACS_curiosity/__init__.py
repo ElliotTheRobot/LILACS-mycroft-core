@@ -102,21 +102,22 @@ class LILACS_curiosity_skill(MycroftSkill):
 
     def converse(self, transcript, lang="en-us"):
         # parse all utterances for entitys
-        nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
-        print "nodes: " + str(nodes)
-        print "parents: " + str(parents)
-        print "synonims: " + str(synonims)
+        if transcript[0] != "bump curiosity to active skill list":
+            nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
+            print "nodes: " + str(nodes)
+            print "parents: " + str(parents)
+            print "synonims: " + str(synonims)
 
-        # if flag get info for nodes
-        # TODO use appropriate backends
-        if self.get_node_info:
-            backend = "wolfram alpha"
-            for node in nodes:
-                node_info = self.service.adquire(node, backend)
-                print node_info
+            # if flag get info for nodes
+            # TODO use appropriate backends
+            if self.get_node_info:
+                backend = "wolfram alpha"
+                for node in nodes:
+                    node_info = self.service.adquire(node, backend)
+                    print node_info
 
-        # TODO signal core to create nodes
-        pass
+            # TODO signal core to create nodes
+            pass
 
         # tell intent skill you did not handle intent
         return False

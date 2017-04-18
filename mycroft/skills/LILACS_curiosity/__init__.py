@@ -19,9 +19,12 @@
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
+from mycroft.messagebus.message import Message
+from mycroft.skills.question_parser import LILACSQuestionParser
+from mycroft.skills.knowledgeservice import KnowledgeService
 
-from mycroft.skills.LILACS_core.concept import ConceptConnector, ConceptCrawler
-from mycroft.skills.LILACS_core.questions import *
+from time import sleep
+from threading import Thread
 
 __author__ = 'jarbas'
 
@@ -35,11 +38,36 @@ class LILACS_curiosity_skill(MycroftSkill):
         # initialize your variables
         self.reload_skill = False
         self.active = False
+        self.get_node_info = True
+        self.parser = None
+        self.service = None
+        self.TIMEOUT = 2
 
     def initialize(self):
         # register intents
+        self.parser = LILACSQuestionParser()
+        self.service = KnowledgeService(self.emitter)
         self.build_intents()
         self.handle_activate_intent("start_up activation")
+
+        # make thread to keep active
+        self.make_bump_thread()
+
+    def ping(self):
+        while True:
+            i = 0
+            self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_curiosity_skill",
+                                                                    "utterances": [
+                                                                        "bump curiosity to active skill list"]}))
+            while i < 60 * self.TIMEOUT:
+                i += 1
+                sleep(1)
+            i = 0
+
+    def make_bump_thread(self):
+        timer_thread = Thread(target=self.ping)
+        timer_thread.setDaemon(True)
+        timer_thread.start()
 
     def build_intents(self):
         # build intents
@@ -48,9 +76,18 @@ class LILACS_curiosity_skill(MycroftSkill):
         activate_intent=IntentBuilder("ActivateCuriosityIntent") \
             .require("activateKeyword").build()
 
+        bump_intent = IntentBuilder("ActiveSkillIntent"). \
+            require("bumpKeyword").build()
+
         # register intents
         self.register_intent(deactivate_intent, self.handle_deactivate_intent)
         self.register_intent(activate_intent, self.handle_activate_intent)
+        self.register_intent(bump_intent, self.handle_set_on_top_active_list())
+
+    def handle_set_on_top_active_list(self):
+        # dummy intent just to bump curiosity skill to top of active skill list
+        # called on a timer in order to always use converse method
+        pass
 
     def handle_deactivate_intent(self, message):
         self.active = False
@@ -65,8 +102,21 @@ class LILACS_curiosity_skill(MycroftSkill):
 
     def converse(self, transcript, lang="en-us"):
         # parse all utterances for entitys
-        # signal core to create nodes
+        nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
+        print "nodes: " + str(nodes)
+        print "parents: " + str(parents)
+        print "synonims: " + str(synonims)
+
         # if flag get info for nodes
+        # TODO use appropriate backends
+        if self.get_node_info:
+            backend = "wolfram alpha"
+            for node in nodes:
+                node_info = self.service.adquire(node, backend)
+                print node_info
+
+        # TODO signal core to create nodes
+        pass
 
         # tell intent skill you did not handle intent
         return False

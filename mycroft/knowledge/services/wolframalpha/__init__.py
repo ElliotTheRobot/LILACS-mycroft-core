@@ -19,7 +19,7 @@ logger = getLogger(abspath(__file__).split('/')[-2])
 
 
 class WolframAlpha(KnowledgeBackend):
-    def __init__(self, config, emitter, name='wolfram_alpha'):
+    def __init__(self, config, emitter, name='wolfram alpha'):
         self.config = config
         self.process = None
         self.emitter = emitter

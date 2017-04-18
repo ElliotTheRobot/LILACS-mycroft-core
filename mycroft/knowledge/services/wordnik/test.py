@@ -30,9 +30,6 @@ def get_related_words(subject):
         pass
     return words
 
-def get_word(subject):
-    res = wordApi.getWord(subject)
-    print res.word
 
 subject = "evil"
 rels = get_related_words(subject)

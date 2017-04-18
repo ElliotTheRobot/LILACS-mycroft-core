@@ -20,6 +20,7 @@ from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
 from mycroft.messagebus.message import Message
+
 from mycroft.skills.question_parser import LILACSQuestionParser
 from mycroft.skills.knowledgeservice import KnowledgeService
 
@@ -48,7 +49,7 @@ class LILACS_curiosity_skill(MycroftSkill):
         self.parser = LILACSQuestionParser()
         self.service = KnowledgeService(self.emitter)
         self.build_intents()
-        self.handle_activate_intent("start_up activation")
+        #self.handle_activate_intent("start_up activation")
 
         # make thread to keep active
         self.make_bump_thread()
@@ -56,9 +57,10 @@ class LILACS_curiosity_skill(MycroftSkill):
     def ping(self):
         while True:
             i = 0
-            self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_curiosity_skill",
+            if self.active:
+                self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_curiosity_skill",
                                                                     "utterances": [
-                                                                        "bump curiosity to active skill list"]}))
+                                                                        "bump LILACS to active skill list"]}))
             while i < 60 * self.TIMEOUT:
                 i += 1
                 sleep(1)
@@ -76,7 +78,7 @@ class LILACS_curiosity_skill(MycroftSkill):
         activate_intent=IntentBuilder("ActivateCuriosityIntent") \
             .require("activateKeyword").build()
 
-        bump_intent = IntentBuilder("ActiveSkillIntent"). \
+        bump_intent = IntentBuilder("BumpCuriositySkillIntent"). \
             require("bumpKeyword").build()
 
         # register intents

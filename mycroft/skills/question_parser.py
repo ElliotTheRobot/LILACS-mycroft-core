@@ -21,6 +21,16 @@ class EnglishQuestionParser():
                 "(?P<Query1>.*) (?P<QuestionVerb>is|are|was|were) "
                 "(?P<Query2>.*)"),
             re.compile(
+                ".*(?P<QuestionWord>are|is) "
+                "(?P<Query1>.*) (?P<QuestionVerb>an|a|an example off|an instance off) "
+                "(?P<Query2>.*)"),
+            re.compile(
+                "(?P<Query1>.*) (?P<QuestionVerb>and) "
+                "(?P<Query2>.*) (?P<QuestionWord>in common)"),
+            re.compile(
+                ".*(?P<QuestionWord>talk|rant) "
+                "(?P<QuestionVerb>\w+) (?P<Query>.*)"),
+            re.compile(
                 ".*(?P<QuestionWord>who|what|when|where|why|which|how|give examples) "
                 "(?P<QuestionVerb>\w+) (?P<Query>.*)")
         ]

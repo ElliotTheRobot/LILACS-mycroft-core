@@ -118,15 +118,18 @@ class WikiHowService(KnowledgeBackend):
             print "No wikihow results"
             return
         for link in links:
-            how_to = {}
-            # get steps and pics
-            title, steps, descript, pics, link = self.get_steps(link)
-            how_to["title"] = title
-            how_to["steps"] = steps
-            how_to["detailed"] = descript
-            how_to["pics"] = pics
-            how_to["url"] = link
-            how_tos[title] = how_to
+            try:
+                how_to = {}
+                # get steps and pics
+                title, steps, descript, pics, link = self.get_steps(link)
+                how_to["title"] = title
+                how_to["steps"] = steps
+                how_to["detailed"] = descript
+                how_to["pics"] = pics
+                how_to["url"] = link
+                how_tos[title] = how_to
+            except:
+                print "error, skipping link " + link
         return how_tos
 
     def random_how_to(self):

@@ -18,6 +18,7 @@
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
+from mycroft.messagebus.message import Message
 
 from mycroft.skills.LILACS_core.concept import ConceptCrawler, ConceptConnector
 from mycroft.skills.LILACS_core.storage import ConceptStorage
@@ -25,6 +26,9 @@ from mycroft.skills.knowledgeservice import KnowledgeService
 from mycroft.skills.question_parser import LILACSQuestionParser
 # import helper questions functions
 from mycroft.skills.LILACS_core.questions import *
+
+from time import sleep
+from threading import Thread
 
 logger = getLogger("Skills")
 
@@ -41,7 +45,7 @@ class LilacsSkill(MycroftSkill):
         self.crawler = None
         self.parser = None
         self.service = None
-
+        self.debug = True
         self.answered = False
         self.last_question = ""
         self.last_question_type = ""
@@ -58,13 +62,40 @@ class LilacsSkill(MycroftSkill):
         self.emitter.on("intent_failure", self.handle_fallback)
         self.emitter.on("multi_utterance_intent_failure", self.handle_multiple_fallback)
 
+        # make thread to keep active
+        self.make_bump_thread()
+
+    def ping(self):
+        while True:
+            i = 0
+            self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_core_skill",
+                                                                        "utterances": [
+                                                                            "bump LILACS to active skill list"]}))
+            while i < 60 * 4:
+                i += 1
+                sleep(1)
+            i = 0
+
+    def make_bump_thread(self):
+        timer_thread = Thread(target=self.ping)
+        timer_thread.setDaemon(True)
+        timer_thread.start()
+
     def build_intents(self):
         # build intents
         intro_intent = IntentBuilder("IntroduceLILACSIntent") \
             .require("IntroduceKeyword").build()
+        bump_intent = IntentBuilder("BumpLILACSSkillIntent"). \
+            require("bumpKeyword").build()
 
         # register intents
         self.register_intent(intro_intent, self.handle_introduce_intent)
+        self.register_intent(bump_intent, self.handle_set_on_top_active_list())
+
+    def handle_set_on_top_active_list(self):
+        # dummy intent just to bump lilacs core skill to top of active skill list
+        # called on a timer in order to always use converse method
+        pass
 
     def handle_introduce_intent(self, message):
         self.speak_dialog("whatisLILACS")
@@ -72,16 +103,8 @@ class LilacsSkill(MycroftSkill):
     def parse_utterance(self, utterance):
         # get question type from utterance
         center_node, target_node, parents, synonims, midle, question = self.parser.process_entitys(utterance)
-        print "\nQuestion: " + utterance
-        print "question_type: " + question
-        print "center_node: " + center_node
-        print "target_node: " + target_node
-        print "parents: " + str(parents)
-        print "relevant_nodes: " + str(midle)
-        print "synonims: " + str(synonims)
-        # TODO get relevant nodes in connector
+        # TODO input relevant nodes in connector
         # TODO update crawler with new nodes
-
         return center_node, target_node, parents, synonims, midle, question
 
     def deduce_answer(self, utterance):
@@ -94,7 +117,7 @@ class LilacsSkill(MycroftSkill):
         self.last_question_type = question
         # TODO try to load concepts from storage
         # TODO create/update concepts from available info and save
-        # TODO add question verb, will be needed for disambiguation
+        # TODO maybe add question verb to parser, may be needed for disambiguation between types
         # TODO add more question types
         # who|what|when|where|why|which|whose|how|give examples
 
@@ -116,7 +139,9 @@ class LilacsSkill(MycroftSkill):
             pass
         elif question == "whose":
             pass
-        elif question == "common":
+        elif question == "talk" or question == "rant":
+            pass
+        elif question == "in common":
             # what do this and that have in common / what is the relationship between / unreachable needs parsing
             self.answered = self.handle_relation(center_node, target_node)
         elif question == "is" or question == "are" :
@@ -128,43 +153,56 @@ class LilacsSkill(MycroftSkill):
 
         # if no answer ask user
         if not self.answered:
-            self.handle_learning()
+            self.handle_learning(utterance)
+
+        if self.debug:
+            self.speak("utterance : " + utterance)
+            self.speak("question type: " + question)
+            self.speak("center_node: " + center_node)
+            self.speak("target_node: " + target_node)
+            self.speak("parents: " + str(parents))
+            self.speak("synonims: " + str(synonims))
+            self.speak("related: " + str(midle))
+            self.speak("answered: " + str(self.answered))
+
+    def handle_talk_about(self, node):
+        pass
 
     def handle_relation(self, center_node, target_node):
         commons = common_this_and_that(center_node, target_node, self.crawler)
+        print commons
         for common in commons:
+            print common
             self.speak(center_node + " are " + common + " like " + target_node)
         if commons == []:
             self.speak(center_node + " and " + target_node + " have nothing in common")
         return True
 
     def handle_why(self, center_node, target_node):
-        # why is this that
+        # is this that
         flag = is_this_that(center_node, target_node, self.crawler)
         self.speak("answer to is " + center_node + " a " + target_node + " is " + str(flag))
         if flag:
-            # what is relationship
+            # why
             nodes = why_is_this_that(center_node, target_node, self.crawler)
             i = 0
             for node in nodes:
                 if node != target_node:
                     self.speak(node + " is " + nodes[i + 1])
                 i += 1
-        else:
-            # what do they have in common
-            commons = common_this_and_that(center_node, target_node, self.crawler)
-            for common in commons:
-                self.speak(center_node + " are " + common + " like " + target_node)
-            if not commons:
-                self.speak("I think they don't have anything in common")
         return True
 
     def handle_how_intent(self, utterance):
         how_to = self.service.adquire(utterance, "wikihow")
+        how_to = how_to["wikihow"]
+        # TODO check for empty how to and return false
         # the following how_tos are available
-        # create intent tree
-        # start selection query
-        # speak how to
+        self.speak("the following how tos are available")
+        for how in how_to:
+            self.speak(how)
+        # TODO create intent tree
+        # TODO start selection query
+        # TODO speak how to
         return True
 
     def handle_compare_intent(self, center_node, target_node):
@@ -199,6 +237,11 @@ class LilacsSkill(MycroftSkill):
             return True
 
     def handle_what_intent(self, node):
+        # TODO read node summary
+        # TODO use intent tree to give interactive dialog suggesting examples
+        # self.speak("Do you want examples of " + node)
+        # activate yes intent
+        # use converse method to disable or do something
         return False
 
     def handle_who_intent(self, node):
@@ -216,9 +259,11 @@ class LilacsSkill(MycroftSkill):
     def handle_whose_intent(self, node):
         return False
 
-    def handle_learning(self):
+    def handle_learning(self, utterance):
+        if self.debug:
+            self.speak("Searching wolfram alpha")
+        self.handle_unknown_intent(utterance)
         # TODO ask user questions about unknown nodes, teach skill handles response
-        pass
 
     def handle_fallback(self, message):
         # on single utterance intent failure ask user for correct answer
@@ -237,7 +282,7 @@ class LilacsSkill(MycroftSkill):
         #self.last_question_type = ""
         #self.last_center = ""
         #self.last_target = ""
-        self.speak("Please use the teach skill to input correct answer")
+        self.speak_dialog("wrong_answer")
 
     def feedback(self, feedback, utterance):
         # check if previously answered a question
@@ -246,7 +291,7 @@ class LilacsSkill(MycroftSkill):
             self.handle_incorrect_answer()
         if feedback == "negative" and not self.answered:
             # no apparent reason for negative feedback
-            self.speak("i am confused by that statement")
+            self.speak_dialog("wrong_answer_confused")
 
     def stop(self):
         pass

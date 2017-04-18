@@ -554,7 +554,12 @@ class ConceptCrawler():
         # start at center node
         self.logger.info("start node: " + center_node)
         self.logger.info("target node: " + target_node)
-        next_node = self.choose_next_node(center_node, direction)
+        try:
+            next_node = self.choose_next_node(center_node, direction)
+        except:
+            self.logger.error("no connections to start crawling from!")
+            return False
+
         crawl_depth = 1
         while True:
             # check if we found answer

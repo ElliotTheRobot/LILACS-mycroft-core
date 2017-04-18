@@ -109,18 +109,18 @@ class TestSkill(MycroftSkill):
                                  child_concepts=child_concepts)
 
     def handle_test_knowledge_backend_intent(self, message):
-        self.speak("Testing wikipedia backend")
-        self.service.adquire("pig", "wikipedia")
-        sleep(5)
-        self.speak("Testing wikidata backend")
-        self.service.adquire("Johnny Cash", "wikidata")
-        sleep(5)
-        self.speak("Testing wikihow backend")
-        self.service.adquire("buy bitcoin", "wikihow")
-        sleep(15)
-        self.speak("Testing dbpedia backend")
-        self.service.adquire("animals", "dbpedia")
-        sleep(5)
+
+        subj = "human"
+        backend = "wolfram alpha"
+
+        self.speak("Testing " + backend + " backend")
+
+        result = self.service.adquire(subj, backend)
+        if result == {}:
+            self.speak("could not get any data for " + backend)
+        else:
+            for key in result[backend]:
+                self.speak(key + " is " + str(result[backend][key]))
 
     def handle_talk_intent(self, message):
         start = random.choice(self.knowledge.get_concept_names())

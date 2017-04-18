@@ -26,6 +26,7 @@ import imp
 from mycroft.configuration import ConfigurationManager
 from mycroft.messagebus.client.ws import WebsocketClient
 from mycroft.util.log import getLogger
+from mycroft.messagebus.message import Message
 
 __author__ = 'jarbas'
 

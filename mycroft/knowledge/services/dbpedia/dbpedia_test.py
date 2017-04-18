@@ -84,7 +84,7 @@ def tag(text):
         return url
 
 
-text = "living beings"
+text = "god"
 print "sentence: " + text
 link = tag(text)
 dbpedia = scrap_resource_page(link)

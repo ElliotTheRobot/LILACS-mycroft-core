@@ -44,20 +44,16 @@ class WikidataService(KnowledgeBackend):
                 node_data["properties"] = page.props
                 # id info source
                 dict["wikidata"] = node_data
-                self.emit_node_info(dict)
             except:
                 logger.error("Could not parse wikidata for " + str(subject))
+            self.send_result(dict)
 
     def adquire(self, subject):
         logger.info('Call WikidataKnowledgeAdquire')
         self.emitter.emit(Message('WikidataKnowledgeAdquire', {"subject": subject}))
 
-    def emit_node_info(self, info):
-        # TODO emit node_info for node manager to update/create node
-        for source in info:
-            for key in info[source]:
-                print key + " : " + str(info[source][key])
-        self.emitter.emit(Message('WikidataKnowledgeResult', {"wikidata": info}))
+    def send_result(self, result = {}):
+        self.emitter.emit(Message("LILACS_result", {"data": result}))
 
     def stop(self):
         logger.info('WikidataKnowledge_Stop')

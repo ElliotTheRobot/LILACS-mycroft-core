@@ -59,9 +59,9 @@ class DBpediaService(KnowledgeBackend):
 
                 # id info source
                 dict["dbpedia"] = node_data
-                self.emit_node_info(dict)
             except:
                 logger.error("Could not parse dbpedia for " + str(subject))
+            self.send_result(dict)
 
     def scrap_resource_page(self, link):
         u = link.replace("http://dbpedia.org/resource/", "http://dbpedia.org/data/") + ".json"
@@ -123,13 +123,8 @@ class DBpediaService(KnowledgeBackend):
         logger.info('Call DBpediaKnowledgeAdquire')
         self.emitter.emit(Message('DBpediaKnowledgeAdquire', {"subject": subject}))
 
-    def emit_node_info(self, info):
-        # TODO emit node_info for node manager to update/create node
-        for source in info:
-            for key in info[source]:
-                pass
-                #print "\n" + key + " : " + str(info[source][key])
-        self.emitter.emit(Message('DBPediaResult', {"dbpedia": info}))
+    def send_result(self, result = {}):
+        self.emitter.emit(Message("LILACS_result", {"data": result}))
 
     def stop(self):
         logger.info('DBpediaKnowledge_Stop')

@@ -41,9 +41,10 @@ class WikipediaService(KnowledgeBackend):
                 node_data["infobox"] = self.parse_infobox(subject)
                 # id info source
                 dict["wikipedia"] = node_data
-                self.emit_node_info(dict)
+
             except:
                 logger.error("Could not parse wikipedia for " + str(subject))
+            self.send_result(dict)
 
     def parse_infobox(self, subject):
         page = wptools.page(subject, silent=True, verbose=False).get_parse()
@@ -60,12 +61,8 @@ class WikipediaService(KnowledgeBackend):
         logger.info('Call WikipediaKnowledgeAdquire')
         self.emitter.emit(Message('WikipediaKnowledgeAdquire', {"subject": subject}))
 
-    def emit_node_info(self, info):
-        # TODO emit node_info for node manager to update/create node
-        for source in info:
-            for key in info[source]:
-                print "\n" + key + " : " + str(info[source][key])
-        self.emitter.emit(Message('WikipediaKnowledgeResult', {"wikipedia": info}))
+    def send_result(self, result = {}):
+        self.emitter.emit(Message("LILACS_result", {"data": result}))
 
     def stop(self):
         logger.info('WikipediaKnowledge_Stop')

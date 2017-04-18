@@ -33,9 +33,9 @@ class WikiHowService(KnowledgeBackend):
             try:
                 how_to = self.how_to(subject)
                 dict["wikihow"] = how_to
-                self.emit_node_info(dict)
             except:
                 logger.error("Could not parse wikihow for " + str(subject))
+            self.send_result(dict)
 
     def search_wikihow(self, search_term):
         # print "Seaching wikihow for " + search_term
@@ -145,12 +145,8 @@ class WikiHowService(KnowledgeBackend):
         logger.info('Call WikihowKnowledgeAdquire')
         self.emitter.emit(Message('WikihowKnowledgeAdquire', {"subject": subject}))
 
-    def emit_node_info(self, info):
-        # TODO emit node_info for node manager to update/create node
-        for source in info:
-            for key in info[source]:
-                print "\n" + key + " : " + str(info[source][key])
-        self.emitter.emit(Message('WikihowKnowledgeResult', {"wikihow": info}))
+    def send_result(self, result = {}):
+        self.emitter.emit(Message("LILACS_result", {"data": result}))
 
     def stop(self):
         logger.info('WikihowKnowledge_Stop')

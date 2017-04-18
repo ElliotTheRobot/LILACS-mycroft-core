@@ -17,7 +17,7 @@ class KnowledgeBackend():
         pass
 
     @abstractmethod
-    def emit_node_info(self, info):
+    def send_result(self, result = {}):
         pass
 
     @abstractmethod

@@ -73,24 +73,21 @@ class ConceptNetService(KnowledgeBackend):
                     if usage is not None:
                         examples.append(usage)
                 # id info source
-                dict.setdefault("conceptnet", {"RelatedNodes": other, "IsA": parents, "CapableOf": capable, "HasA": has,
+                dict.setdefault("concept net", {"RelatedNodes": other, "IsA": parents, "CapableOf": capable, "HasA": has,
                                                "Desires": desires, "UsedFor": used, "RelatedTo": related,
                                                "AtLocation": location, "surfaceText": examples})
-                self.emit_node_info(dict)
+
             except:
-                logger.error("Could not parse conceptnet for " + str(subject))
+                logger.error("Could not parse concept net for " + str(subject))
+            self.send_result(dict)
 
 
     def adquire(self, subject):
         logger.info('Call ConceptNetKnowledgeAdquire')
         self.emitter.emit(Message('ConceptNetKnowledgeAdquire', {"subject": subject}))
 
-    def emit_node_info(self, info):
-        # TODO emit node_info for node manager to update/create node
-        for source in info:
-            for key in info[source]:
-                print "\n" + key + " : " + str(info[source][key])
-        self.emitter.emit(Message('ConceptNetKnowledgeResult', {"conceptnet": info}))
+    def send_result(self, result={}):
+        self.emitter.emit(Message("LILACS_result", {"data": result}))
 
     def stop(self):
         logger.info('ConceptNetKnowledge_Stop')
@@ -103,6 +100,6 @@ class ConceptNetService(KnowledgeBackend):
 def load_service(base_config, emitter):
     backends = base_config.get('backends', [])
     services = [(b, backends[b]) for b in backends
-                if backends[b]['type'] == 'conceptnet']
+                if backends[b]['type'] == 'concept net']
     instances = [ConceptNetService(s[1], emitter, s[0]) for s in services]
     return instances

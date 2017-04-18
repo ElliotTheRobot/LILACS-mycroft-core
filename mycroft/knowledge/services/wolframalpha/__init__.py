@@ -40,25 +40,22 @@ class WolframAlpha(KnowledgeBackend):
             # get knowledge about
             # TODO exceptions for erros
             try:
-                response, parents, synonims, midle = self.wolfram_to_nodes()
+                response, parents, synonims, midle = self.wolfram_to_nodes(subject)
                 node_data = {"answer":response, "parents":parents, "synonims":synonims, "relevant":midle}
                 # id info source
-                dict["wolfram_alpha"] = node_data
-                self.emit_node_info(dict)
+                dict["wolfram alpha"] = node_data
             except:
-                logger.error("Could not parse wolfam_alpha for " + str(subject))
+                logger.error("Could not parse wolfram alpha for " + str(subject))
+            self.send_result(dict)
 
 
     def adquire(self, subject):
         logger.info('Call WolframKnowledgeAdquire')
         self.emitter.emit(Message('WolframAlphaKnowledgeAdquire', {"subject": subject}))
 
-    def emit_node_info(self, info):
-        # TODO emit node_info for node manager to update/create node
-        for source in info:
-            for key in info[source]:
-                print "\n" + key + " : " + str(info[source][key])
-        self.emitter.emit(Message('WolframAlphaKnowledgeResult', {"wolfam_alpha": info}))
+    def send_result(self, result={}):
+        self.emitter.emit(Message("LILACS_result", {"data": result}))
+
 
     def wolfram_to_nodes(self, query, lang="en-us"):
 
@@ -188,6 +185,6 @@ class WolframAlpha(KnowledgeBackend):
 def load_service(base_config, emitter):
     backends = base_config.get('backends', [])
     services = [(b, backends[b]) for b in backends
-                if backends[b]['type'] == 'wolfram_alpha']
+                if backends[b]['type'] == 'wolfram alpha']
     instances = [WolframAlpha(s[1], emitter, s[0]) for s in services]
     return instances

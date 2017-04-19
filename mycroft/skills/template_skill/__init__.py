@@ -17,13 +17,11 @@
 
 
 from adapt.intent import IntentBuilder
+
+from mycroft.skills.LILACS_core.concept import ConceptConnector
 from mycroft.skills.core import MycroftSkill
-from mycroft.util.log import getLogger
-
 from mycroft.skills.intent_parser import IntentParser, IntentTree
-
-from mycroft.skills.LILACS_core.concept import ConceptConnector, ConceptCrawler
-from mycroft.skills.LILACS_core.questions import *
+from mycroft.util.log import getLogger
 
 __author__ = 'jarbas'
 

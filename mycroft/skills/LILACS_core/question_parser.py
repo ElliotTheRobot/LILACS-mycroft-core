@@ -16,6 +16,9 @@ class EnglishQuestionParser():
 
     def __init__(self):
         self.regexes = [
+            #re.compile(
+            #    ".*(?P<QuestionWord>are) "
+            #    "(?P<Query>.*)"),
             re.compile(
                 ".*(?P<QuestionWord>who|what|when|where|why|which|whose) "
                 "(?P<Query1>.*) (?P<QuestionVerb>is|are|was|were) "

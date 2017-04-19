@@ -16,22 +16,18 @@
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
-
-from mycroft.skills.LILACS_core.concept import ConceptConnector, ConceptCrawler
-from mycroft.skills.LILACS_core.questions import *
 
 __author__ = 'jarbas'
 
 logger = getLogger(__name__)
 
 
-class LILACS_teach_skill(MycroftSkill):
+class LILACSTeachSkill(MycroftSkill):
     # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/27
     def __init__(self):
-        super(LILACS_teach_skill, self).__init__(name="TeachSkill")
+        super(LILACSTeachSkill, self).__init__(name="TeachSkill")
         # initialize your variables
         self.reload_skill = False
 
@@ -47,4 +43,4 @@ class LILACS_teach_skill(MycroftSkill):
 
 
 def create_skill():
-    return LILACS_teach_skill()
+    return LILACSTeachSkill()

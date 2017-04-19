@@ -28,9 +28,9 @@ __author__ = 'jarbas'
 logger = getLogger(__name__)
 
 
-class LILACS_Knowledge_Skill(MycroftSkill):
+class LILACSKnowledgeSkill(MycroftSkill):
     def __init__(self):
-        super(LILACS_Knowledge_Skill, self).__init__(name="LILACS_Knowledge_Skill")
+        super(LILACSKnowledgeSkill, self).__init__(name="LILACS_Knowledge_Skill")
 
     def initialize(self):
         timer_thread = Thread(target=self.service)
@@ -42,4 +42,4 @@ class LILACS_Knowledge_Skill(MycroftSkill):
 
 
 def create_skill():
-    return LILACS_Knowledge_Skill()
+    return LILACSKnowledgeSkill()

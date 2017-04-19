@@ -20,10 +20,10 @@ from threading import Thread
 from time import sleep
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.LILACS_core.knowledgeservice import KnowledgeService
-from mycroft.skills.LILACS_core.question_parser import LILACSQuestionParser
 
 from mycroft.messagebus.message import Message
+from mycroft.skills.LILACS_core.question_parser import LILACSQuestionParser
+from mycroft.skills.LILACS_knowledge.knowledgeservice import KnowledgeService
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
 
@@ -32,10 +32,10 @@ __author__ = 'jarbas'
 logger = getLogger(__name__)
 
 
-class LILACS_curiosity_skill(MycroftSkill):
+class LILACSCuriositySkill(MycroftSkill):
     # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/19
     def __init__(self):
-        super(LILACS_curiosity_skill, self).__init__(name="CuriositySkill")
+        super(LILACSCuriositySkill, self).__init__(name="CuriositySkill")
         # initialize your variables
         self.reload_skill = False
         self.active = False
@@ -125,4 +125,4 @@ class LILACS_curiosity_skill(MycroftSkill):
         return False
 
 def create_skill():
-    return LILACS_curiosity_skill()
+    return LILACSCuriositySkill()

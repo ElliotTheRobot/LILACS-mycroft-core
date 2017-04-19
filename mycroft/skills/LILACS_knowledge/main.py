@@ -16,17 +16,14 @@
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import json
-from os.path import expanduser, exists, abspath, dirname, basename, isdir, join
+from os.path import abspath, dirname, basename, isdir, join
 from os import listdir
 import sys
-import time
 import imp
 
 from mycroft.configuration import ConfigurationManager
 from mycroft.messagebus.client.ws import WebsocketClient
 from mycroft.util.log import getLogger
-from mycroft.messagebus.message import Message
 
 __author__ = 'jarbas'
 
@@ -196,20 +193,7 @@ def main():
     ws = WebsocketClient()
     ConfigurationManager.init(ws)
 
-    def echo(message):
-        try:
-            _message = json.loads(message)
-
-            if _message.get("type") == "registration":
-                # do not log tokens from registration messages
-                _message["data"]["token"] = None
-            message = json.dumps(_message)
-        except:
-            pass
-        #logger.debug(message)
-
     logger.info("Staring Knowledge Services")
-    ws.on('message', echo)
     ws.once('open', load_services_callback)
     ws.run_forever()
 

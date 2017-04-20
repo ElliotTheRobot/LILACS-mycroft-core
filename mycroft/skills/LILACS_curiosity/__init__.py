@@ -104,7 +104,7 @@ class LILACSCuriositySkill(MycroftSkill):
 
     def converse(self, transcript, lang="en-us"):
         # parse all utterances for entitys
-        if transcript[0] != "bump curiosity to active skill list":
+        if "bump curiosity" not in transcript[0] and "bump lilacs" not in transcript[0]:
             nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
             self.log.info("nodes: " + str(nodes))
             self.log.info("parents: " + str(parents))

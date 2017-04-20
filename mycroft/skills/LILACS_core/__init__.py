@@ -251,7 +251,7 @@ class LilacsCoreSkill(MycroftSkill):
                 for p in parents[node]:
                     self.log.info("parent: " + p)
                     pdict.setdefault(p, 5)  # gen 5 for auto-adquire
-                self.connector.create_concept(node, parent_concepts=pdict)
+                self.connector.create_concept(node, parent_concepts=pdict, child_concepts= {},synonims= {}, antonims={})
         # make all nodes with childs
         for node in childs:
             self.log.info("processing childs of node: " + node)
@@ -260,22 +260,22 @@ class LilacsCoreSkill(MycroftSkill):
                 for c in childs[node]:
                     self.log.info("child: " + c)
                     cdict.setdefault(c, 5)  # gen 5 for auto-adquire
-                self.connector.create_concept(node, child_concepts=cdict)
+                self.connector.create_concept(node, child_concepts=cdict, parent_concepts= {}, synonims= {}, antonims={})
         # make all nodes with synonims
         for node in synonims:
             self.log.info("processing synonims of node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node, synonims=[synonims[node]])
+                self.connector.create_concept(node, synonims=[synonims[node]], child_concepts={}, parent_concepts={}, antonims={})
         # make all nodes with antonims
         for node in antonims:
             self.log.info("processing antonims of node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node, antonims=[antonims[node]])
+                self.connector.create_concept(node, synonims={}, child_concepts={}, parent_concepts={}, antonims=[antonims[node]])
         # make all nodes with data
         for node in data:
             self.log.info("processing data of node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node, data=data[node])
+                self.connector.create_concept(node, data=data[node], synonims={}, child_concepts= {}, parent_concepts={}, antonims={})
 
         # update crawler
         self.crawler.update_connector(self.connector)

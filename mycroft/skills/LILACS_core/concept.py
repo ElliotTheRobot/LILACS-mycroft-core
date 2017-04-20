@@ -283,6 +283,7 @@ class ConceptConnector():
                     self.logger.info("adding synonim: " + str(synonim))
                     self.concepts[concept_name].add_synonim(synonim)
 
+
         else:
             self.concepts.setdefault(concept_name, concept)
 
@@ -365,4 +366,28 @@ class ConceptConnector():
             self.logger.info("adding parent: " + new_concept_name + " to child: " + concept_name)
             self.concepts[concept_name].add_parent(new_concept_name, gen=gen)
 
+        # handle synonims
+        for concept_name in synonims:
+            self.logger.info("checking if synonim exists: " + concept_name)
+            # create synonim if it doesnt exist
+            if concept_name not in self.concepts:
+                self.logger.info("creating node: " + concept_name)
+                concept = ConceptNode(concept_name, data={}, child_concepts={}, parent_concepts={}, synonims=[],
+                                      antonims=[])
+                self.add_concept(concept_name, concept)
+            # add synonim to synonim
+            self.logger.info("adding synonim: " + new_concept_name + " to concept: " + concept_name)
+            self.concepts[concept_name].add_synonim(new_concept_name)
 
+        # handle antonims
+        for concept_name in antonims:
+            self.logger.info("checking if antonim exists: " + concept_name)
+            # create synonim if it doesnt exist
+            if concept_name not in self.concepts:
+                self.logger.info("creating node: " + concept_name)
+                concept = ConceptNode(concept_name, data={}, child_concepts={}, parent_concepts={}, synonims=[],
+                                      antonims=[])
+                self.add_concept(concept_name, concept)
+            # add antonim to antonim
+            self.logger.info("adding antonim: " + new_concept_name + " to concept: " + concept_name)
+            self.concepts[concept_name].add_antonim(new_concept_name)

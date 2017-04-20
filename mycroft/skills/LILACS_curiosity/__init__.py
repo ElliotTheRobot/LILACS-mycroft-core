@@ -141,7 +141,7 @@ class LILACSCuriositySkill(MycroftSkill):
                 node_dict.setdefault("node_name", node)
                 node_dict.setdefault("parents", {})
                 node_dict.setdefault("childs", {})
-                node_dict.setdefault("synonims", synonims[node])
+                node_dict.setdefault("synonims", [synonims[node]])
                 node_dict.setdefault("antonims", [])
                 node_dict.setdefault("data", {})
                 self.emitter.emit(Message("new_node", node_dict))

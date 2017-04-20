@@ -246,11 +246,24 @@ class ConceptConnector():
         self.emitter = emitter
         self.emitter.on("new_node", self.new_node)
 
-    def new_node(message):
-        # TODO messagebus functions
-        # update node from knowledge service
-        # get node from storage
-        pass
+    def new_node(self, message):
+        # create node signaled from outside
+        node_name = message.data["node_name"]
+        p = message.data["parents"]
+        parents = {}
+        for parent in p:
+            parents.setdefault(parent, 7)
+        c = message.data["childs"]
+        childs = {}
+        for child in c:
+            childs.setdefault(child, 7)
+        synonims = message.data["synonims"]
+        antonims = message.data["antonims"]
+        data = message.data["data"]
+        self.create_concept(new_concept_name=node_name, parent_concepts=parents, child_concepts=childs, synonims=synonims, antonims=antonims, data=data)
+        # TODO other fields
+        # TODO if configured gather node info from knowledge service?
+        # TODO update node in storage
 
     def get_concept_names(self):
         concepts = []

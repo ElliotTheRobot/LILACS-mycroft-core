@@ -38,8 +38,8 @@ class LILACSCuriositySkill(MycroftSkill):
         super(LILACSCuriositySkill, self).__init__(name="CuriositySkill")
         # initialize your variables
         self.reload_skill = False
-        self.active = False
-        self.get_node_info = True
+        self.active = True
+        self.get_node_info = False
         self.parser = None
         self.service = None
         self.TIMEOUT = 2
@@ -60,7 +60,7 @@ class LILACSCuriositySkill(MycroftSkill):
             if self.active:
                 self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_curiosity_skill",
                                                                     "utterances": [
-                                                                        "bump LILACS to active skill list"]}))
+                                                                        "bump curiosity to active skill list"]}))
             while i < 60 * self.TIMEOUT:
                 i += 1
                 sleep(1)
@@ -106,10 +106,9 @@ class LILACSCuriositySkill(MycroftSkill):
         # parse all utterances for entitys
         if transcript[0] != "bump curiosity to active skill list":
             nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
-            print "nodes: " + str(nodes)
-            print "parents: " + str(parents)
-            print "synonims: " + str(synonims)
-
+            self.log.info("nodes: " + str(nodes))
+            self.log.info("parents: " + str(parents))
+            self.log.info("synonims: " + str(synonims))
             # if flag get info for nodes
             # TODO use appropriate backends
             if self.get_node_info:
@@ -118,8 +117,34 @@ class LILACSCuriositySkill(MycroftSkill):
                     node_info = self.service.adquire(node, backend)
                     print node_info
 
-            # TODO signal core to create nodes
-            pass
+            #signal core to create nodes
+            for node in nodes:
+                node_dict = {}
+                node_dict.setdefault("node_name", node)
+                node_dict.setdefault("parents", {})
+                node_dict.setdefault("childs", {})
+                node_dict.setdefault("synonims", [])
+                node_dict.setdefault("antonims", [])
+                node_dict.setdefault("data", {})
+                self.emitter.emit(Message("new_node", node_dict))
+            for node in parents:
+                node_dict = {}
+                node_dict.setdefault("node_name", node)
+                node_dict.setdefault("parents", parents[node])
+                node_dict.setdefault("childs", {})
+                node_dict.setdefault("synonims", [])
+                node_dict.setdefault("antonims", [])
+                node_dict.setdefault("data", {})
+                self.emitter.emit(Message("new_node", node_dict))
+            for node in synonims:
+                node_dict = {}
+                node_dict.setdefault("node_name", node)
+                node_dict.setdefault("parents", {})
+                node_dict.setdefault("childs", {})
+                node_dict.setdefault("synonims", synonims[node])
+                node_dict.setdefault("antonims", [])
+                node_dict.setdefault("data", {})
+                self.emitter.emit(Message("new_node", node_dict))
 
         # tell intent skill you did not handle intent
         return False

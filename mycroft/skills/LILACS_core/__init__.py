@@ -72,14 +72,14 @@ class LilacsCoreSkill(MycroftSkill):
         # build intents
         intro_intent = IntentBuilder("IntroduceLILACSIntent") \
             .require("IntroduceKeyword").build()
-        bump_intent = IntentBuilder("BumpLILACSSkillIntent"). \
-            require("bumpKeyword").build()
+        bumpcore_intent = IntentBuilder("BumpLILACSSkillIntent"). \
+            require("bumpCoreKeyword").build()
         nodes_intent = IntentBuilder("ListNodesIntent"). \
             require("nodesKeyword").build()
 
         # register intents
         self.register_intent(intro_intent, self.handle_introduce_intent)
-        self.register_intent(bump_intent, self.handle_set_on_top_active_list)
+        self.register_intent(bumpcore_intent, self.handle_set_on_top_active_list)
         self.register_intent(nodes_intent, self.handle_list_nodes_intent)
 
     # keep skill in active skill list for feedback skill
@@ -281,9 +281,11 @@ class LilacsCoreSkill(MycroftSkill):
         self.crawler.update_connector(self.connector)
 
     def handle_learning(self, utterance):
+        learned = False
         if self.debug:
             self.speak("Searching wolfram alpha")
-        return self.handle_unknown_intent(utterance)
+            learned = self.handle_unknown_intent(utterance)
+        return learned
         # TODO ask user questions about unknown nodes, teach skill handles response
 
     def handle_fallback(self, message):

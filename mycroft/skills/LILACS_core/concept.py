@@ -54,37 +54,37 @@ class ConceptNode():
         self.connections.setdefault("part_off", part_off)
 
     def get_parents(self):
-        return self.connections["parents"];
+        return self.connections["parents"]
 
     def get_childs(self):
-        return self.connections["childs"];
+        return self.connections["childs"]
 
     def get_cousins(self):
-        return self.connections["cousins"];
+        return self.connections["cousins"]
 
     def get_consumes(self):
-        return self.connections["consumes"];
+        return self.connections["consumes"]
 
     def get_consumed_by(self):
-        return self.connections["consumed_by"];
+        return self.connections["consumed_by"]
 
     def get_spawn(self):
-        return self.connections["spawns"];
+        return self.connections["spawns"]
 
     def get_spawned_by(self):
-        return self.connections["spawned_by"];
+        return self.connections["spawned_by"]
 
     def get_parts(self):
-        return self.connections["parts"];
+        return self.connections["parts"]
 
     def get_part_off(self):
-        return self.connections["part_off"];
+        return self.connections["part_off"]
 
     def get_synonims(self):
-        return self.connections["synonims"];
+        return self.connections["synonims"]
 
     def get_antonims(self):
-        return self.connections["antonims"];
+        return self.connections["antonims"]
 
     def add_synonim(self, synonim):
         if synonim not in self.connections["synonims"]:

@@ -54,19 +54,35 @@ class LilacsCoreSkill(MycroftSkill):
 
     def initialize(self):
 
-
         self.emitter.on("intent_failure", self.handle_fallback)
         self.emitter.on("multi_utterance_intent_failure", self.handle_multiple_fallback)
 
-        self.connector = ConceptConnector(emitter=self.emitter)
-        self.crawler = ConceptCrawler(self.connector)
         self.parser = LILACSQuestionParser()
         self.service = KnowledgeService(self.emitter)
         self.build_intents()
 
+        self.connector = ConceptConnector(emitter=self.emitter)
+        self.create_concepts()
+        self.crawler = ConceptCrawler(self.connector)
+
         # make thread to keep active
         self.make_bump_thread()
 
+    def build_intents(self):
+        # build intents
+        intro_intent = IntentBuilder("IntroduceLILACSIntent") \
+            .require("IntroduceKeyword").build()
+        bump_intent = IntentBuilder("BumpLILACSSkillIntent"). \
+            require("bumpKeyword").build()
+        nodes_intent = IntentBuilder("ListNodesIntent"). \
+            require("nodesKeyword").build()
+
+        # register intents
+        self.register_intent(intro_intent, self.handle_introduce_intent)
+        self.register_intent(bump_intent, self.handle_set_on_top_active_list)
+        self.register_intent(nodes_intent, self.handle_list_nodes_intent)
+
+    # keep skill in active skill list for feedback skill
     def ping(self):
         while True:
             i = 0
@@ -83,25 +99,52 @@ class LilacsCoreSkill(MycroftSkill):
         timer_thread.setDaemon(True)
         timer_thread.start()
 
-    def build_intents(self):
-        # build intents
-        intro_intent = IntentBuilder("IntroduceLILACSIntent") \
-            .require("IntroduceKeyword").build()
-        bump_intent = IntentBuilder("BumpLILACSSkillIntent"). \
-            require("bumpKeyword").build()
-
-        # register intents
-        self.register_intent(intro_intent, self.handle_introduce_intent)
-        self.register_intent(bump_intent, self.handle_set_on_top_active_list())
-
-    def handle_set_on_top_active_list(self):
+    def handle_set_on_top_active_list(self, message):
         # dummy intent just to bump lilacs core skill to top of active skill list
         # called on a timer in order to always use converse method
         pass
 
+    # debug methods
+    def create_concepts(self):
+        # this is just for debug purposes
+        if self.debug:
+            name = "human"
+            child_concepts = {"human_male": 1, "human_female": 1}
+            parent_concepts = {"animal": 2, "mammal": 1}
+            self.connector.create_concept(name, parent_concepts=parent_concepts,
+                                          child_concepts=child_concepts)
+
+            name = "joana"
+            child_concepts = {"human_wife": 1}
+            parent_concepts = {"human_female": 2, "human": 1}
+            self.connector.create_concept(name, parent_concepts=parent_concepts,
+                                          child_concepts=child_concepts)
+
+            name = "maria"
+            child_concepts = {"human_wife": 1}
+            parent_concepts = {"human_female": 2, "human": 1}
+            self.connector.create_concept(name, parent_concepts=parent_concepts,
+                                          child_concepts=child_concepts)
+
+            name = "animal"
+            child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
+            parent_concepts = {"living being": 1}
+            self.connector.create_concept(name, parent_concepts=parent_concepts,
+                                          child_concepts=child_concepts)
+
+    def handle_list_nodes_intent(self, message):
+        nodes = self.connector.get_concept_names()
+        self.speak("the following nodes are available")
+        if nodes == []:
+            self.speak("none")
+        for node in nodes:
+            self.speak(node)
+
+    # standard intents
     def handle_introduce_intent(self, message):
         self.speak_dialog("whatisLILACS")
 
+    # core methods
     def parse_utterance(self, utterance):
         # get question type from utterance
         center_node, target_node, parents, synonims, midle, question = self.parser.process_entitys(utterance)
@@ -184,50 +227,6 @@ class LilacsCoreSkill(MycroftSkill):
         if self.debug:
             self.speak("answered: " + str(self.answered))
 
-    def handle_talk_about(self, node):
-        pass
-
-    def handle_relation(self, center_node, target_node):
-        commons = common_this_and_that(center_node, target_node, self.crawler)
-        for common in commons:
-            self.speak(center_node + " are " + common + " like " + target_node)
-        if commons == []:
-            self.speak(center_node + " and " + target_node + " have nothing in common")
-        return True
-
-    def handle_why(self, center_node, target_node):
-        # is this that
-        flag = is_this_that(center_node, target_node, self.crawler)
-        self.speak("answer to is " + center_node + " a " + target_node + " is " + str(flag))
-        if flag:
-            # why
-            nodes = why_is_this_that(center_node, target_node, self.crawler)
-            i = 0
-            for node in nodes:
-                if node != target_node:
-                    self.speak(node + " is " + nodes[i + 1])
-                i += 1
-        return True
-
-    def handle_how_intent(self, utterance):
-        how_to = self.service.adquire(utterance, "wikihow")
-        # TODO emit bus message for connector to update node with info
-        how_to = how_to["wikihow"]
-        # TODO check for empty how to and return false
-        # the following how_tos are available
-        self.speak("the following how tos are available")
-        for how in how_to:
-            self.speak(how)
-        # TODO create intent tree
-        # TODO start selection query
-        # TODO speak how to
-        return True
-
-    def handle_compare_intent(self, center_node, target_node):
-        flag = is_this_that(center_node, target_node, self.crawler)
-        self.speak("answer to is " + center_node + " a " + target_node + " is " + str(flag))
-        return True
-
     def handle_update_connector(self, nodes=[], parents={}, childs={}, synonims={}, antonims={}, data={}):
         # nodes = [ node_names ]
         # parents = { node_name: [node_parents] }
@@ -278,6 +277,75 @@ class LilacsCoreSkill(MycroftSkill):
             if node is not None and node != "" and node != " ":
                 self.connector.create_concept(node, data=data[node])
 
+        # update crawler
+        self.crawler.update_connector(self.connector)
+
+    def handle_learning(self, utterance):
+        if self.debug:
+            self.speak("Searching wolfram alpha")
+        return self.handle_unknown_intent(utterance)
+        # TODO ask user questions about unknown nodes, teach skill handles response
+
+    def handle_fallback(self, message):
+        # on single utterance intent failure ask user for correct answer
+        utterance = message.data["utterance"]
+        self.deduce_answer(utterance)
+
+    def handle_multiple_fallback(self, message):
+        # on multiple utterance intent failure ask user for correct answer
+        utterances = message.data["utterances"]
+        for utterance in utterances:
+            self.deduce_answer(utterance)
+
+    # questions methods
+    def handle_talk_about(self, node):
+        self.crawler.update_connector(self.connector)
+        pass
+
+    def handle_relation(self, center_node, target_node):
+        self.crawler.update_connector(self.connector)
+        commons = common_this_and_that(center_node, target_node, self.crawler)
+        for common in commons:
+            self.speak(center_node + " are " + common + " like " + target_node)
+        if commons == []:
+            self.speak(center_node + " and " + target_node + " have nothing in common")
+        return True
+
+    def handle_why(self, center_node, target_node):
+        # is this that
+        self.crawler.update_connector(self.connector)
+        flag = is_this_that(center_node, target_node, self.crawler)
+        self.speak("answer to is " + center_node + " a " + target_node + " is " + str(flag))
+        if flag:
+            # why
+            nodes = why_is_this_that(center_node, target_node, self.crawler)
+            i = 0
+            for node in nodes:
+                if node != target_node:
+                    self.speak(node + " is " + nodes[i + 1])
+                i += 1
+        return True
+
+    def handle_how_intent(self, utterance):
+        how_to = self.service.adquire(utterance, "wikihow")
+        # TODO emit bus message for connector to update node with info
+        how_to = how_to["wikihow"]
+        # TODO check for empty how to and return false
+        # the following how_tos are available
+        self.speak("the following how tos are available")
+        for how in how_to:
+            self.speak(how)
+        # TODO create intent tree
+        # TODO start selection query
+        # TODO speak how to
+        return True
+
+    def handle_compare_intent(self, center_node, target_node):
+        self.crawler.update_connector(self.connector)
+        flag = is_this_that(center_node, target_node, self.crawler)
+        self.speak("answer to is " + center_node + " a " + target_node + " is " + str(flag))
+        return True
+
     def handle_unknown_intent(self, utterance):
         # get answer from wolfram alpha
         result = None
@@ -305,6 +373,7 @@ class LilacsCoreSkill(MycroftSkill):
         return False
 
     def handle_examples_intent(self, node):
+        self.crawler.update_connector(self.connector)
         examples = examples_of_this(node, self.crawler)
         for example in examples:
             if example != node:
@@ -317,44 +386,34 @@ class LilacsCoreSkill(MycroftSkill):
 
     def handle_what_intent(self, node):
         # TODO read node summary
-        # TODO use intent tree to give interactive dialog suggesting examples
+        # TODO use intent tree to give interactive dialog suggesting more info
         # self.speak("Do you want examples of " + node)
         # activate yes intent
         # use converse method to disable or do something
+        self.crawler.update_connector(self.connector)
         return False
 
     def handle_who_intent(self, node):
+        self.crawler.update_connector(self.connector)
         return False
 
     def handle_when_intent(self, node):
+        self.crawler.update_connector(self.connector)
         return False
 
     def handle_where_intent(self, node):
+        self.crawler.update_connector(self.connector)
         return False
 
     def handle_which_intent(self, node):
+        self.crawler.update_connector(self.connector)
         return False
 
     def handle_whose_intent(self, node):
+        self.crawler.update_connector(self.connector)
         return False
 
-    def handle_learning(self, utterance):
-        if self.debug:
-            self.speak("Searching wolfram alpha")
-        return self.handle_unknown_intent(utterance)
-        # TODO ask user questions about unknown nodes, teach skill handles response
-
-    def handle_fallback(self, message):
-        # on single utterance intent failure ask user for correct answer
-        utterance = message.data["utterance"]
-        self.deduce_answer(utterance)
-
-    def handle_multiple_fallback(self, message):
-        # on multiple utterance intent failure ask user for correct answer
-        utterances = message.data["utterances"]
-        for utterance in utterances:
-            self.deduce_answer(utterance)
-
+    # feedback
     def handle_incorrect_answer(self):
         # create nodes / connections for right answer
         #self.last_question = ""

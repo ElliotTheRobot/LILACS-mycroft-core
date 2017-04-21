@@ -161,7 +161,12 @@ class ConceptCrawler():
                 # get connections of these synonims also
                 self.logger.info("found synonim: " + synonim)
                 self.logger.info("adding synonim connections to crawl list")
-                c = self.concept_db.get_childs(synonim)
+                c = {}
+                try:
+                    c = self.concept_db.get_childs(synonim)
+                except:
+                    pass
+                self.logger.debug("synonim connections: " + str(c))
                 for n in c:
                     nodes.setdefault(n, c[n])
         else:

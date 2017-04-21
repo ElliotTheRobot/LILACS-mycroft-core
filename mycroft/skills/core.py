@@ -303,13 +303,6 @@ class MycroftSkill(object):
 
         self.emitter.emit(Message("speak", data))
 
-    def feedback(self, feedback, utterance):
-        # get sentiment result utterance and confidences, do something
-        if feedback == "positive":
-            self.log.info("Positive feedback for skill " + self.name)
-        elif feedback == "negative":
-            self.log.info("Negative feedback for skill " + self.name)
-
     def speak_dialog(self, key, data={}, expect_response=False):
         data['expect_response'] = expect_response
         self.speak(self.dialog_renderer.render(key, data))

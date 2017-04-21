@@ -86,6 +86,9 @@ class ConceptNode():
     def get_antonims(self):
         return self.connections["antonims"]
 
+    def get_data(self):
+        return self.data
+
     def add_synonim(self, synonim):
         if synonim not in self.connections["synonims"]:
             self.connections["synonims"].append(synonim)
@@ -300,6 +303,9 @@ class ConceptConnector():
 
     def remove_concept(self, concept_name):
         self.concepts.pop(concept_name)
+
+    def get_data(self, concept_name):
+        return self.concepts[concept_name].get_data()
 
     def get_childs(self, concept_name):
         return self.concepts[concept_name].get_childs()

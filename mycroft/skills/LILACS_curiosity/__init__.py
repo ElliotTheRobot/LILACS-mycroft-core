@@ -49,7 +49,6 @@ class LILACSCuriositySkill(MycroftSkill):
         self.parser = LILACSQuestionParser()
         self.service = KnowledgeService(self.emitter)
         self.build_intents()
-        #self.handle_activate_intent("start_up activation")
 
         # make thread to keep active
         self.make_bump_thread()
@@ -104,7 +103,7 @@ class LILACSCuriositySkill(MycroftSkill):
 
     def converse(self, transcript, lang="en-us"):
         # parse all utterances for entitys
-        if "bump curiosity" not in transcript[0] and "bump LILACS" not in transcript[0]:
+        if "bump curiosity" not in transcript[0]:
             nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
             self.log.info("nodes: " + str(nodes))
             self.log.info("parents: " + str(parents))

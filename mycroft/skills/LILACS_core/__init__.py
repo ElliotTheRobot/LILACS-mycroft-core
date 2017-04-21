@@ -45,7 +45,7 @@ class LilacsCoreSkill(MycroftSkill):
         self.crawler = None
         self.parser = None
         self.service = None
-        self.debug = True
+        self.debug = False
         self.answered = False
         self.last_question = ""
         self.last_question_type = ""
@@ -155,7 +155,7 @@ class LilacsCoreSkill(MycroftSkill):
         # try to answer what user asks depending on question type
         self.answered = False
         if question == "what":
-            pass
+            self.answered = self.handle_what_intent(center_node)
         elif question == "how":
             self.answered = self.handle_how_intent(utterance)
         elif question == "who":
@@ -176,7 +176,7 @@ class LilacsCoreSkill(MycroftSkill):
             self.answered = self.handle_relation(center_node, target_node)
         elif question == "is" or question == "are" :
             self.answered = self.handle_compare_intent(center_node, target_node)
-        elif question == "give examples":
+        elif question == "examples":
             self.answered = self.handle_examples_intent(center_node)
         else:# question == "unknown":
             self.answered = self.handle_unknown_intent(utterance)
@@ -353,7 +353,103 @@ class LilacsCoreSkill(MycroftSkill):
             return True
 
     def handle_what_intent(self, node):
-        # TODO read node summary
+        data = self.connector.get_data(node)
+        description = ""
+        abstract = ""
+        summary = ""
+        dbpedia = {}
+        wikidata = {}
+        wikipedia = {}
+
+        if self.debug:
+            self.speak("node data: " + str(data))
+
+        # get data from web
+        if data == {}:
+            self.log.info("no node data available")
+            if self.debug:
+                self.speak("seaching dbpedia")
+            self.log.info("adquiring dbpedia")
+            try:
+                dbpedia = self.service.adquire(node, "dbpedia")["dbpedia"][node]
+            except:
+                if self.debug:
+                    self.speak("no results from dbpedia")
+                self.log.info("no results from dbpedia")
+
+            if self.debug:
+                self.speak("seaching wikidata")
+            self.log.info("adquiring wikidata")
+            try:
+                wikidata = self.service.adquire(node, "wikidata")["wikidata"]
+            except:
+                if self.debug:
+                    self.speak("no results from wikidata")
+                self.log.info("no results from wikidata")
+
+            if self.debug:
+                self.speak("seaching wikipedia")
+            self.log.info("adquiring wikipedia")
+            try:
+                wikipedia = self.service.adquire(node, "wikipedia")["wikipedia"]
+            except:
+                if self.debug:
+                    self.speak("no results from wikipedia")
+                self.log.info("no results from wikipedia")
+
+           # debug available data
+            if self.debug:
+                self.speak("wikipedia data: " + str(wikipedia))
+                self.speak("wikidata data: " + str(wikidata))
+                self.speak("dbpedia data: " + str(dbpedia))
+
+        # update data from web
+        try:
+            description = wikidata["description"]
+            data["description"] = description
+        except:
+            self.log.error("no wikidata for " + node)
+        try:
+            # TODO update node connector
+            abstract = dbpedia["page_info"]["abstract"]
+            pic = dbpedia["page_info"]["picture"]
+            links = dbpedia["page_info"]["external_links"]
+            cousins = dbpedia["page_info"]["related_subjects"]
+            self.emitter.emit(Message("new_node",{}))
+            data["abstract"] = abstract
+        except:
+            self.log.error("no dbpedia for " + node)
+        try:
+            summary = wikipedia["summary"]
+            data["summary"] = summary
+            description = wikipedia["description"]
+            data["description"] = description
+        except:
+            self.log.error("no wikipedia for " + node)
+
+        # read node data
+        try:
+            abstract = data["abstract"]
+            if abstract != "":
+                self.speak(abstract)
+                return True
+        except:
+            pass
+        try:
+            description = data["description"]
+            if description != "":
+                self.speak(description)
+                return True
+        except:
+            pass
+        try:
+            summary = data["summary"]
+            if summary != "":
+                self.speak(summary)
+                return True
+        except:
+            pass
+
         # TODO use intent tree to give interactive dialog suggesting more info
         # self.speak("Do you want examples of " + node)
         # activate yes intent

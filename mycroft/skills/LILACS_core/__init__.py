@@ -17,6 +17,7 @@
 
 from threading import Thread
 from time import sleep
+import random
 
 from adapt.intent import IntentBuilder
 
@@ -45,7 +46,7 @@ class LilacsCoreSkill(MycroftSkill):
         self.crawler = None
         self.parser = None
         self.service = None
-        self.debug = True
+        self.debug = False
         self.answered = False
         self.last_question = ""
         self.last_question_type = ""
@@ -119,6 +120,11 @@ class LilacsCoreSkill(MycroftSkill):
     def deduce_answer(self, utterance):
         # try to undestand what user asks
         center_node, target_node, parents, synonims, midle, question = self.parse_utterance(utterance)
+        if center_node is None or center_node == "":
+            self.speak("i dont understand the question")
+            self.answered = self.handle_learning(utterance)
+            return
+
         # update data for feedback
         self.last_center = center_node
         self.last_target = target_node
@@ -159,7 +165,8 @@ class LilacsCoreSkill(MycroftSkill):
         elif question == "how":
             self.answered = self.handle_how_intent(utterance)
         elif question == "who":
-            pass
+            # TODO find a good backend for persons only!
+            self.answered = self.handle_what_intent(center_node)
         elif question == "when":
             pass
         elif question == "where":
@@ -171,7 +178,7 @@ class LilacsCoreSkill(MycroftSkill):
         elif question == "whose":
             pass
         elif question == "talk" or question == "rant":
-            pass
+            self.answered = self.handle_talk_about(center_node, target_node, utterance)
         elif question == "in common":
             self.answered = self.handle_relation(center_node, target_node)
         elif question == "is" or question == "are" :
@@ -243,15 +250,15 @@ class LilacsCoreSkill(MycroftSkill):
         self.crawler.update_connector(self.connector)
 
     def handle_learning(self, utterance):
-        self.speak("learning correct answer")
         self.log.info("learning correct answer")
-        # this is placeholder, always call wolfram, when question type is implemented wolfram wont be called
-        learned = self.handle_unknown_intent(utterance)
         if self.debug:
+            self.speak("learning correct answer")
             self.speak("Searching wolfram alpha")
-        else:
-            if not learned:
-                self.speak("i dont know the answer")
+        # this is placeholder, always call wolfram, when question type is fully implemented wolfram maybe wont be called
+        learned = self.handle_unknown_intent(utterance)
+
+        if not learned:
+            self.speak("i dont know the answer")
         return learned
         # TODO ask user questions about unknown nodes, teach skill handles response
 
@@ -267,9 +274,37 @@ class LilacsCoreSkill(MycroftSkill):
             self.deduce_answer(utterance)
 
     # questions methods
-    def handle_talk_about(self, node):
-        self.crawler.update_connector(self.connector)
-        pass
+    def handle_talk_about(self, node, node2, utterance=""):
+
+        # dont talk about "action" node
+        if node == "talk" or node == "rant":
+            node = node2
+
+        # say what
+        talked = self.handle_what_intent(node)
+        if not talked:
+            # no what ask wolfram
+            talked = self.handle_unknown_intent(utterance)
+
+        # get related nodes
+        related = self.connector.get_cousins(node)
+
+        if self.debug:
+            self.speak("related subjects: " + str(related))
+        try:
+            # pick one at random
+            choice = random.choice(related).lower()
+            if self.debug:
+                self.speak("chosing related topic: " + choice)
+            # talk about it
+            more = self.handle_what_intent(choice)
+            if not more:
+                self.handle_unknown_intent(choice)
+        except:
+            if self.debug:
+                self.speak("could not find related info")
+            self.log.info("could not find related info")
+        return talked
 
     def handle_relation(self, center_node, target_node):
         self.crawler.update_connector(self.connector)
@@ -354,9 +389,6 @@ class LilacsCoreSkill(MycroftSkill):
 
     def handle_what_intent(self, node):
         data = self.connector.get_data(node)
-        description = ""
-        abstract = ""
-        summary = ""
         dbpedia = {}
         wikidata = {}
         wikipedia = {}
@@ -377,55 +409,77 @@ class LilacsCoreSkill(MycroftSkill):
                     self.speak("no results from dbpedia")
                 self.log.info("no results from dbpedia")
 
-            if self.debug:
-                self.speak("seaching wikidata")
-            self.log.info("adquiring wikidata")
-            try:
-                wikidata = self.service.adquire(node, "wikidata")["wikidata"]
-            except:
                 if self.debug:
-                    self.speak("no results from wikidata")
-                self.log.info("no results from wikidata")
+                    self.speak("seaching wikidata")
+                self.log.info("adquiring wikidata")
+                try:
+                    wikidata = self.service.adquire(node, "wikidata")["wikidata"]
+                except:
+                    if self.debug:
+                        self.speak("no results from wikidata")
+                    self.log.info("no results from wikidata")
 
-            if self.debug:
-                self.speak("seaching wikipedia")
-            self.log.info("adquiring wikipedia")
-            try:
-                wikipedia = self.service.adquire(node, "wikipedia")["wikipedia"]
-            except:
-                if self.debug:
-                    self.speak("no results from wikipedia")
-                self.log.info("no results from wikipedia")
+                    if self.debug:
+                        self.speak("seaching wikipedia")
+                    self.log.info("adquiring wikipedia")
+                    try:
+                        wikipedia = self.service.adquire(node, "wikipedia")["wikipedia"]
+                    except:
+                        if self.debug:
+                            self.speak("no results from wikipedia")
+                        self.log.info("no results from wikipedia")
 
            # debug available data
+
             if self.debug:
-                self.speak("wikipedia data: " + str(wikipedia))
-                self.speak("wikidata data: " + str(wikidata))
                 self.speak("dbpedia data: " + str(dbpedia))
+                self.speak("wikidata data: " + str(wikidata))
+                self.speak("wikipedia data: " + str(wikipedia))
 
         # update data from web
         try:
-            description = wikidata["description"]
-            data["description"] = description
-        except:
-            self.log.error("no wikidata for " + node)
-        try:
-            # TODO update node connector
+            # dbpedia parents are handled in pre-processing / curiosity
             abstract = dbpedia["page_info"]["abstract"]
-            pic = dbpedia["page_info"]["picture"]
-            links = dbpedia["page_info"]["external_links"]
-            cousins = dbpedia["page_info"]["related_subjects"]
-            self.emitter.emit(Message("new_node",{}))
             data["abstract"] = abstract
+            self.connector.add_data(node, "abstract", abstract)
+            pic = dbpedia["page_info"]["picture"]
+            self.connector.add_data(node, "pic", pic)
+            links = dbpedia["page_info"]["external_links"]
+            self.connector.add_data(node, "links", links)
+            cousins = dbpedia["page_info"]["related_subjects"]
+            concepts = self.connector.get_concept_names()
+            for cousin in cousins:
+                if cousin not in concepts:
+                    if self.debug:
+                        self.speak("creating concept: " + cousin)
+                    self.connector.create_concept(new_concept_name=cousin.lower(), data={}, child_concepts={},
+                                              parent_concepts={}, synonims=[], antonims=[])
+                if cousin not in self.connector.get_cousins(node):
+                    if self.debug:
+                        self.speak("adding cousin: " + cousin + " to concept: " + node)
+                    self.log.info("adding cousin: " + cousin + " to concept: " + node)
+                    self.connector.add_cousin(node, cousin.lower())
         except:
             self.log.error("no dbpedia for " + node)
-        try:
-            summary = wikipedia["summary"]
-            data["summary"] = summary
-            description = wikipedia["description"]
-            data["description"] = description
-        except:
-            self.log.error("no wikipedia for " + node)
+            try:
+                # TODO all fields
+                description = wikidata["description"]
+                data["description"] = description
+                self.connector.add_data(node, "description", description)
+            except:
+                self.log.error("no wikidata for " + node)
+            try:
+                # TODO all fields
+                summary = wikipedia["summary"]
+                data["summary"] = summary
+                self.connector.add_data(node, "summary", summary)
+                description = wikipedia["description"]
+                data["description"] = description
+                self.connector.add_data(node, "description", description)
+            except:
+                self.log.error("no wikipedia for " + node)
+
+        self.crawler.update_connector(self.connector)
 
         # read node data
         try:
@@ -454,7 +508,6 @@ class LilacsCoreSkill(MycroftSkill):
         # self.speak("Do you want examples of " + node)
         # activate yes intent
         # use converse method to disable or do something
-        self.crawler.update_connector(self.connector)
         return False
 
     def handle_who_intent(self, node):

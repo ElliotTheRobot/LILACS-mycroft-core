@@ -33,25 +33,58 @@ class ConceptNode():
             external_links[ suggested links from dbpedia]
     '''
 
-    def __init__(self, name, data={}, parent_concepts={},
-        child_concepts={}, synonims=[], antonims=[], cousins = [],
-        spawns = [], spawned_by = [], consumes = [], consumed_by = [],
-        parts = [], part_off=[], type="info"):
+    def __init__(self, name, data=None, parent_concepts=None,
+        child_concepts=None, synonims=None, antonims=None, cousins = None,
+        spawns = None, spawned_by = None, consumes = None, consumed_by = None,
+        parts = None, part_off=None, type="info"):
         self.name = name
         self.type = type
         self.data = data
         self.connections = {}
-        self.connections.setdefault("parents", parent_concepts)
-        self.connections.setdefault("childs", child_concepts)
-        self.connections.setdefault("synonims", synonims)
-        self.connections.setdefault("antonims", antonims)
-        self.connections.setdefault("cousins", cousins)
-        self.connections.setdefault("spawns", spawns)
-        self.connections.setdefault("spawned_by", spawned_by)
-        self.connections.setdefault("consumes", consumes)
-        self.connections.setdefault("consumed_by", consumed_by)
-        self.connections.setdefault("parts", parts)
-        self.connections.setdefault("part_off", part_off)
+        if parent_concepts is not None:
+            self.connections.setdefault("parents", parent_concepts)
+        else:
+            self.connections.setdefault("parents", {})
+        if child_concepts is not None:
+            self.connections.setdefault("childs", child_concepts)
+        else:
+            self.connections.setdefault("childs", {})
+        if synonims is not None:
+            self.connections.setdefault("synonims", synonims)
+        else:
+            self.connections.setdefault("synonims", [])
+        if antonims is not None:
+            self.connections.setdefault("antonims", antonims)
+        else:
+            self.connections.setdefault("antonims", [])
+        if cousins is not None:
+            self.connections.setdefault("cousins", cousins)
+        else:
+            self.connections.setdefault("cousins", [])
+        if spawns is not None:
+            self.connections.setdefault("spawns", spawns)
+        else:
+            self.connections.setdefault("spawns", [])
+        if spawned_by is not None:
+            self.connections.setdefault("spawned_by", spawned_by)
+        else:
+            self.connections.setdefault("spawned_by", [])
+        if consumes is not None:
+            self.connections.setdefault("consumes", consumes)
+        else:
+            self.connections.setdefault("consumes", [])
+        if consumed_by is not None:
+            self.connections.setdefault("consumed_by", consumed_by)
+        else:
+            self.connections.setdefault("consumed_by", [])
+        if parts is not None:
+            self.connections.setdefault("parts", parts)
+        else:
+            self.connections.setdefault("parts", [])
+        if part_off is not None:
+            self.connections.setdefault("part_off", part_off)
+        else:
+            self.connections.setdefault("part_off", [])
 
     def get_parents(self):
         return self.connections["parents"]
@@ -307,39 +340,75 @@ class ConceptConnector():
     def get_data(self, concept_name):
         return self.concepts[concept_name].get_data()
 
+    def add_data(self, concept_name, key, data={}):
+        self.concepts[concept_name].add_data(key, data)
+
     def get_childs(self, concept_name):
         return self.concepts[concept_name].get_childs()
+
+    def add_child(self, concept_name, child):
+        self.concepts[concept_name].add_child(child)
 
     def get_parents(self, concept_name):
         return self.concepts[concept_name].get_parents()
 
+    def add_parent(self, concept_name, parent):
+        self.concepts[concept_name].add_parent(parent)
+
     def get_antonims(self, concept_name):
         return self.concepts[concept_name].get_antonims()
+
+    def add_antonim(self, concept_name, antonim):
+        self.concepts[concept_name].add_antonim(antonim)
 
     def get_synonims(self, concept_name):
         return self.concepts[concept_name].get_synonims()
 
+    def add_synonim(self, concept_name, synonim):
+        self.concepts[concept_name].add_synonim(synonim)
+
     def get_cousins(self, concept_name):
         return self.concepts[concept_name].get_cousins()
+
+    def add_cousin(self, concept_name, cousin):
+        self.logger.info("adding cousin: " + cousin + " to concept: " + concept_name)
+        self.concepts[concept_name].add_cousin(cousin)
 
     def get_parts(self, concept_name):
         return self.concepts[concept_name].get_parts()
 
+    def add_part(self, concept_name, part):
+        self.concepts[concept_name].add_part(part)
+
     def get_part_off(self, concept_name):
         return self.concepts[concept_name].get_part_off()
+
+    def add_part_off(self, concept_name, part_off):
+        self.concepts[concept_name].add_part_off(part_off)
 
     def get_spawn(self, concept_name):
         return self.concepts[concept_name].get_spawn()
 
+    def add_spawn(self, concept_name, spawn):
+        self.concepts[concept_name].add_spawn(spawn)
+
     def get_spawned_by(self, concept_name):
         return self.concepts[concept_name].get_spawned_by()
+
+    def add_spawned_by(self, concept_name, spawned_by):
+        self.concepts[concept_name].add_spawned_by(spawned_by)
 
     def get_consumes(self, concept_name):
         return self.concepts[concept_name].get_consumes()
 
+    def add_consumes(self, concept_name, consumes):
+        self.concepts[concept_name].add_consumes(consumes)
+
     def get_consumed_by(self, concept_name):
         return self.concepts[concept_name].get_consumed_by()
 
+    def add_consumed_by(self, concept_name, consumed_by):
+        self.concepts[concept_name].add_consumed_by(consumed_by)
 
     def create_concept(self, new_concept_name, data={},
                            child_concepts={}, parent_concepts={}, synonims=[], antonims=[]):

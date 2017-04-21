@@ -45,7 +45,7 @@ class LilacsCoreSkill(MycroftSkill):
         self.crawler = None
         self.parser = None
         self.service = None
-        self.debug = False
+        self.debug = True
         self.answered = False
         self.last_question = ""
         self.last_question_type = ""

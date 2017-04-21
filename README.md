@@ -110,10 +110,6 @@ Answering random questions (fallback to wolfram alpha backend if unknown)
         Input: do aliens exist
         2017-04-21 18:51:02,029 - CLIClient - INFO - Speak: Drake equation : number of communicating civilizations in the Milky Way, 10
 
-        Input:when will the world end
-        2017-04-21 18:51:26,287 - CLIClient - INFO - Speak: learning correct answer
-        2017-04-21 18:51:29,106 - CLIClient - INFO - Speak: time until the end of the world is 5 billion years, (The world will effectively end 5 billion years from now when the Sun becomes a red giant. As a red giant, the Sun will lose roughly 30% of its mass and (without tidal effects) the Earth will move to an orbit 1.7 AU from the Sun when the star reaches its maximum radius. Therefore, the planet is expected to escape envelopment by the expanded Sun's sparse outer atmosphere, though most, if not all, remaining life will be destroyed because of the Sun's increased luminosity. However, a more recent simulation indicates that Earth's orbit will decay due to tidal effects and drag, causing it to enter the red giant Sun's atmosphere and be destroyed.)
-
 Answering How to questions (WIP, lists available how tos, gets short an detailed step by step and pictures of each step)
 
         Input: how to boil an egg
@@ -171,6 +167,77 @@ debug mode creates a few concepts for testing, node concept comes from curiosity
         2017-04-21 19:01:31,227 - CLIClient - INFO - Speak: A planet (from Ancient Greek ἀστήρ πλανήτης astēr planētēs, or πλάνης ἀστήρ plánēs astēr, meaning "wandering star") is an astronomical object orbiting a star or stellar remnant that The term planet is ancient, with ties to history, science, mythology, and religion. Several planets in the Solar System can be seen with the naked eye. These were regarded by many early cultures as divine, or as emissaries of deities. As scientific knowledge advanced, human perception of the planets changed, incorporating a number of disparate objects. In 2006, the International Astronomical Union (IAU) officially adopted a resolution defining planets within the Solar System. This definition is controversial because it excludes many objects of planetary mass based on where or what they orbit. Although eight of the planetary bodies discovered before 1950 remain "planets" under the modern definition, some celestial bodies, such as Ceres, Pallas, Juno and Vesta (each an object in the solar asteroid belt), and Pluto (the first trans-Neptunian object discovered), that were once considered planets by the scientific community, are no longer viewed as such. The planets were thought by Ptolemy to orbit Earth in deferent and epicycle motions. Although the idea that the planets orbited the Sun had been suggested many times, it was not until the 17th century that this view was supported by evidence from the first telescopic astronomical observations, performed by Galileo Galilei. By careful analysis of the observation data, Johannes Kepler found the planets' orbits were not circular but elliptical. As observational tools improved, astronomers saw that, like Earth, the planets rotated around tilted axes, and some shared such features as ice caps and seasons. Since the dawn of the Space Age, close observation by space probes has found that Earth and the other planets share characteristics such as volcanism, hurricanes, tectonics, and even hydrology. Planets are generally divided into two main types: large low-density giant planets, and smaller rocky terrestrials. Under IAU definitions, there are eight planets in the Solar System. In order of increasing distance from the Sun, they are the four terrestrials, Mercury, Venus, Earth, and Mars, then the four giant planets, Jupiter, Saturn, Uranus, and Neptune. Six of the planets are orbited by one or more natural satellites. More than two thousand planets around other stars ("" or "exoplanets") have been discovered in the Milky Way: as of 22 February 2016, 2085 known extrasolar planets in 1331 planetary systems (including 509 multiple planetary systems), ranging in size from just above the size of the Moon to gas giants about twice as large as Jupiter. On December 20, 2011, the Kepler Space Telescope team reported the discovery of the first Earth-sized extrasolar planets, Kepler-20e and Kepler-20f, orbiting a Sun-like star, Kepler-20. A 2012 study, analyzing gravitational microlensing data, estimates an average of at least 1.6 bound planets for every star in the Milky Way. Around one in five Sun-like stars is thought to have an Earth-sized planet in its habitable zone.
         2017-04-21 19:01:31,228 - CLIClient - INFO - Speak: answered: True
 
+        Input: when will the world end
+        2017-04-21 19:03:02,840 - CLIClient - INFO - Speak: Pre-processing of utterance : when will the world end
+        2017-04-21 19:03:02,841 - CLIClient - INFO - Speak: question type: when
+        2017-04-21 19:03:02,843 - CLIClient - INFO - Speak: center_node:
+        2017-04-21 19:03:02,846 - CLIClient - INFO - Speak: target_node:
+        2017-04-21 19:03:02,848 - CLIClient - INFO - Speak: parents: {}
+        2017-04-21 19:03:02,850 - CLIClient - INFO - Speak: synonims: {}
+        2017-04-21 19:03:02,853 - CLIClient - INFO - Speak: related: []
+        2017-04-21 19:03:02,860 - CLIClient - INFO - Speak: learning correct answer
+        2017-04-21 19:03:05,632 - CLIClient - INFO - Speak: new nodes from wolfram alpha answer: time until the end of the world is 5 billion years, (The world will effectively end 5 billion years from now when the Sun becomes a red giant. As a red giant, the Sun will lose roughly 30% of its mass and (without tidal effects) the Earth will move to an orbit 1.7 AU from the Sun when the star reaches its maximum radius. Therefore, the planet is expected to escape envelopment by the expanded Sun's sparse outer atmosphere, though most, if not all, remaining life will be destroyed because of the Sun's increased luminosity. However, a more recent simulation indicates that Earth's orbit will decay due to tidal effects and drag, causing it to enter the red giant Sun's atmosphere and be destroyed.)
+        2017-04-21 19:03:05,632 - CLIClient - INFO - Speak: parents: {u'earth': [u'celestialbody', u'planet']}
+        2017-04-21 19:03:05,634 - CLIClient - INFO - Speak: synonims: {u'atmosphere': u'stellar atmosphere', u'tidal effects': u'tidal force', u'decay': u'radioactive decay', u'luminosity': u'solar luminosity', u'move': u'bird migration', u'maximum': u'maxima and minima', u'reaches': u'sailing', u'simulation': u'computer simulation', u'destroyed': u'slighting', u'envelopment': u'envelope', u'drag': u'drag (physics)', u'causing': u'causality', u'radius': u'solar radius', u'escape': u'escape velocity', u'expected': u'expected value', u'au': u'astronomical unit', u'outer atmosphere': u'stellar atmosphere', u'enter': u'atmospheric entry', u'mass': u'solar mass'}
+        2017-04-21 19:03:05,638 - CLIClient - INFO - Speak: relevant: [u'atmosphere', u'move', u'reaches', u'maximum', u'radius', u'escape', u'earth', u'red giant', u'decay', u'sun', u'destroyed', u'causing', u'envelopment', u'outer atmosphere', u'life', u'star', u'enter', u'expected', u'drag', u'luminosity', u'tidal effects', u'orbit', u'simulation', u'planet', u'mass', u'time', u'au']
+        2017-04-21 19:03:05,683 - CLIClient - INFO - Speak: time until the end of the world is 5 billion years, (The world will effectively end 5 billion years from now when the Sun becomes a red giant. As a red giant, the Sun will lose roughly 30% of its mass and (without tidal effects) the Earth will move to an orbit 1.7 AU from the Sun when the star reaches its maximum radius. Therefore, the planet is expected to escape envelopment by the expanded Sun's sparse outer atmosphere, though most, if not all, remaining life will be destroyed because of the Sun's increased luminosity. However, a more recent simulation indicates that Earth's orbit will decay due to tidal effects and drag, causing it to enter the red giant Sun's atmosphere and be destroyed.)
+        2017-04-21 19:03:05,683 - CLIClient - INFO - Speak: Searching wolfram alpha
+        2017-04-21 19:03:05,687 - CLIClient - INFO - Speak: answered: True
+
+        Input: list nodes
+        2017-04-21 19:03:09,854 - CLIClient - INFO - Speak: the following nodes are available
+        2017-04-21 19:03:09,857 - CLIClient - INFO - Speak: atmosphere
+        2017-04-21 19:03:09,862 - CLIClient - INFO - Speak: celestialbody
+        2017-04-21 19:03:09,865 - CLIClient - INFO - Speak: solar luminosity
+        2017-04-21 19:03:09,868 - CLIClient - INFO - Speak: move
+        2017-04-21 19:03:09,871 - CLIClient - INFO - Speak: node (computer science)
+        2017-04-21 19:03:09,873 - CLIClient - INFO - Speak: reaches
+        2017-04-21 19:03:09,875 - CLIClient - INFO - Speak: orbit
+        2017-04-21 19:03:09,877 - CLIClient - INFO - Speak: radius
+        2017-04-21 19:03:09,879 - CLIClient - INFO - Speak: human
+        2017-04-21 19:03:09,882 - CLIClient - INFO - Speak: escape
+        2017-04-21 19:03:09,883 - CLIClient - INFO - Speak: earth
+        2017-04-21 19:03:09,884 - CLIClient - INFO - Speak: slighting
+        2017-04-21 19:03:09,886 - CLIClient - INFO - Speak: red giant
+        2017-04-21 19:03:09,887 - CLIClient - INFO - Speak: causality
+        2017-04-21 19:03:09,889 - CLIClient - INFO - Speak: decay
+        2017-04-21 19:03:09,891 - CLIClient - INFO - Speak: sun
+        2017-04-21 19:03:09,896 - CLIClient - INFO - Speak: stellar atmosphere
+        2017-04-21 19:03:09,898 - CLIClient - INFO - Speak: maxima and minima
+        2017-04-21 19:03:09,900 - CLIClient - INFO - Speak: frog
+        2017-04-21 19:03:09,903 - CLIClient - INFO - Speak: destroyed
+        2017-04-21 19:03:09,905 - CLIClient - INFO - Speak: causing
+        2017-04-21 19:03:09,908 - CLIClient - INFO - Speak: expected value
+        2017-04-21 19:03:09,911 - CLIClient - INFO - Speak: animal
+        2017-04-21 19:03:09,913 - CLIClient - INFO - Speak: envelopment
+        2017-04-21 19:03:09,915 - CLIClient - INFO - Speak: radioactive decay
+        2017-04-21 19:03:09,918 - CLIClient - INFO - Speak: nodes
+        2017-04-21 19:03:09,921 - CLIClient - INFO - Speak: outer atmosphere
+        2017-04-21 19:03:09,923 - CLIClient - INFO - Speak: drag (physics)
+        2017-04-21 19:03:09,924 - CLIClient - INFO - Speak: life
+        2017-04-21 19:03:09,927 - CLIClient - INFO - Speak: bird migration
+        2017-04-21 19:03:09,929 - CLIClient - INFO - Speak: star
+        2017-04-21 19:03:09,931 - CLIClient - INFO - Speak: atmospheric entry
+        2017-04-21 19:03:09,934 - CLIClient - INFO - Speak: time
+        2017-04-21 19:03:09,936 - CLIClient - INFO - Speak: envelope
+        2017-04-21 19:03:09,938 - CLIClient - INFO - Speak: expected
+        2017-04-21 19:03:09,941 - CLIClient - INFO - Speak: drag
+        2017-04-21 19:03:09,943 - CLIClient - INFO - Speak: computer simulation
+        2017-04-21 19:03:09,953 - CLIClient - INFO - Speak: escape velocity
+        2017-04-21 19:03:09,955 - CLIClient - INFO - Speak: au
+        2017-04-21 19:03:09,958 - CLIClient - INFO - Speak: solar radius
+        2017-04-21 19:03:09,960 - CLIClient - INFO - Speak: sailing
+        2017-04-21 19:03:09,963 - CLIClient - INFO - Speak: astronomical unit
+        2017-04-21 19:03:09,966 - CLIClient - INFO - Speak: luminosity
+        2017-04-21 19:03:09,968 - CLIClient - INFO - Speak: tidal effects
+        2017-04-21 19:03:09,970 - CLIClient - INFO - Speak: maximum
+        2017-04-21 19:03:09,972 - CLIClient - INFO - Speak: solar mass
+        2017-04-21 19:03:09,974 - CLIClient - INFO - Speak: simulation
+        2017-04-21 19:03:09,976 - CLIClient - INFO - Speak: planet
+        2017-04-21 19:03:09,978 - CLIClient - INFO - Speak: mass
+        2017-04-21 19:03:09,980 - CLIClient - INFO - Speak: enter
+        2017-04-21 19:03:09,983 - CLIClient - INFO - Speak: mammal
+        2017-04-21 19:03:09,985 - CLIClient - INFO - Speak: tidal force
 
 
 Mycroft [![Build Status](https://travis-ci.org/MycroftAI/mycroft-core.svg?branch=master)](https://travis-ci.org/MycroftAI/mycroft-core)

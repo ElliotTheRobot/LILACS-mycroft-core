@@ -165,7 +165,7 @@ class ConceptNode():
             self.connections["childs"][child_name] = gen
 
     def add_cousin(self, cousin):
-        if cousin not in self.connections["cousins"]:
+        if cousin not in self.connections["cousins"] and cousin != self.name:
             self.connections["cousins"].append(cousin)
 
     def add_spawn(self, spawn):

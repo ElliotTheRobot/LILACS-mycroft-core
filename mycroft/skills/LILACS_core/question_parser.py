@@ -31,7 +31,7 @@ class EnglishQuestionParser():
                 "(?P<Query1>.*) (?P<QuestionVerb>and) "
                 "(?P<Query2>.*) (?P<QuestionWord>in common)"),
             re.compile(
-                ".*(?P<QuestionWord>talk|rant) "
+                ".*(?P<QuestionWord>talk|rant|think) "
                 "(?P<QuestionVerb>\w+) (?P<Query>.*)"),
             re.compile(
                 ".*(?P<QuestionWord>who|what|when|where|why|which|how|examples) "

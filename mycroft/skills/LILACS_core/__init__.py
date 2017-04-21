@@ -179,6 +179,8 @@ class LilacsCoreSkill(MycroftSkill):
             pass
         elif question == "talk" or question == "rant":
             self.answered = self.handle_talk_about(center_node, target_node, utterance)
+        elif question == "think":
+            self.answered = self.handle_think_about(center_node)
         elif question == "in common":
             self.answered = self.handle_relation(center_node, target_node)
         elif question == "is" or question == "are" :
@@ -274,6 +276,34 @@ class LilacsCoreSkill(MycroftSkill):
             self.deduce_answer(utterance)
 
     # questions methods
+    def handle_think_about(self, node):
+        # talk until no more related subjects
+        # say what
+        talked = self.handle_what_intent(node)
+        if not talked:
+            # no what ask wolfram
+            talked = self.handle_unknown_intent(node)
+
+        # get related nodes
+        related = self.connector.get_cousins(node)
+
+        if self.debug:
+            self.speak("related subjects: " + str(related))
+        try:
+            # pick one at random
+            choice = random.choice(related).lower()
+            if self.debug:
+                self.speak("chosing related topic: " + choice)
+            # talk about it
+            more = self.handle_think_about(choice)
+            if not more:
+                self.handle_unknown_intent(choice)
+        except:
+            if self.debug:
+                self.speak("could not find related info")
+            self.log.info("could not find related info")
+        return talked
+
     def handle_talk_about(self, node, node2, utterance=""):
 
         # dont talk about "action" node

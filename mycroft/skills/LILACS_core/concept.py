@@ -277,8 +277,6 @@ class ConceptConnector():
     def add_concept(self, concept_name, concept):
         if concept_name in self.concepts:
             #  merge fields
-            self.logger.info("updating concept: " + str(concept_name))
-
             for parent in concept.get_parents():
                 if parent not in self.get_parents(concept_name):
                     self.logger.info(("adding parent node: " + parent))
@@ -346,7 +344,10 @@ class ConceptConnector():
         if new_concept_name in child_concepts:
             child_concepts.pop(new_concept_name)
 
-
+        if new_concept_name not in self.concepts:
+            self.logger.info("creating concept " + new_concept_name)
+        else:
+            self.logger.info("updating concept " + new_concept_name)
         # handle new concept
         concept = ConceptNode(name=new_concept_name, data=data, child_concepts=child_concepts, parent_concepts=parent_concepts,
                               synonims=synonims, antonims=antonims)

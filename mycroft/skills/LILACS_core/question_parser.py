@@ -34,7 +34,7 @@ class EnglishQuestionParser():
                 ".*(?P<QuestionWord>talk|rant) "
                 "(?P<QuestionVerb>\w+) (?P<Query>.*)"),
             re.compile(
-                ".*(?P<QuestionWord>who|what|when|where|why|which|how|give examples) "
+                ".*(?P<QuestionWord>who|what|when|where|why|which|how|give examples|examples of) "
                 "(?P<QuestionVerb>\w+) (?P<Query>.*)")
         ]
 

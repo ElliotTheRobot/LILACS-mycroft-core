@@ -133,21 +133,17 @@ class ConceptCrawler():
         self.mark_as_crawled(node)
         # are we checking parents or childs?
         if direction == "parents":
-            nodes = {}
-            try:
-                nodes = self.concept_db.get_parents(node)
-            except:
-                pass
+            nodes = self.concept_db.get_parents(node)
+            self.logger.info("parents of " + node + " : " + str(nodes))
             # check if node as synonims
             synonims = []
-            try:
-                synonims = self.concept_db.get_synonims(node)
-            except:
-                pass
+            synonims = self.concept_db.get_synonims(node)
+            self.logger.info("synonim of " + node + " : " + str(synonims))
 
             for synonim in synonims:
                 # get connections of these synonims also
                 self.logger.info("found synonim: " + synonim)
+                self.crawled.append(synonim)
                 self.logger.info("adding synonim connections to crawl list")
                 p = {}
                 try:

@@ -56,6 +56,7 @@ class LilacsCoreSkill(MycroftSkill):
 
         self.emitter.on("intent_failure", self.handle_fallback)
         self.emitter.on("multi_utterance_intent_failure", self.handle_multiple_fallback)
+        self.emitter.on("LILACS_feedback", self.feedback)
 
         self.parser = LILACSQuestionParser()
         self.service = KnowledgeService(self.emitter)
@@ -65,70 +66,31 @@ class LilacsCoreSkill(MycroftSkill):
         self.create_concepts()
         self.crawler = ConceptCrawler(self.connector)
 
-        # make thread to keep active
-        self.make_bump_thread()
-
     def build_intents(self):
         # build intents
         intro_intent = IntentBuilder("IntroduceLILACSIntent") \
             .require("IntroduceKeyword").build()
-        bumpcore_intent = IntentBuilder("BumpLILACSSkillIntent"). \
-            require("bumpCoreKeyword").build()
         nodes_intent = IntentBuilder("ListNodesIntent"). \
             require("nodesKeyword").build()
 
         # register intents
         self.register_intent(intro_intent, self.handle_introduce_intent)
-        self.register_intent(bumpcore_intent, self.handle_set_on_top_active_list)
         self.register_intent(nodes_intent, self.handle_list_nodes_intent)
-
-    # keep skill in active skill list for feedback skill
-    def ping(self):
-        while True:
-            i = 0
-            self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_core_skill",
-                                                                        "utterances": [
-                                                                            "bump LILACS to active skill list"]}))
-            while i < 60 * 4:
-                i += 1
-                sleep(1)
-            i = 0
-
-    def make_bump_thread(self):
-        timer_thread = Thread(target=self.ping)
-        timer_thread.setDaemon(True)
-        timer_thread.start()
-
-    def handle_set_on_top_active_list(self, message):
-        # dummy intent just to bump lilacs core skill to top of active skill list
-        # called on a timer in order to always use converse method
-        pass
 
     # debug methods
     def create_concepts(self):
         # this is just for debug purposes
         if self.debug:
+            self.speak("creating standard nodes for debugging")
             name = "human"
-            child_concepts = {"human_male": 1, "human_female": 1}
+            child_concepts = {}
             parent_concepts = {"animal": 2, "mammal": 1}
             self.connector.create_concept(name, parent_concepts=parent_concepts,
                                           child_concepts=child_concepts)
 
-            name = "joana"
-            child_concepts = {"human_wife": 1}
-            parent_concepts = {"human_female": 2, "human": 1}
-            self.connector.create_concept(name, parent_concepts=parent_concepts,
-                                          child_concepts=child_concepts)
-
-            name = "maria"
-            child_concepts = {"human_wife": 1}
-            parent_concepts = {"human_female": 2, "human": 1}
-            self.connector.create_concept(name, parent_concepts=parent_concepts,
-                                          child_concepts=child_concepts)
-
             name = "animal"
-            child_concepts = {"dog": 1, "cow": 1, "frog": 1, "cat": 1, "spider": 1, "insect": 1}
-            parent_concepts = {"living being": 1}
+            child_concepts = {"frog": 1}
+            parent_concepts = {}
             self.connector.create_concept(name, parent_concepts=parent_concepts,
                                           child_concepts=child_concepts)
 
@@ -165,7 +127,7 @@ class LilacsCoreSkill(MycroftSkill):
         # TODO maybe add question verb to parser, may be needed for disambiguation between types
         # TODO add more question types
         if self.debug:
-            self.speak("utterance : " + utterance)
+            self.speak("Pre-processing of utterance : " + utterance)
             self.speak("question type: " + question)
             self.speak("center_node: " + center_node)
             self.speak("target_node: " + target_node)
@@ -242,7 +204,7 @@ class LilacsCoreSkill(MycroftSkill):
         for node in nodes:
             self.log.info("processing node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node)
+                self.connector.create_concept(node, parent_concepts={}, child_concepts= {},synonims= [], antonims=[], data={} )
         # make all nodes with parents
         for node in parents:
             self.log.info("processing parents of node: " + node)
@@ -251,7 +213,7 @@ class LilacsCoreSkill(MycroftSkill):
                 for p in parents[node]:
                     self.log.info("parent: " + p)
                     pdict.setdefault(p, 5)  # gen 5 for auto-adquire
-                self.connector.create_concept(node, parent_concepts=pdict, child_concepts= {},synonims= {}, antonims={})
+                self.connector.create_concept(node, parent_concepts=pdict, child_concepts= {},synonims= [], antonims=[], data={})
         # make all nodes with childs
         for node in childs:
             self.log.info("processing childs of node: " + node)
@@ -260,31 +222,36 @@ class LilacsCoreSkill(MycroftSkill):
                 for c in childs[node]:
                     self.log.info("child: " + c)
                     cdict.setdefault(c, 5)  # gen 5 for auto-adquire
-                self.connector.create_concept(node, child_concepts=cdict, parent_concepts= {}, synonims= {}, antonims={})
+                self.connector.create_concept(node, child_concepts=cdict, parent_concepts= {}, synonims= [], antonims=[], data={})
         # make all nodes with synonims
         for node in synonims:
             self.log.info("processing synonims of node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node, synonims=[synonims[node]], child_concepts={}, parent_concepts={}, antonims={})
+                self.connector.create_concept(node, synonims=[synonims[node]], child_concepts={}, parent_concepts={}, antonims=[], data={})
         # make all nodes with antonims
         for node in antonims:
             self.log.info("processing antonims of node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node, synonims={}, child_concepts={}, parent_concepts={}, antonims=[antonims[node]])
+                self.connector.create_concept(node, synonims=[], child_concepts={}, parent_concepts={}, antonims=[antonims[node]], data={})
         # make all nodes with data
         for node in data:
             self.log.info("processing data of node: " + node)
             if node is not None and node != "" and node != " ":
-                self.connector.create_concept(node, data=data[node], synonims={}, child_concepts= {}, parent_concepts={}, antonims={})
+                self.connector.create_concept(node, data=data[node], synonims=[], child_concepts= {}, parent_concepts={}, antonims=[])
 
         # update crawler
         self.crawler.update_connector(self.connector)
 
     def handle_learning(self, utterance):
-        learned = False
+        self.speak("learning correct answer")
+        self.log.info("learning correct answer")
+        # this is placeholder, always call wolfram, when question type is implemented wolfram wont be called
+        learned = self.handle_unknown_intent(utterance)
         if self.debug:
             self.speak("Searching wolfram alpha")
-            learned = self.handle_unknown_intent(utterance)
+        else:
+            if not learned:
+                self.speak("i dont know the answer")
         return learned
         # TODO ask user questions about unknown nodes, teach skill handles response
 
@@ -361,8 +328,7 @@ class LilacsCoreSkill(MycroftSkill):
         childs = {}
         antonims = {}
         if self.debug:
-            self.speak("answer: " + answer)
-            self.speak("new nodes from wolfram alpha answer")
+            self.speak("new nodes from wolfram alpha answer: " + answer)
             self.speak("parents: " + str(parents))
             self.speak("synonims: " + str(synonims))
             self.speak("relevant: " + str(relevant))
@@ -424,7 +390,8 @@ class LilacsCoreSkill(MycroftSkill):
         #self.last_target = ""
         self.speak_dialog("wrong_answer")
 
-    def feedback(self, feedback, utterance):
+    def feedback(self, message):
+        feedback = message.data["feedback"]
         # check if previously answered a question
         if feedback == "negative" and self.answered:
             # wrong answer was given, react to negative feedback

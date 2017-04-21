@@ -31,7 +31,6 @@ class FeedbackSkill(MycroftSkill):
     def __init__(self):
         super(FeedbackSkill, self).__init__(name="FeedbackSkill")
         self.reload_skill = False
-        self.active_skill = 0
 
     def initialize(self):
 
@@ -45,28 +44,11 @@ class FeedbackSkill(MycroftSkill):
         self.register_intent(negative_feedback_intent,
                              self.handle_negative_feedback_intent)
 
-        #self.emitter.on("sentiment_result", self.handle_sentiment_result)
-
-
     def handle_positive_feedback_intent(self, message):
-        utterance = message.data["utterance"]
-        # evaluate sentiment from sentiment analisys service?
-        # self.emitter.emit(Message("sentiment_request",{"utterances":utterance}))
-        self.result = "positive"
-
+        self.emitter.emit(Message("LILACS_feedback", {"feedback": "positive"}))
 
     def handle_negative_feedback_intent(self, message):
-        utterance = message.data["utterance"]
-        # evaluate sentiment from sentiment analisys service?
-        # self.emitter.emit(Message("sentiment_request",{"utterances":utterance}))
-        self.result = "negative"
-
-    def handle_sentiment_result(self, message):
-        self.result = message.data["result"]
-        self.positive_conf = message.data["conf+"]
-        self.negative_conf= message.data["conf-"]
-        self.waiting = False
-
+        self.emitter.emit(Message("LILACS_feedback", {"feedback": "negative"}))
 
     def stop(self):
         pass

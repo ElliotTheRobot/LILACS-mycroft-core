@@ -128,14 +128,5 @@ class TemplateSkill(MycroftSkill):
         # tell intent skill if you handled intent
         return False
 
-    def feedback(self, feedback, lang):
-        if feedback == "positive":
-            # do stuff on positive reinforcement words intent
-            pass
-        elif feedback == "negative":
-            # do stuff on negative reinforcement words inten
-            pass
-
-
 def create_skill():
     return TemplateSkill()

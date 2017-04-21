@@ -103,18 +103,6 @@ class Intent(object):
 
             self.add_active_skill(skill_id)
 
-            # process feedback
-            intent_name = best_intent['intent_type'].split(":")[1]
-            top_skill = self.active_skills[1][0]
-            if intent_name == "PositiveFeedbackIntent":
-                sentiment = "positive"
-                self.emitter.emit(
-                    Message("do_feedback", {"skill_id": top_skill, "utterance": utterances[0], "sentiment": sentiment}))
-            elif intent_name == "NegativeFeedbackIntent":
-                sentiment = "negative"
-                self.emitter.emit(
-                    Message("do_feedback", {"skill_id": top_skill, "utterance": utterances[0], "sentiment": sentiment}))
-
         elif len(utterances) == 1:
             self.emitter.emit(Message("intent_failure", {
                 "utterance": utterances[0],

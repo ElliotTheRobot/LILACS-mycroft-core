@@ -166,19 +166,6 @@ def handle_conversation_request(message):
         "skill_id": 0, "result": False}))
 
 
-def handle_feedback_request(message):
-    global loaded_skills
-    skill_id = message.data["skill_id"]
-    utterance = message.data["utterance"]
-    result = message.data["sentiment"]
-    # loop trough skills list and call feedback for skill with skill_id
-    for skill in loaded_skills:
-        if loaded_skills[skill]["id"] == skill_id:
-            instance = loaded_skills[skill]["instance"]
-            instance.feedback(result, utterance)
-            return
-
-
 def main():
     global ws
     lock = Lock('skills')  # prevent multiply instances of this service
@@ -205,7 +192,6 @@ def main():
     ws.on('message', echo)
     ws.once('open', load_watch_skills)
     ws.on('converse_status_request', handle_conversation_request)
-    ws.on('do_feedback', handle_feedback_request)
     ws.run_forever()
 
 

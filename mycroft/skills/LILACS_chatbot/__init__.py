@@ -18,6 +18,7 @@
 
 from threading import Thread
 from time import sleep
+import random
 
 from adapt.intent import IntentBuilder
 
@@ -32,14 +33,13 @@ __author__ = 'jarbas'
 logger = getLogger(__name__)
 
 
-class LILACSCuriositySkill(MycroftSkill):
+class LILACSChatbotSkill(MycroftSkill):
     # https://github.com/ElliotTheRobot/LILACS-mycroft-core/issues/19
     def __init__(self):
-        super(LILACSCuriositySkill, self).__init__(name="CuriositySkill")
+        super(LILACSChatbotSkill, self).__init__(name="ChatbotSkill")
         # initialize your variables
         self.reload_skill = False
         self.active = True
-        self.get_node_info = False
         self.parser = None
         self.service = None
         self.TIMEOUT = 2
@@ -57,9 +57,9 @@ class LILACSCuriositySkill(MycroftSkill):
         while True:
             i = 0
             if self.active:
-                self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_curiosity_skill",
+                self.emitter.emit(Message("recognizer_loop:utterance", {"source": "LILACS_chatbot_skill",
                                                                     "utterances": [
-                                                                        "bump curiosity to active skill list"]}))
+                                                                        "bump chat to active skill list"]}))
             while i < 60 * self.TIMEOUT:
                 i += 1
                 sleep(1)
@@ -72,13 +72,13 @@ class LILACSCuriositySkill(MycroftSkill):
 
     def build_intents(self):
         # build intents
-        deactivate_intent = IntentBuilder("DeactivateCuriosityIntent") \
-            .require("deactivateCuriosityKeyword").build()
-        activate_intent=IntentBuilder("ActivateCuriosityIntent") \
-            .require("activateCuriosityKeyword").build()
+        deactivate_intent = IntentBuilder("DeactivateChatbotIntent") \
+            .require("deactivateChatBotKeyword").build()
+        activate_intent=IntentBuilder("ActivateChatbotIntent") \
+            .require("activateChatBotKeyword").build()
 
-        bump_intent = IntentBuilder("BumpCuriositySkillIntent"). \
-            require("bumpCuriosityKeyword").build()
+        bump_intent = IntentBuilder("BumpChatBotSkillIntent"). \
+            require("bumpChatBotKeyword").build()
 
         # register intents
         self.register_intent(deactivate_intent, self.handle_deactivate_intent)
@@ -92,61 +92,47 @@ class LILACSCuriositySkill(MycroftSkill):
 
     def handle_deactivate_intent(self, message):
         self.active = False
-        self.speak_dialog("curiosity_off")
+        self.speak_dialog("chatbot_off")
 
     def handle_activate_intent(self, message):
         self.active = True
-        self.speak_dialog("curiosity_on")
+        self.speak_dialog("chatbot_on")
 
     def stop(self):
         self.handle_deactivate_intent("global stop")
 
     def converse(self, transcript, lang="en-us"):
-        # parse all utterances for entitys
-        if "bump curiosity" not in transcript[0]:
+        # parse 1st utterance for entitys
+        if self.active and "bump chat" not in transcript[0] and "bump curiosity" not in transcript[0]:
             nodes, parents, synonims = self.parser.tag_from_dbpedia(transcript[0])
             self.log.info("nodes: " + str(nodes))
             self.log.info("parents: " + str(parents))
             self.log.info("synonims: " + str(synonims))
-            # if flag get info for nodes
-            # TODO use appropriate backends
-            if self.get_node_info:
-                backend = "dbpedia"
-                for node in nodes:
-                    node_info = self.service.adquire(node, backend)
-                    print node_info
-
-            #signal core to create nodes
+            # get concept net , talk
+            possible_responses = []
             for node in nodes:
-                node_dict = {}
-                node_dict.setdefault("node_name", node)
-                node_dict.setdefault("parents", {})
-                node_dict.setdefault("childs", {})
-                node_dict.setdefault("synonims", [])
-                node_dict.setdefault("antonims", [])
-                node_dict.setdefault("data", {})
-                self.emitter.emit(Message("new_node", node_dict))
-            for node in parents:
-                node_dict = {}
-                node_dict.setdefault("node_name", node)
-                node_dict.setdefault("parents", parents[node])
-                node_dict.setdefault("childs", {})
-                node_dict.setdefault("synonims", [])
-                node_dict.setdefault("antonims", [])
-                node_dict.setdefault("data", {})
-                self.emitter.emit(Message("new_node", node_dict))
-            for node in synonims:
-                node_dict = {}
-                node_dict.setdefault("node_name", node)
-                node_dict.setdefault("parents", {})
-                node_dict.setdefault("childs", {})
-                node_dict.setdefault("synonims", [synonims[node]])
-                node_dict.setdefault("antonims", [])
-                node_dict.setdefault("data", {})
-                self.emitter.emit(Message("new_node", node_dict))
+                try:
+                    dict = self.service.adquire(node, "concept net")
+                    usages = dict["concept net"]["surfaceText"]
+                    for usage in usages:
+                        possible_responses.append(usage.replace("[", "").replace("]", ""))
+                except:
+                    self.log.info("could not get reply for node " + node)
+
+            try:
+                # say something random
+                reply = random.choice(possible_responses)
+                self.speak(reply)
+                return True
+            except:
+                self.log.error("Could not get chatbot response for: " + transcript[0])
+                # dont know what to say
+                # TODO ask user a question and play du,mb
+                return False
 
         # tell intent skill you did not handle intent
         return False
 
+
 def create_skill():
-    return LILACSCuriositySkill()
+    return LILACSChatbotSkill()

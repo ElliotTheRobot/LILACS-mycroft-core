@@ -47,6 +47,15 @@ class LilacsCoreSkill(MycroftSkill):
         self.parser = None
         self.service = None
         self.debug = False
+        self.focus = 10
+        # focus = 0 -> think about all nodes
+        # focus >15 -> think only of original subject
+        # focus <10 -> think only of current subject
+        # focus < 15 -> also think about parents and childs of current node
+        # focus < 10 -> also think about synonims and antonims of current node
+        # focus <15 -> also get related nodes from wordnik (less objective)
+        # focus < 10 -> gets even more nodes from wordnik
+        # focus < 5 -> even more nodes from wordnik
         self.answered = False
         self.last_question = ""
         self.last_question_type = ""
@@ -276,7 +285,57 @@ class LilacsCoreSkill(MycroftSkill):
             self.deduce_answer(utterance)
 
     # questions methods
-    def handle_think_about(self, node):
+
+    def get_wordnik(self, node):
+
+        # check wordnik backend for more related nodes
+        try:
+            wordnik = self.connector.get_data(node, "wordnik")
+        except:
+            wordnik = self.service.adquire(node, "wordnik")["wordnik"]
+            self.connector.add_data(node, "wordnik", wordnik)
+            definition = wordnik["definitions"][0]
+            self.connector.add_data(node, "definition", definition)
+
+        w_dict = wordnik
+        wordnik = wordnik["relations"]
+        try:
+            # antonyms are legit
+            for antonim in wordnik["antonym"]:
+                self.connector.add_antonim(node, antonim)
+        except:
+            self.log.info("no antonyms in wordnik")
+
+        # other fields not very reliable, make cousins
+        related = ["unknown"]
+        extra = ["equivalent", "cross-reference", "hypernym"]
+        extra2 = ["synonym", "same-context"]
+        if self.focus < 10:
+            related += extra
+        if self.focus < 5:
+            related += extra2
+
+        concepts = self.connector.get_concept_names()
+        for r in related:
+            try:
+                for c in wordnik[r]:
+                    c = c.lower().replace("the ", "")
+                    if c not in concepts:
+                        if self.debug:
+                            self.speak("creating concept: " + c)
+                        self.connector.create_concept(new_concept_name=c, data={}, child_concepts={},
+                                                      parent_concepts={}, synonims=[], antonims=[])
+                    if c not in self.connector.get_cousins(node):
+                        if self.debug:
+                            self.speak("adding cousin: " + c + " to concept: " + node)
+                        self.log.info("adding cousin: " + c + " to concept: " + node)
+                        self.connector.add_cousin(node, c)
+            except:
+                self.log.info("no " + r + " in wordnik")
+        return w_dict
+
+    def handle_think_about(self, node, related=[]):
+
         # talk until no more related subjects
         # say what
         talked = self.handle_what_intent(node)
@@ -284,18 +343,74 @@ class LilacsCoreSkill(MycroftSkill):
             # no what ask wolfram
             talked = self.handle_unknown_intent(node)
 
-        # get related nodes
-        related = self.connector.get_cousins(node)
 
-        if self.debug:
-            self.speak("related subjects: " + str(related))
+        # check wordnik backend for more related nodes
+        if self.focus < 15:
+            w = self.get_wordnik(node)
+
+        # get related nodes
+        rel = self.connector.get_cousins(node)
+        self.log.info("focus level: " + str(self.focus))
+        self.log.info("related nodes: " + str(rel))
+        if self.focus > 15:
+            # previous
+            self.log.info("focusing only in nodes related to previous node")
+            self.log.info("thinking about: " + str(related))
+
+        if self.focus < 10:
+            # previous
+            self.log.info("forgetting previous nodes, focusing on node: " + node)
+            # only related to this node
+            related = rel
+            self.log.info("thinking about:" + str(related))
+
+        if self.focus == 0 or related == []:
+            if related == []:
+                self.log.info("no related nodes available")
+            self.log.info("adquiring new nodes")
+            # keep both
+            related += rel
+            self.log.info("thinking about:" + str(related))
+
         try:
+            # add parents and childs ot possible choice
+            if self.focus < 15 or related == []:
+                if related == []:
+                    self.log.info("no related nodes available")
+                self.log.info("Getting parents and childs of this node")
+                for c in self.connector.get_parents(node):
+                    if c not in related:
+                        related.append(c)
+                for c in self.connector.get_childs(node):
+                    if c not in related:
+                        related.append(c)
+            if self.focus < 10 or related == []:
+                if related == []:
+                    self.log.info("no related nodes available")
+                self.log.info("Getting synonims and antonims of this node")
+                for c in self.connector.get_synonims(node):
+                    if c not in related:
+                        related.append(c)
+                for c in self.connector.get_antonims(node):
+                    if c not in related:
+                        related.append(c)
+
+            # remove self from list
+            i = 0
+            for c in related:
+                if c.lower() == node.lower():
+                    related.pop(i)
+                i += 1
+
+            if self.debug:
+                self.speak("related subjects: " + str(related))
             # pick one at random
             choice = random.choice(related).lower()
+            self.log.info("current tought: " + choice)
             if self.debug:
                 self.speak("chosing related topic: " + choice)
             # talk about it
-            more = self.handle_think_about(choice)
+            more = self.handle_think_about(choice, related)
             if not more:
                 self.handle_unknown_intent(choice)
         except:
@@ -322,6 +437,19 @@ class LilacsCoreSkill(MycroftSkill):
         if self.debug:
             self.speak("related subjects: " + str(related))
         try:
+            # add parents and childs ot possible choice
+            for c in self.connector.get_parents(node):
+                if c not in related:
+                    related.append(c)
+            for c in self.connector.get_childs(node):
+                if c not in related:
+                    related.append(c)
+            for c in self.connector.get_synonims(node):
+                if c not in related:
+                    related.append(c)
+            for c in self.connector.get_antonims(node):
+                if c not in related:
+                    related.append(c)
             # pick one at random
             choice = random.choice(related).lower()
             if self.debug:
@@ -422,6 +550,7 @@ class LilacsCoreSkill(MycroftSkill):
         dbpedia = {}
         wikidata = {}
         wikipedia = {}
+        wordnik = {}
 
         if self.debug:
             self.speak("node data: " + str(data))
@@ -458,6 +587,15 @@ class LilacsCoreSkill(MycroftSkill):
                         if self.debug:
                             self.speak("no results from wikipedia")
                         self.log.info("no results from wikipedia")
+                        if self.debug:
+                            self.speak("seaching wordnik")
+                        self.log.info("adquiring wordnik")
+                        try:
+                            wordnik = self.get_wordnik(node)
+                        except:
+                            if self.debug:
+                                self.speak("no results from wordnik")
+                            self.log.info("no results from wordnik")
 
            # debug available data
 
@@ -465,6 +603,7 @@ class LilacsCoreSkill(MycroftSkill):
                 self.speak("dbpedia data: " + str(dbpedia))
                 self.speak("wikidata data: " + str(wikidata))
                 self.speak("wikipedia data: " + str(wikipedia))
+                self.speak("wordnik data: " + str(wordnik))
 
         # update data from web
         try:
@@ -508,6 +647,12 @@ class LilacsCoreSkill(MycroftSkill):
                 self.connector.add_data(node, "description", description)
             except:
                 self.log.error("no wikipedia for " + node)
+                try:
+                    definition = wordnik["definitions"][0]
+                    data["definition"] = definition
+                    self.connector.add_data(node, "definition", definition)
+                except:
+                    self.log.error("no wordnik for " + node)
 
         self.crawler.update_connector(self.connector)
 
@@ -532,7 +677,12 @@ class LilacsCoreSkill(MycroftSkill):
                 self.speak(summary)
                 return True
         except:
-            pass
+            try:
+                definition = data["definition"]
+                self.speak(definition)
+                return True
+            except:
+                pass
 
         # TODO use intent tree to give interactive dialog suggesting more info
         # self.speak("Do you want examples of " + node)

@@ -344,13 +344,21 @@ class ConceptConnector():
         self.concepts[concept_name].add_data(key, data)
 
     def get_childs(self, concept_name):
-        return self.concepts[concept_name].get_childs()
+        try:
+            c = self.concepts[concept_name].get_childs()
+        except:
+            c = {}
+        return c
 
     def add_child(self, concept_name, child):
         self.concepts[concept_name].add_child(child)
 
     def get_parents(self, concept_name):
-        return self.concepts[concept_name].get_parents()
+        try:
+            p = self.concepts[concept_name].get_parents()
+        except:
+            p = {}
+        return p
 
     def add_parent(self, concept_name, parent):
         self.concepts[concept_name].add_parent(parent)
